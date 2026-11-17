@@ -49,9 +49,11 @@ every session; delete items when they close.
    and the end-of-run fix-up continuation. Until trusted, `/kb-check` is absent.
 5. ~~**Building the feature is not authorised.**~~ *Superseded 2026-11-17:* **G0 lifted** for
    W1–W3 ([gate amendment](open-decisions.md), [log](verification-log.md#g0-lift-and-w1-dispatch)).
-   Handoff committed in `.pi/handoff/` (plan, context, ledger). W1 dispatched this session; next
-   W2 then W3, one worker at a time. V and H need separate operator permission. Open for W1:
-   the §5 `edu_endpoint` question (handoff plan Q1).
+   Handoff committed in `.pi/handoff/` (plan, context, ledger). **W1 done** (station 3 lines,
+   local commit); next W2 then W3, one worker at a time. V and H need separate operator
+   permission. **Operator to rule Q1:** add one `edu_endpoint` `recent` case to
+   `tests/test_midnight_reset.php`? (works; needs lock + real clock). PHP in a stale tool shell:
+   export `PHP_INI_SCAN_DIR` inside `bash -lc` — `-d extension=sqlite3` alone fails.
 6. **R5 answered (2026-11-16): yes, reachable today** — a live community bundle has 22
    flight-only species; D12's "drawable" now means "unsuffixed slug is a masks key" ([R5 brief](../outputs/r5-drawable-base-pose.md)).
    No open research questions remain.

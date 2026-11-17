@@ -690,7 +690,40 @@ this session did (`avian/api/birdnet-api.php:135`, `:169-171`, `:358-364`;
 
 ### W1 result
 
-(pending — filled in when the worker returns)
+**Worker** (`worker`, fresh context, mission `22be6e47`, one child, sync). `defaultReads` is
+not an accepted `subagent` option in this install (rejected: "unknown options key"), so the
+`.pi/handoff/*` paths were pinned in the task text only. The commit is local and holds only
+`avian/api/birdnet-api.php` (+3/−2): new `$resetAtMidnight` at `avian/api/birdnet-api.php:136`,
+Cache-Control at `:170`, `recentWindow` argument at `:363`. The worker confirmed
+`$RESET_AT_MIDNIGHT` is defined at `:129`.
+
+**Parent re-verification (same host):**
+
+* `php -l` clean; `php tests/test_site_name_api.php` 6 checks pass.
+* `php tests/test_midnight_reset.php` 20 checks pass; R3 clamp 30/0 and param 20/0 pass.
+  These needed `PHP_INI_SCAN_DIR` exported inside `bash -lc`. In the stale tool shell
+  `php --ini` shows no scan dir, and `-d extension=sqlite3` alone **fails**, because
+  `extension_dir` is only set by the drop-in `.ini`. Environment, not product.
+* Frame suites (stub loop): 94 passed (76 capture + 18 birdweather) plus the 7 known
+  POSIX-mode failures. Characterization: 13/13.
+* flake8 fatal set: clean, no `.py` changed. No `frame/` or `tests/` path was touched.
+* `grep -c reset_at_midnight avian/api/birdnet-api.php` = **4**, not 3. The 3 pre-existing
+  response keys (`:95`, `:121`, `:394`) plus the new `$_GET` read; this is inherent in plan
+  §4.1's verbatim line.
+
+**Q1 (`edu_endpoint`), the worker's finding, not yet re-run by the parent.** It works. A scratch
+script outside the repo ran the full `recent` endpoint against a temp `birds.db`. With the
+param it returned `midnight_clamped=true` and only today's species; without it, or with `=0`,
+the rolling window; `stats` was unchanged. The worker reports ~0.1 s per call, unmeasured by the
+parent. A real test would need three things:
+
+* the Educators lock provisioned, as upstream does at `tests/test_educator_backend.php:114-132`
+  (else 503);
+* the real SQLite clock (flake risk at midnight);
+* a real server to see `Cache-Control`, because `headers_list()` is empty under CLI.
+
+Whether to add the case is **left to the operator** (Q1 in `.pi/handoff/plan.md`). No test was
+added.
 
 ### Not executed
 
