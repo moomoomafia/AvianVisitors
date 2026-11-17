@@ -621,3 +621,34 @@ These tests assert **today's** outcomes; v0.3's tests should show C1–C5 flip u
 
 Items 2 (parent CI health), 4 (upstream `edu_endpoint` harness on Windows PHP), 7 (station-default
 masks scan) and 8 (throwaway spike) were not selected.
+
+---
+
+## Plan v0.3 Oracle review
+
+* **Date:** 2026-11-16 · **Executor:** one `oracle` child (`45c675ca-9a4c-4139-9511-26faed72037e`),
+  forked context, read-only, no tests run. **Plan:**
+  [`.pi/reset-after-midnight Plan v0.3.md`](../reset-after-midnight%20Plan%20v0.3.md).
+* **Verdict:** **READY WITH EDITS.** The architecture matches every ruling: §4.1 is exactly R1
+  variant B′; §4.3 uses the single rewrite point (`frame/shoot.py:258`); §4.4's lookup is right
+  (`frame/display.py:80-81` `slugify` and `frame/bundle_runtime.py:1233-1234` `_slug` are the same
+  regex). Confirmed: step (d) returns True before the gate on every path, so a bundle `use`
+  (`--force --no-signature`) on an empty day keeps the bundle (`frame/bundle_runtime.py:2108-2110`);
+  steps (b)/(c) return False on forced paths and revert the bundle (`:1962-1972`), as D14/D16 record;
+  (c) before (d) is correct; D13 is met; the 45–60-line footprint is plausible.
+
+| # | Finding | Severity | Parent re-check | Resolution |
+|---|---|---|---|---|
+| 1 | Step (e) "continue into the unchanged gate" leaves the existing `if use_signature:` block (`frame/display.py:429-443`) calling `fetch_species` **without** the param ⇒ a second, rolling fetch; `changed` (`:445`) decided on the rolling list while the capture draws the clamped one; can delay req 6 just after midnight | **High** | held — read `:429-443` | §4.2 (e) rewritten: the block is skipped when active; `sig` from `payload["species"]` + the bundle salt; exactly one fetch; new tests |
+| 2 | No-bundle "only empty declines" silently departs from D12's text ("else the station's mask table") and R5's `slug in MASKS` | Medium | held — [open-decisions.md](open-decisions.md) D12 combined ruling | D12 amended (parent-decided; basis D20 — `avian/frontend/masks.json` ~800 KB — and D12b); §4.4 cites it |
+| 3 | §6 claimed the parent's CI runs "on the fork"; pushing the branch triggers nothing | Medium | held — `.github/workflows/python-app.yml` triggers; 0 `workflow_dispatch` | §6 states the real trigger; new **D21** (open, stage V) |
+| 4 | Step (e) listed "lock" as part of the gate; the lock is taken in `main()` (`:520-528`) | Low | held | removed; note added |
+| 5 | §4.2 item 2 departs from the superseded D17 "flag-only helper" bullet without saying so | Low | held | deviation stated in §4.2 and §9 |
+| 6 | Missing tests: D8 (first bird in quiet hours), D1 (preview of an empty day) | Low | — | added to §5 |
+| 7 | Brief scenario 9 (timezones) had no named test | Low | — | clock-independence test added |
+| 8 | Brief scenario 11 (other clients unchanged) has no parent-CI coverage | Low | — | W1 must record the gap if no `edu_endpoint` test is added |
+
+Also added from the review's risks: §4.5 README must say an outdated station reports failure every
+15 minutes, including in quiet hours (D14); §9 notes `core.autocrlf=true` (keep files LF).
+
+**Operator question raised:** D21 (CI via a PR inside the fork) — open, not blocking until stage V.

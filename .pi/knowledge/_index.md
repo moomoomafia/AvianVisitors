@@ -14,8 +14,7 @@ the rules for keeping the map true.
 web frontend (`avian/`) plus an optional e-ink wall frame (`frame/`).
 **This checkout:** git **worktree** `AvianVisitors-birdframe-midnight-reset`,
 branch `feature/birdframe-midnight-reset`, main worktree
-`C:/apps/birdNet/AvianVisitors`. Feature brief: `.pi/reset-after-midnight Plan
-v0.2.md` (draft; v0.1 kept for the delta). Plan critique + open questions:
+`C:/apps/birdNet/AvianVisitors`. Current plan: [`.pi/reset-after-midnight Plan v0.3.md`](../reset-after-midnight%20Plan%20v0.3.md) (v0.1 and v0.2 kept for history). Plan critique + open questions:
 [plan-review-midnight-reset.md](plan-review-midnight-reset.md).
 
 ---
@@ -72,7 +71,10 @@ every session; delete items when they close.
    (after R2: parent CI already runs PHP + SQLite3 on `ubuntu-latest`). **R1 done**
    (variant B′, [brief](../outputs/r1-station-param-variant.md)); R3 remains (execute the
    `hours=24` clamp proof and the param-shape claims in the `.pi/` container with `php`).
-9. **Next natural step:** write Plan v0.3 from the register +
+9. **Plan v0.3 written and Oracle-reviewed (2026-11-16)** — [`Plan v0.3`](../reset-after-midnight%20Plan%20v0.3.md)
+   revision 2; verdict "ready with edits", all applied ([Plan v0.3 Oracle review](verification-log.md#plan-v03-oracle-review)).
+   Next: operator gate **G0** (authorise building). **D21** (CI via a PR inside the fork) is open
+   but only needed at execution stage V. *Earlier text:* write Plan v0.3 from the register +
    [minimal-footprint.md](minimal-footprint.md) (which overrides the older
    "Decided design" where they differ); then, when authorised, the harness in `.pi/` before
    any feature code.

@@ -28,6 +28,7 @@
 | [D18](open-decisions.md#d18--knowledge-base-reference-conventions-linking) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [D19](open-decisions.md#d19--make-the-documentation-duty-fire-automatically-skill-vs-extension) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [D20](open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) | [_index.md](_index.md), [code-conventions.md](code-conventions.md), [feature-midnight-reset.md](feature-midnight-reset.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
+| [D21](open-decisions.md#d21--may-the-parent-open-a-pr-inside-the-fork-so-the-parents-ci-runs) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 
 ## Knowledge docs (backlinks)
 
@@ -58,7 +59,8 @@
 | [r5-drawable-base-pose.md](../../.pi/outputs/r5-drawable-base-pose.md) | [_index.md](_index.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | [r5-drawable-base-pose.provenance.md](../../.pi/outputs/r5-drawable-base-pose.provenance.md) | [verification-log.md](verification-log.md) |
 | [reset-after-midnight Plan v0.1.md](../../.pi/reset-after-midnight Plan v0.1.md) | [frame-refresh-decision.md](frame-refresh-decision.md) |
-| [reset-after-midnight Plan v0.2.md](../../.pi/reset-after-midnight Plan v0.2.md) | [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
+| [reset-after-midnight Plan v0.2.md](../../.pi/reset-after-midnight Plan v0.2.md) | [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [verification-log.md](verification-log.md) |
+| [reset-after-midnight Plan v0.3.md](../../.pi/reset-after-midnight Plan v0.3.md) | [_index.md](_index.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [SKILL.md](../../.pi/skills/kb-document/SKILL.md) | [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [AGENTS.md](../../AGENTS.md) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 
@@ -107,7 +109,7 @@
 | `avian/frontend/apt.js` | [_index.md](_index.md), [birdnet-api.md](birdnet-api.md), [birdweather-source.md](birdweather-source.md), [code-conventions.md](code-conventions.md), [config-reference.md](config-reference.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [frame-render-capture.md](frame-render-capture.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | `avian/frontend/assets/bundle-catalog/catalog-snapshot.js` | [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [AGENTS.md](../../AGENTS.md) |
 | `avian/frontend/dims.json` | [_index.md](_index.md), [birdweather-source.md](birdweather-source.md), [open-decisions.md](open-decisions.md) |
-| `avian/frontend/masks.json` | [_index.md](_index.md), [open-decisions.md](open-decisions.md) |
+| `avian/frontend/masks.json` | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `avian/scripts/build_masks.py` | [illustration-bundles.md](illustration-bundles.md) |
 | `avian/scripts/bundle_canonical.py` | [illustration-bundles.md](illustration-bundles.md) |
 | `avian/scripts/bundle_export.py` | [verification-log.md](verification-log.md) |

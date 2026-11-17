@@ -29,6 +29,7 @@ authorised** by the operator.
 | `PARENT-DECIDED` | D6 (dropped by D20), D7, D8, D9, D10, D15 |
 | `ANSWERED` (interim), housekeeping | D11 — hidden locally; upstream-vs-personal still undecided |
 | `ANSWERED` (principle, outranks parent-decisions) | D20 — minimal footprint, align with the parent repo |
+| `OPEN`, needed only at execution stage V | D21 — CI access via a PR inside the fork |
 | Re-asked under D20, now ruled | D4 CI clause — "No new workflow" (2026-11-16) |
 | `SUPERSEDED` | D17 — operator chose the parent repo's flow (2026-11-16); D5 → D14 |
 | `ANSWERED`, housekeeping | D18 — 2026-11-16 |
@@ -407,6 +408,15 @@ drawable set can't be determined, proceed as today.
 > This implements D12a's ruling ("keep yesterday's collage" until the wall can show today's
 > bird) more faithfully; it does not change it. Computed locally — **`ActiveBundle.drawable_slugs`
 > stays species-level** (upstream uses it for BirdWeather filtering).
+
+> **Amended 2026-11-16 after the [Plan v0.3 Oracle review](verification-log.md#plan-v03-oracle-review) (`PARENT-DECIDED`, no-bundle path only).**
+> With **no frame bundle**, the frame does **not** fetch the station's mask table: only an
+> **empty** today-window declines; every listed species counts as drawable. *Basis:* D20 (the
+> station table `avian/frontend/masks.json` is ~800 KB — too heavy to fetch every 15 minutes on
+> a Zero 2 W) and D12b (the operator's frame has its own bundle, where the exact base-pose test
+> applies). The "else the station's mask table" clause above and the R5 "station default:
+> `slug in MASKS`" clause are **superseded for the frame**. Residual risk (a station-default
+> flight-only species, no frame bundle) is fail-static: panel kept, capture times out, exit 1.
 
 **Why it blocks:** D1 as written declines on an *empty* list. But a non-empty list can be
 undrawable: in `local` mode `fetch_species` ignores `drawable` (`frame/display.py:132-150`),
@@ -797,6 +807,23 @@ half → [D17](#d17--the-local-mode-served-list-variant), and D4's "mirror it as
 **Outcomes:** D17 — operator chose the parent repo's flow (superseded). D4 CI clause — operator:
 "Decide after research R2"; R2 done (parent CI already runs PHP + SQLite3); then **"No new
 workflow."**
+
+### D21 — May the parent open a PR inside the fork so the parent's CI runs?
+
+**Status:** `OPEN` (not blocking until execution stage V of Plan v0.3)
+
+**Why:** the parent's `.github/workflows/python-app.yml` runs only on pushes to
+`main`/`test_me`/`avian-visitors` or PRs into `main`/`avian-visitors`, and has no
+`workflow_dispatch` — pushing `feature/birdframe-midnight-reset` alone runs nothing (found by the
+[Plan v0.3 Oracle review](verification-log.md#plan-v03-oracle-review)). Real Linux CI (real `fcntl`, PHP + SQLite3) needs a PR inside
+`moomoomafia/AvianVisitors` into its `avian-visitors` branch, with Actions enabled on the fork.
+
+**Options:** (1) yes, at stage V only, never targeting the parent (recommended); (2) push the
+change to the fork's `avian-visitors` directly (also triggers CI, but changes the fork's main
+branch); (3) no CI — rely on local runs + the hardware pass.
+
+**Consequence if unanswered:** Plan v0.3's CI row cannot run; verification rests on local runs
+(stubbed `fcntl`, scoop PHP) and hardware.
 
 ---
 

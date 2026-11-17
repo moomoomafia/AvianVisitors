@@ -157,8 +157,8 @@ Any report must name the environment and list what was **not** executed.
 
 ## Feature freeze (current branch)
 
-Branch `feature/birdframe-midnight-reset`. The draft brief is
-[`.pi/reset-after-midnight Plan v0.2.md`](.pi/reset-after-midnight%20Plan%20v0.2.md); it is a **rough draft and building the feature is
+Branch `feature/birdframe-midnight-reset`. The current plan is
+[`.pi/reset-after-midnight Plan v0.3.md`](.pi/reset-after-midnight%20Plan%20v0.3.md) (v0.1/v0.2 kept for history). **Building the feature is
 NOT authorised** — that is an operator permission, and only the operator can lift it.
 Whether the *design* is settled is a separate question answered solely by the register's
 status table (open items are also marked ⚑ in
