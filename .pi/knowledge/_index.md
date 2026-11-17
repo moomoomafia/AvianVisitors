@@ -53,11 +53,15 @@ every session; delete items when they close.
 6. **Unverified assumptions** carried forward (full list in
    [verification-log.md](verification-log.md)): `getenv()` visibility of
    `AVIAN_STATION_TIMEZONE` under FPM; index use through the unscoped `TEMP VIEW`;
-   Playwright 1.62.0 on Debian 12; whether GitHub runners have `php`; how often a day's
-   first detection lacks art.
-7. **Nothing has been executed** in a real verification environment yet. The [D4](open-decisions.md#d4--what-environment-is-the-acceptance-gate) container
-   does not exist; Docker Desktop's daemon is off on this machine (WSL2 Ubuntu is
-   installed but stopped).
+   Playwright 1.62.0 on Debian 12; how often a day's first detection lacks art. *(Closed
+   since: GitHub runners have PHP + SQLite3 — R2; the clamp and param-shape claims — R3.)*
+7. **PHP now runs locally** (scoop, PHP 8.5; [R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php)): the parent's PHP suites and the R3
+   checks execute for real. Still not executed: anything needing Linux (`frame/display.py`
+   tests, the fake station + fake panel) or hardware. The [D4](open-decisions.md#d4--what-environment-is-the-acceptance-gate) container
+   does not exist; Docker Desktop's daemon is off on this machine, and **WSL2 cannot start**
+   (Wsl/Service/CreateInstance/CreateVm/HCS/HCS_E_HYPERV_NOT_INSTALLED — Virtual Machine Platform / virtualization not enabled;
+   found 2026-11-16 when attempting R3), so Docker almost certainly can't run either. The
+   D4 container needs virtualization enabled first (admin + reboot).
 8. **[D20](open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) principle adopted (2026-11-16):** align with the parent repo, change the least
    code. [minimal-footprint.md](minimal-footprint.md) shrank the design. Re-asked rulings:
    D17 → **use the parent repo's flow** (superseded); D4's CI clause → **no new workflow**
@@ -187,3 +191,8 @@ Three frame data sources, one renderer:
     (`frame/display.py:457-463`). The whole station change is three lines (R1 variant B′:
     one new `$resetAtMidnight` local + two one-token swaps in `avian/api/birdnet-api.php`).
     See [minimal-footprint.md](minimal-footprint.md).
+
+17. **PHP runs here now — in a *new* shell.** Scoop's PHP loads SQLite3 via the user env
+    var `PHP_INI_SCAN_DIR` + `~/scoop/persist/php/cli/conf.d/zz-avian-sqlite3.ini`. A shell
+    older than the install fails `tests/test_midnight_reset.py` with `Class "SQLite3" not
+    found` — environment, not product. WSL2/Docker can't start (`HCS_E_HYPERV_NOT_INSTALLED`).

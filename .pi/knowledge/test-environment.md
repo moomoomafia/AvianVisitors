@@ -15,9 +15,9 @@ timing, and colour fidelity.
 
 | Tool | Status |
 |---|---|
-| `php` | **absent** |
-| `docker` | CLI at `C:\Program Files\Docker\...\docker.exe`; **daemon not running** (`//./pipe/dockerDesktopLinuxEngine` not found) — needs Docker Desktop started |
-| `wsl` | **WSL2 present**, `Ubuntu` (Stopped) + `docker-desktop` distro; default version 2 |
+| `php` | **Installed 2026-11-16 per-user via scoop: PHP 8.5.12** (CLI, ZTS, x64). SQLite3 enabled by `~/scoop/persist/php/cli/conf.d/zz-avian-sqlite3.ini`; loaded in shells that have scoop's user `PHP_INI_SCAN_DIR`. Runs the parent's PHP tests natively ([R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php)). *Earlier: absent.* |
+| `docker` | **Inferred unavailable too (not verified):** Docker Desktop on Windows needs the WSL2 or Hyper-V backend, and Hyper-V is reported as not installed. CLI at `C:\Program Files\Docker\...\docker.exe`; **daemon not running** (`//./pipe/dockerDesktopLinuxEngine` not found) — needs Docker Desktop started |
+| `wsl` | **WSL2 registered but cannot start** (checked 2026-11-16 when attempting R3): `wsl -d Ubuntu` fails with `Wsl/Service/CreateInstance/CreateVm/HCS/HCS_E_HYPERV_NOT_INSTALLED` — "WSL2 is not supported with your current machine configuration. Please enable the 'Virtual Machine Platform' optional component and ensure virtualization is enabled in the BIOS." Fix needs admin: `wsl.exe --install --no-distribution` (+ reboot, possibly BIOS). *Earlier text: "WSL2 present, `Ubuntu` (Stopped) + `docker-desktop` distro" — the distros are registered, but none can run.* |
 | `node` / `npm` | present |
 | Python | 3.14 (default) + 3.13; **no 3.11**; `venv`/`ensurepip` OK; Pillow, pytest, playwright importable |
 | `sqlite3` | present (miniconda) |

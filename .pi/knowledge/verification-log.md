@@ -414,3 +414,57 @@ above) was superseded. It was updated in [_index.md](_index.md) (fact 16 and ope
 ### Still unverified
 
 E8's mangling/duplicate behaviour and the `hours=24` clamp are argued, not executed — R3.
+
+---
+
+## R3: execute the clamp and param-shape claims with PHP
+
+* **Date:** 2026-11-16 · **Executor:** parent · **Operator choices:** run R3 in WSL Ubuntu →
+  WSL2 could not start → *"scoop install php"*.
+* **Environment found:** `wsl -d Ubuntu` fails with
+  `Wsl/Service/CreateInstance/CreateVm/HCS/HCS_E_HYPERV_NOT_INSTALLED` (Virtual Machine Platform /
+  virtualization not enabled). Docker Desktop needs the same, so the D4 container is blocked here
+  (inferred, not started). Recorded in [test-environment.md](test-environment.md) and the D4 entry.
+* **Environment set up:** `scoop install php` → PHP **8.5.12** (CLI, ZTS, x64), per-user, no admin.
+  Scoop sets the user env var `PHP_INI_SCAN_DIR`, but its `php.ini` leaves `sqlite3` commented and
+  uses a relative `extension_dir`. Added one drop-in,
+  `~/scoop/persist/php/cli/conf.d/zz-avian-sqlite3.ini` (absolute `extension_dir` +
+  `extension=sqlite3`), to match GitHub's runner, which loads SQLite3 (R2). Nothing in the repo
+  changed. Undo: delete that file; `scoop uninstall php`.
+* **Scripts (kept for reproducibility, our tree only):** `.pi/research/r3/clamp_check.php`,
+  `.pi/research/r3/param_check.php`, `.pi/research/r3/www/echo.php`.
+
+| Check | Result | Notes |
+|---|---|---|
+| Parent suite `tests/test_midnight_reset.php`, unmodified | **20/20 pass** | first-ever execution of this contract in this project |
+| Parent suite `tests/test_site_name_api.php`, unmodified | **6/6 pass** | same library-mode include |
+| Parent pytest wrapper `tests/test_midnight_reset.py` | **1 passed** (was a vacuous skip) | in a new-shell environment; see the side effect below |
+| (a) Clamp: `recentWindow(hours=24, reset on, today)` | **30/30** | clamps to that day's `00:00:00` at 8 anchors (00:00:00, 00:00:01, 06:30, 12:00, 23:59:59, US DST date 2026-03-08, fall-back hour 2026-11-01 01:30, leap day 2028-02-29); contrast cases `hours=12`, ALL, reset off and educator scope do **not** clamp; rows: yesterday 23:59:59 excluded, `00:00:00` included, anchor included, anchor+1s excluded; reset off keeps yesterday's row (the bug the feature fixes) |
+| (b) Param shape: `$RESET_AT_MIDNIGHT \|\| (($_GET['reset_at_midnight'] ?? null) === '1')` | **38/38**, identical in `parse_str` and a **real HTTP request via `php -S`** | only exact `1` (incl. `%31`) is true; absent, `0`, empty, key-only, `true`, `01`, trailing space, `RESET_AT_MIDNIGHT=1` (case-sensitive key), `x[]=1`, `x[k]=1` are false; `reset.at.midnight=1` and `reset at midnight=1` are **mangled to `reset_at_midnight` and true**; duplicates: **last wins**; station flag ON can never be switched off by the request |
+
+### Claims this converts from "argued" to "executed"
+
+* R1 brief E7 (the clamp the design relies on) and E8 (param shape, incl. mangling and last-wins)
+  — [../outputs/r1-station-param-variant.md](../outputs/r1-station-param-variant.md).
+* D13's implementation via `recentWindow` reuse and `hours=24` (minimal-footprint, D20 audit).
+* The D3 amendment by D20/R1 (mangled aliases honoured, harmless).
+
+### Side effect found and fixed
+
+Installing PHP flipped `tests/test_midnight_reset.py` from **skip** to **fail** in this shell:
+`Class "SQLite3" not found`, because the shell predated scoop's `PHP_INI_SCAN_DIR` and the
+`php.ini` didn't load SQLite3 anyway. Fixed by the drop-in `.ini`; verified `1 passed` with the
+new-shell environment. Documented in AGENTS.md (verification honesty) and as hard-won fact 17,
+so a future agent doesn't read an environment failure as a product failure.
+
+### Defect in the parent's own work
+
+The first clamp run reported 1 failure: the test's *expected* row count for the reset-off
+contrast case was wrong (it guessed 2; the rolling window correctly returns 3, including
+yesterday's 23:59:59 bird). The product behaved correctly; the expectation was fixed.
+
+### Still unverified
+
+The station change itself (R1 variant B′) is not implemented — building is not authorised — so
+the full endpoint with the real param (e.g. via upstream's `edu_endpoint` harness) is untested.
+Everything needing Linux (`fcntl`) or the D4 container is still blocked by the WSL2 finding.

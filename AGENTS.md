@@ -129,7 +129,16 @@ not escalated.
 This workstation cannot verify most of what matters here, and that must never leak into
 a report as a green check:
 
-* `php` is absent → PHP contract tests are `skipUnless` and **pass vacuously**.
+* **PHP 8.5 is installed per-user via scoop** (2026-11-16, for R3). New shells load SQLite3
+  through scoop's `PHP_INI_SCAN_DIR` and a drop-in `~/scoop/persist/php/cli/conf.d/zz-avian-sqlite3.ini`,
+  so `pytest tests/test_midnight_reset.py` **runs the PHP contract for real** (it used to skip).
+  A shell started *before* the install lacks that variable: the test then **fails** with
+  `Class "SQLite3" not found` — an environment issue, not a product failure. Fix by opening a
+  new shell or passing `PHP_INI_SCAN_DIR` explicitly. Uninstall: `scoop uninstall php` and
+  delete that `.ini`.
+* **WSL2 cannot start here** (`HCS_E_HYPERV_NOT_INSTALLED`: Virtual Machine Platform /
+  virtualization not enabled), so the D4 Docker container is blocked until the operator
+  enables it (admin + reboot).
 * `fcntl` is absent → every `frame/display.py`-dependent test errors on import.
 * `os.geteuid` / `os.O_NOFOLLOW` absent → installer and credential tests fail to collect.
 * No e-ink panel → requirement checks must assert *"no push was attempted"*, not

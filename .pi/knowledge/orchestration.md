@@ -61,10 +61,11 @@ unless you pass `cwd`/`worktree`. Two consequences:
 
 ## Environment constraints children must be told
 
-* **`php` is not installed here** → every PHP contract test skips. A worker that
-  "verifies" a PHP change by running `pytest tests/test_midnight_reset.py` has
-  verified nothing (it passes vacuously). Either install PHP, run in WSL/Docker, or
-  state plainly in the report that the PHP contract was not executed.
+* **PHP is now installed per-user (scoop, PHP 8.5; 2026-11-16, see [R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php))** and
+  `pytest tests/test_midnight_reset.py` runs the PHP contract for real in a new shell. A shell
+  that predates the install fails it with `Class "SQLite3" not found` — that is environment,
+  not product. *Before 2026-11-16 `php` was absent and the test passed vacuously.* WSL2 and
+  therefore Docker cannot start here (`HCS_E_HYPERV_NOT_INSTALLED`).
 * **`fcntl`, `os.geteuid`, `os.O_NOFOLLOW` are absent** → `frame/display.py`-dependent
   tests error locally; use the stub recipe in
   [testing-and-ci.md](testing-and-ci.md#running-displaypy-tests-on-windows) and label

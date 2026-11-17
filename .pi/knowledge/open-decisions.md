@@ -303,9 +303,17 @@ What this commits us to, per [test-environment.md](test-environment.md):
 On this machine the daemon is not running: Docker Desktop must be started before the
 first build. WSL2 Ubuntu stays a fine ad-hoc fallback but is no longer the gate.
 
+> **Environment finding (2026-11-16, while attempting R3):** WSL2 **cannot start** on this
+> machine — `Wsl/Service/CreateInstance/CreateVm/HCS/HCS_E_HYPERV_NOT_INSTALLED` (Virtual Machine Platform / virtualization not enabled). Docker
+> Desktop needs the same virtualization, so the D4 container is **blocked here** until the
+> operator enables it (admin `wsl.exe --install --no-distribution` + reboot, possibly a
+> BIOS setting). The ruling stands; only its local feasibility changed. Parent CI (R2) is
+> unaffected.
+
 Original context retained below.
 
-On this workstation nothing load-bearing is verifiable: `php` is absent (PHP contract
+On this workstation nothing load-bearing is verifiable *(as of the D4 ruling; since 2026-11-16 PHP is
+installed per-user and the PHP contract runs — [R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php))*: `php` is absent (PHP contract
 tests **pass vacuously**, `tests/test_midnight_reset.py:7`), `fcntl` is absent (every
 `display.py`-dependent test errors), the full suite aborts at collection, and there is
 no e-ink panel.

@@ -178,7 +178,7 @@ asymmetry is a design statement the plan should record so nobody "fixes" it cent
   oracle's built-in `contact_supervisor` behaviour on material unknowns. Pre-resolve
   the questions below so no child blocks on them.
 * Completion criteria say "Tests pass" without naming the platform. On this Windows
-  box, `php` is absent (PHP contract tests **pass vacuously**) and `fcntl` is absent
+  box, `php` is absent *(true at the time; installed 2026-11-16, [R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php))* (PHP contract tests **pass vacuously**) and `fcntl` is absent
   (`frame/display.py` tests error). Require the final report to name the environment and
   list not-executed checks.
 

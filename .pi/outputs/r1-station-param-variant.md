@@ -138,8 +138,10 @@ odd; `$resetAtMidnightEffective` is an acceptable alternative. Avoid client-spec
 
 ## Open / unverified
 
-* E8's mangling/duplicate behaviour and the E7 clamp are argued, not executed — R3 runs them in
-  the `.pi/` container with `php`.
+* ~~E8's mangling/duplicate behaviour and the E7 clamp are argued, not executed.~~ **Executed
+  by R3 (2026-11-16) on PHP 8.5.12: clamp 30/30, param shape 38/38 (both `parse_str` and a real
+  HTTP request), parent suites 20/20 + 6/6 — every claim held.** See
+  [verification-log.md → R3](../knowledge/verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php).
 * Commit attributions and churn in E3/E4/E6 come from the parent's `git` reads; the reviewer had
   no git and could not independently confirm them.
 * Not implemented (building is not authorised); nothing observed on a live station or proxy.

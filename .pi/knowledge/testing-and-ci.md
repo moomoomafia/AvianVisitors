@@ -26,13 +26,14 @@ Python matrix in `.github/workflows/python-ci.yml`: **3.9 / 3.11 / 3.13** → ke
 ## Verified state on this Windows workstation (2026-11-16)
 
 Environment: Python 3.14.0, pytest 9.1.1, Pillow present, playwright importable,
-**`php` not installed**, `fcntl`/`os.geteuid`/`O_NOFOLLOW` absent (POSIX-only).
+`php` **not installed at the time** (installed per-user via scoop on 2026-11-16 — see below),
+`fcntl`/`os.geteuid`/`O_NOFOLLOW` absent (POSIX-only).
 
 | Command | Result |
 |---|---|
 | `pytest tests/test_frame_capture.py` | **58 passed, 1 skipped, 19 errors** |
 | `pytest tests/test_frame_birdweather.py` | **14 passed + 34 subtests, 4 errors** |
-| `pytest tests/test_midnight_reset.py` | passes (skips the PHP check — no `php`) |
+| `pytest tests/test_midnight_reset.py` | passed vacuously (skipped the PHP check — no `php`). **Since the scoop PHP install: `1 passed` for real in a new shell** ([R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php)) |
 | `pytest tests/` | **collection aborted: 15 errors** |
 | `pytest frame/` | **collection aborted: 4 errors** |
 
