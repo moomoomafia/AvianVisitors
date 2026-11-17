@@ -1,0 +1,368 @@
+# Verification log
+
+Durable record of **independent verification runs** over the findings in this knowledge
+base, so future agents know which claims were checked, how, and by whom — and which are
+still assumptions. The subagent artifact this was distilled from is session-scoped and
+will be cleaned; this file is the record.
+
+---
+
+## Audit 1 — Oracle run on the midnight-reset findings
+
+* **Date:** 2026-11-16 · **Branch:** `feature/birdframe-midnight-reset` (no source changes)
+* **Executor:** one `oracle` child agent (`6a6f60a5-36fe-4bb4-8823-2a32808b626d`),
+  read-only, `defaultContext: fork`. One child at a time, per the draft plan's
+  concurrency rule; the child was instructed not to delegate and did not.
+* **Method:** independent re-derivation from source. No test-suite runs (no `php`, no
+  `fcntl` on this box), so every verdict is code-reading plus two local proofs noted
+  below.
+* **Scope audited:** [`.pi/knowledge/plan-review-midnight-reset.md`](plan-review-midnight-reset.md),
+  [`feature-midnight-reset.md`](feature-midnight-reset.md), [`station-clock-and-data.md`](station-clock-and-data.md), plus supporting claims in
+  [`frame-refresh-decision.md`](frame-refresh-decision.md), [`_index.md`](_index.md), [`testing-and-ci.md`](testing-and-ci.md), [`repo-map.md`](repo-map.md),
+  [`orchestration.md`](orchestration.md), against
+  [`.pi/reset-after-midnight Plan v0.2.md`](../reset-after-midnight%20Plan%20v0.2.md).
+
+### Verdicts (post-audit, after the parent re-verified each counter-claim)
+
+| # | Claim | Verdict | Evidence | Falsified by |
+|---|---|---|---|---|
+| 1 | `--force` / `--no-signature` bypass the refresh gate | **AGREE**; `--preview` inclusion **OVERSTATED** | `frame/display.py:445` `changed = (not use_signature) or …`; `:446` `if not force and not preview:`; `--preview` returns at `:468-473` **before** `push_panel` (`:476`) and never calls `save_state` | preview reaching `push_panel` — it does not |
+| 2 | `avian-bundle` renders with `--force --no-signature --wait-lock`; non-zero exit is bad | **AGREE on flags/exit**; **MISSTATED consequence** | `frame/bundle_runtime.py:2098-2106` flags; `:2108-2110` raise; `:1953-1955` render only when `changed`; `:1962-1972` on failure **restores prior state, re-renders, then raises**; `rollback` renders unconditionally `:1993-1997`; hidden `--no-render` `:2121,2124` | a non-zero exit that only logged (it does not) |
+| 3 | `signature([])` is a real distinct hash; `load_state` failure ⇒ "changed" | **AGREE** | `display.py:103-107` (sorted `[]` hashed); independently reproduced `sha256("[]")[:16] = 4f53cda18c2baa0c`; `:329-335` any exception ⇒ `signature: None`; `:445` | an existing emptiness guard — none exists |
+| 4 | A page-URL param cannot reach the API; inject in both places | **AGREE** | `frame/shoot.py:249-250` intercepts only `action=recent`; `:259` is a **substitution** of `hours=\d+`, not an append; `apt.js:378-387 birdApiUrl` builds from passed params + `edu`; `location.search` is read **only** for `edu` (`avian/frontend/apt.js:317`), `labels` (`:1809`), `atlasLifers` (`:4657`) | any generic param pass-through in `apt.js` — there is none |
+| 5 | Client-side `last_seen` filter cannot satisfy "never mix days" | **AGREE** | `avian/api/birdnet-api.php:369-375`: `COUNT(*) AS n … WHERE $where` — `n` is window-scoped; `last_seen` is only `MAX(...)` | `n` being per-day — it is not |
+| 6 | Midnight clamp exists but only via the station-wide flag; scoped requests ignore it | **AGREE** | `:82-89` signature + `$enabled = $resetAtMidnight && !$scoped`; `:110-116` clamp + `>=` vs `>`; `:129` flag; `:358-363` call site; response `:392-397` | a request-level param already existing — it does not |
+| 7 | `Date = :d` is sargable, `DATETIME(Date||' '||Time) >= …` is not | **AGREE — and UNDERSTATED** | `EXPLAIN QUERY PLAN` against the real `scripts/createdb.sh:5-20` schema: `Date = '2026-09-02'` → `SEARCH detections USING INDEX detections_Date_Time (Date=?)`; the current rolling predicate → `SCAN detections`. So **today's `recent` already full-scans on every poll**. Precedent `case 'hourly'` `:571-595` | the planner choosing the index for the expression form |
+| 8 | `Date`/`Time` come from the recording filename; `as_of` is UTC | **AGREE with caveat** | `scripts/utils/classes.py:27-29` `file_date + timedelta(seconds=start)`, `:45-51` naive `strptime`; `as_of = date('c')` at `birdnet-api.php:397`; `:577-581` notes `date.timezone` is UTC on a stock Pi. **Caveat:** nothing in `avian/api/` pins the zone and sibling scripts call `date_default_timezone_set()` (`scripts/common.php:22`, `scripts/config.php:113`) | an API-side `date_default_timezone_set()` — absent |
+| 9 | `AVIAN_STATION_TIMEZONE` reaches PHP | **Delivery AGREE; last hop UNPROVEN** | `env AVIAN_STATION_TIMEZONE $AVIAN_STATION_TIMEZONE` in **six** blocks (`scripts/update_caddyfile.sh:967,976,985,993,1003,1013`); fpm `clear_env = yes` (`scripts/security_refresh.sh:118`). But `tests/smoke_caddy_generated_routes.sh:129` asserts `$_SERVER[...]` while `educator_station_timezone()` reads **`getenv()`** (`avian/api/educator-store.php:408`); PHP tests inject with `putenv` (`tests/test_educator_backend.php:133,519,539`) — CLI only | an HTTP-level test showing `getenv()` returns empty under FPM; or the reverse, confirming it |
+| 10 | `tests/smoke_collage_readiness.mjs` couples to `shoot.py` and pins site blanking | **AGREE** | `:87` `shooter.match(/FRAME_READY = """([\s\S]*?)"""/)`; `:25` `assert.equal(draws.length, 1, 'a successful zero-detection result clears old birds')`; `:19`, `:22` guard loading/malformed cases | the regex no longer matching (i.e. reshaping the literal) |
+| 11 | Unscoped `signature()` hash is a frozen contract; use the `scope` slot | **AGREE** | `tests/test_frame_birdweather.py:191-196` re-derives `sha256(json.dumps([(slug, bucket)]))[:16]`; `tests/test_frame_capture.py:218` pins captured-data signatures; `display.py:103-107` `material = [scope, items] if scope else items` | a compat test being removed |
+| 12 | Local verification is largely impossible here | **AGREE** | `php: command not found`; `importlib.util.find_spec('fcntl') → None`; PHP checks are `@unittest.skipUnless(shutil.which("php"))` (`tests/test_midnight_reset.py:7`) ⇒ **pass vacuously** | installing PHP / running under WSL |
+
+### Corrections the audit forced (all applied, all re-verified by the parent)
+
+1. `--preview` removed from the "can blank the panel" set — it returns before
+   `push_panel`. Was in [`feature-midnight-reset.md`](feature-midnight-reset.md); [`_index.md`](_index.md) fact 9 reworded.
+2. Bundle-render failure consequence rewritten: non-zero exit **reverts the selection
+   and re-renders**, so a non-zero decline silently undoes the user's bundle switch —
+   a stronger reason for exit-0 than "reports failure after activation".
+   [`feature-midnight-reset.md`](feature-midnight-reset.md), [`plan-review-midnight-reset.md`](plan-review-midnight-reset.md), [`_index.md`](_index.md) fact 9.
+3. "Automatic" bundle render reworded to *on selection change*; `rollback` added as an
+   unconditional renderer; hidden `--no-render` noted.
+4. `AVIAN_STATION_TIMEZONE` line list corrected 3 → 6 blocks, and the `getenv()` hop
+   marked assumed. [`station-clock-and-data.md`](station-clock-and-data.md), [`repo-map.md`](repo-map.md), [`testing-and-ci.md`](testing-and-ci.md).
+   (This was the **second** timezone error in the same claim within one session — the
+   first, "not exposed to PHP at all", was caught by the parent before the audit.)
+5. `Date = :d` recommendation narrowed: must retain the `<= DATETIME(:anchor)` ceiling
+   (`avian/api/birdnet-api.php:89`) or the clamp silently changes semantics for skewed /
+   future-stamped rows.
+6. Gap 1 severity scoped to requirements **9 and 10**; requirement 12
+   ("disabled ⇒ unchanged") is untouched by it.
+
+### Confirmed and strengthened by the audit
+
+* The central hazard — an empty window is a **valid, drawable state end to end**, so
+  retention must live in the frame and the gate alone is insufficient — survived
+  verification intact. The audit called it the most valuable finding.
+* "Retain means *don't touch the panel*, not *can redraw*" confirmed: a clamped window
+  structurally cannot return yesterday's rows.
+* Gap 2 (the API change is a decision, not a question) held under an explicit attempt to
+  falsify it: the only frame-only alternative is hour-rounded (barred by the brief) and
+  still cannot fix `n`.
+* Gap 3 (mode scoping) confirmed with sharper evidence: in `image` mode `run()` still
+  calls `fetch_species`→`fetch_recent(base_url)` for the signature (`frame/display.py:430-443`)
+  while the pixels come from someone else's render (`:406-415`), so sending a clamp
+  param there is incoherent.
+* Claim 7 is a broader win than recorded: the current `recent` predicate scans on every
+  poll, so the `Date =` form is a general performance improvement, not just a
+  new-path detail.
+
+### New findings the audit produced
+
+1. **A cheaper, house-consistent option for the signature/image split.** `birdweather`
+   mode already proves it: `_make_api_handler(..., species=species)`
+   (`frame/shoot.py:243-257`) serves the frame's own fetched list to the browser, so the
+   page's request stops mattering. Doing the same in `local` mode makes signature/image
+   agreement **structural with one upstream request** instead of injecting a param in
+   two places and hoping they stay in sync. Supporting evidence: `top_file` has **0
+   occurrences in `avian/frontend/apt.js`**, and the detail modal is hidden during capture. Cost: the
+   payload must carry `sci/com/n`, and the live site is no longer the source of truth
+   for the capture. Added to
+   [feature-midnight-reset.md](feature-midnight-reset.md#window-options-ranked).
+2. **Four brief requirements were unmapped to code** (now added to the requirement→code
+   table in [`feature-midnight-reset.md`](feature-midnight-reset.md) and listed in
+   [plan-review-midnight-reset.md](plan-review-midnight-reset.md#requirements-still-unmapped-to-code)):
+   "do not modify/delete historical detections"; "preserve quiet hours / layout /
+   e-ink"; requirement 11's **scheduled** restart vector (`frame/systemd/birdframe.timer`
+   `OnBootSec=2min` fires a render ~2 min after a boot following a multi-day outage --
+   *Audit 2 correction:* originally also attributed to `Persistent=true`, which is inert
+   without `OnCalendar=`); and an owner for "never write the global `RESET_AT_MIDNIGHT`" —
+   assertable as *`frame/*.py` must not POST to `avian/api/config.php`*.
+
+### Still unverified (carry these forward as assumptions)
+
+* `getenv('AVIAN_STATION_TIMEZONE')` visibility under real PHP-FPM (claim 9). Needs an
+  HTTP-level check on a station or a container with the generated Caddy config.
+* Everything the environment blocked: the PHP window contract
+  (`tests/test_midnight_reset.php`), the `frame/display.py`-dependent pytest set (`fcntl`),
+  and any e-ink behaviour. None of these were executed in this session — they are
+  **not** verified, and any report claiming otherwise should be challenged.
+* Hardware-only questions: heal suppression vs burn-in over a long empty stretch, and
+  panel state after a power glitch mid-update.
+
+### Method note (worth reusing)
+
+Two of the strongest corrections came from **re-deriving, not re-reading**: computing the
+empty-list hash independently, and running `EXPLAIN QUERY PLAN` against the real schema.
+Both are cheap on this box, both produce evidence independent of the prose, and both
+caught things a second read of the same file did not.
+
+---
+
+## Audit 2: Reviewer pass over the settled design
+
+* **Date:** 2026-11-16 · **Status:** complete · **Trigger:** operator switched to a
+  stronger model and asked for a full soundness/viability review before Plan v0.3.
+* **Executor:** one `reviewer` child (`f8005d27-854f-4170-9cee-35a671b5e7af`), read-only,
+  no bash, no delegation. Seeded with parent hypotheses H1–H7 plus a general sweep.
+* **Method:** source-reading only — no PHP, pytest, Node, container, Playwright or
+  hardware was run. The parent then **re-verified each load-bearing counter-claim against
+  source** before accepting it (table below).
+* **Headline:** no Critical findings — nothing in the settled design blanks a wall *if* the
+  guard is keyed on the data. Six High findings changed the contract; **Plan v0.3 is not
+  ready** until [D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)–[D16](open-decisions.md#d16--no-validated-list-fetch-failed-or---no-signature-with-the-flag-on) are ruled ([open-decisions.md](open-decisions.md)).
+
+### Hypothesis verdicts
+
+| # | Hypothesis | Verdict | Key evidence | Design consequence |
+|---|---|---|---|---|
+| H1 | Non-empty but undrawable today-window hangs capture | **CONFIRMED** | `frame/display.py:132-150` (local ignores `drawable`); `avian/frontend/apt.js:3181-3190` (maskless tiles dropped), `:1611-1614` (`loadMask` null); `:3359` (`finishFrameRender` needs `placed.length`); `:3124` (empty nest only when `!items.length`); `frame/shoot.py:517-521` timeout; `display.py:464-466`; `frame/bundle_runtime.py:1962-1972,1993-2000` revert | [D1](open-decisions.md#d1--may-a-forced-render-draw-an-empty-today-window-collage) must key on **drawable**, not empty → **[D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)**. Pre-existing for rolling windows; today-only makes it common. Mixed lists are fine. Second, pre-existing hang not worsened here: a tile still unplaced after 10 shrink passes (`x=-99999`) breaks `collagePlaced.length === placed.length` the same way. |
+| H2 | `Date =` form vs `recentWindow` are two contracts | **CONFIRMED** | `avian/api/birdnet-api.php:91-99,104-116`; `tests/test_midnight_reset.php:38-40` pins "short window inside the day stays rolling"; `display.py:51` `hours` user-settable | Pick one → **[D13](open-decisions.md#d13--does-the-today-window-respect-the-hours-setting)**. Req 1 ("starting at 00:00") literally fits only the `Date =` form. |
+| H3 | Birdweather served-list pattern is drop-in for local | **PARTIAL** | `shoot.py:250-256` answers `recent` with `{hours, species, as_of}` only and everything else with `{}`; `apt.js:6065` `applySiteName` needs `site_name`; `tests/test_frame_capture.py:177-185` pins `educator_scope` pass-through | Needs a local variant: full response, other actions continued, flag-gated → **[D17](open-decisions.md#d17--the-local-mode-served-list-variant)**. Handshake (`frame_capture_id`, `shoot.py:272-275`) and `small_floor` unaffected; captured-signature invariant (`display.py:458-463`) becomes trivially true. |
+| H4 | [D5](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr)'s degraded-station signal is definitive | **REFUTED** | response `reset_at_midnight` = `global && !scoped` (`birdnet-api.php:90,95,118`); `midnight_clamped`/`window_start` always present (`:392-397`) | Distinct echo field + exit-code choice → **[D14](open-decisions.md#d14--how-is-an-un-updated-station-detected-and-with-what-exit-code-supersedes-d5)** (supersedes D5). |
+| H5 | [D6](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr) salt + state are safe | **PARTIAL (safe)** | frozen test only checks the unscoped hash (`tests/test_frame_birdweather.py:193-197`); bundle re-hash after `signature()` (`display.py:438-441,459-463`); `fetch_recent` returns only `data["species"]` (`display.py:100`); `save_state` only after `push_panel` (`:477-481`) | D6 optional; [D7](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr)/[D9](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr) need no mechanism; **never `save_state` on a decline**; metadata needs a flag-only fetch helper. Toggle on/off costs one refresh; no `state.json` reset needed. |
+| H6 | [D4](open-decisions.md#d4--what-environment-is-the-acceptance-gate) fake station is straightforward | **REFUTED (as documented)** | `php -S` = SAPI `cli-server`, all overrides gated on `cli` (`avian/api/educator-store.php:39,46,52,101,421,492`; `avian/api/educator-state.php:23,30`); lock before profile check (`avian/api/educator-scope.php:148-157`); paths (`birdnet-api.php:35-36`); clock from SQLite `localtime` (`:280,294-296`); `scripts/createdb.sh:2-3,22-23` not runnable as a fixture; `frame/requirements-frame.txt:5` pulls `inky`→`spidev` | D4 *ruling* stands; its elaboration amended (D4 note). DST cases drop out under the `Date =` form. |
+| H7 | Every brief requirement maps to the design | **PARTIAL** | reviewer's requirement table | Holes: undrawable-only (req 3–6 → D12), capture without a list (req 8 → **[D16](open-decisions.md#d16--no-validated-list-fetch-failed-or---no-signature-with-the-flag-on)**), Educators automatic scope (req 8 → **[D15](open-decisions.md#d15--educators-capture-active-while-reset_at_midnight-is-on)**), served-list gating (req 12 → D17). `case 'recent'` must re-send `Cache-Control` (sent at `:169-171` before the `switch`). |
+
+### Findings by severity
+
+**High** — F-H1 guard keys on empty, not drawable (→ [D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)) · F-H2 two window contracts
+(→ [D13](open-decisions.md#d13--does-the-today-window-respect-the-hours-setting)) · F-H3 capturing without a list lets the page fetch the rolling window and mixes
+days (→ [D16](open-decisions.md#d16--no-validated-list-fetch-failed-or---no-signature-with-the-flag-on)) · F-H4 Educators automatic scope overrides the frame
+(`avian/api/educator-scope.php:182-191`, `avian/api/educator-store.php:1108-1112`; → [D15](open-decisions.md#d15--educators-capture-active-while-reset_at_midnight-is-on)) · F-H5 [D5](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr) signal
+wrong (→ [D14](open-decisions.md#d14--how-is-an-un-updated-station-detected-and-with-what-exit-code-supersedes-d5)) · F-H6 [D4](open-decisions.md#d4--what-environment-is-the-acceptance-gate) fake station not viable as written (D4 amended).
+
+**Medium** — F-M1 [D2](open-decisions.md#d2--which-frame-modes-does-the-feature-apply-to) activation test also matches `image` mode (D2 amended) · F-M2
+served list not stated as flag-gated (→ [D17](open-decisions.md#d17--the-local-mode-served-list-variant)) · F-M3 degraded-station exit code
+unspecified (→ D14) · F-M4 docs still said "inject in both places" (fixed) · F-M5
+`plan-review` Gap 7 #11 false for local mode (fixed) · F-M6 tri-state param invites `=0`
+overriding the global flag ([D3](open-decisions.md#d3--station-api-additive-request-param-name-and-shape) amended: only `1` counts).
+
+**Low** — [`frame-refresh-decision.md`](frame-refresh-decision.md) "empty nest when zero *drawable*" was wrong (fixed) ·
+`Persistent=true` misattributed in 5 places; inert without `OnCalendar=` (fixed) ·
+[`station-clock-and-data.md`](station-clock-and-data.md) still said `as_of` "is UTC" (fixed) · line drift: preview
+return `frame/display.py:469-474`, `push_panel` `:477`, Cache-Control `avian/api/birdnet-api.php:169-171`
+(fixed) · a 3.11-only container doesn't exercise Python 3.9 · `run()` complexity vs flake8
+15 · date typo 2025→2026 in [`testing-and-ci.md`](testing-and-ci.md) (fixed).
+
+**Simpler-path notes** — [D7](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr)/[D9](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr) need no mechanism (no new `state.json` keys); [D6](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr) optional;
+extend the existing `frame-capture` CI job instead of adding one; `action=hourly`
+already aggregates by station day but caps at 30 species (`birdnet-api.php:584`) and has
+no anchor ceiling, so it is not a drop-in.
+
+### Parent re-verification of the counter-claims
+
+| Counter-claim | Parent check | Result |
+|---|---|---|
+| Lock taken before the Educators-enabled check | read `avian/api/educator-scope.php:148-157` | **holds** — the comment says it guards crash-mid-restore |
+| Test overrides are `cli`-only | grep `PHP_SAPI` in `avian/api/educator-store.php`, `avian/api/educator-state.php` | **holds** — 8 sites, all `=== 'cli'` |
+| Automatic scope during an active capture | read `educator-scope.php:180-193` | **holds** — `$automatic = true` from `educator_current_capture_row` |
+| `--no-signature` never fetches in local mode | read `frame/display.py:377-384,418-432` | **holds** — only birdweather re-fetches when `species is None` |
+| Page re-fetches `recent` itself when no list is served | read `frame/shoot.py:254-262` | **holds** |
+| `avian/frontend/apt.js` "since midnight" label keys on `midnight_clamped` | read `apt.js:3605-3612` | **holds** |
+| `Persistent=true` inert here | `frame/systemd/birdframe.timer:9-13` has no `OnCalendar=`; systemd applies `Persistent=` to calendar timers only | **holds** |
+| [D2](open-decisions.md#d2--which-frame-modes-does-the-feature-apply-to) precedent at `frame/bundle_runtime.py:479` | that line is `_safe_dir` | **citation wrong, substance right** — real precedent `bundle_runtime.py:433,474`, `frame/config_contract.py:75` |
+
+### Corrections applied from this audit
+
+Register: [D2](open-decisions.md#d2--which-frame-modes-does-the-feature-apply-to), [D3](open-decisions.md#d3--station-api-additive-request-param-name-and-shape), [D4](open-decisions.md#d4--what-environment-is-the-acceptance-gate) amended; [D5](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr) superseded; [D6](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr)/[D7](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr)/[D9](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr) annotated; [D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)–[D16](open-decisions.md#d16--no-validated-list-fetch-failed-or---no-signature-with-the-flag-on) opened; [D17](open-decisions.md#d17--the-local-mode-served-list-variant)
+parent-decided. Docs: [`_index.md`](_index.md), [`feature-midnight-reset.md`](feature-midnight-reset.md), [`frame-refresh-decision.md`](frame-refresh-decision.md),
+[`plan-review-midnight-reset.md`](plan-review-midnight-reset.md), [`station-clock-and-data.md`](station-clock-and-data.md), [`test-environment.md`](test-environment.md),
+[`testing-and-ci.md`](testing-and-ci.md), [`frame-pipeline.md`](frame-pipeline.md), [`birdnet-api.md`](birdnet-api.md), this log, and [`AGENTS.md`](../../AGENTS.md).
+
+### Still unverified after Audit 2
+
+* Playwright 1.62.0 on Debian 12; whether the GitHub runner image ships `php` + sqlite3.
+* That SQLite flattens the unscoped `CREATE TEMP VIEW detections AS SELECT d.rowid AS
+  detection_id, d.* FROM main.detections d` (`educator-scope.php:486`) and still uses
+  `detections_Date_Time`. The Audit 1 `EXPLAIN QUERY PLAN` evidence was taken against the
+  base table, not the view the API actually queries. Very likely; not proven.
+* How often a day's first detection lacks illustration art (drives [D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)'s urgency).
+* Everything in Audit 1's "still unverified" list remains open.
+
+---
+
+## D18 migration: reference refactor and checker
+
+* **Date:** 2026-11-16 · **Executor:** parent (no child agent) · **Ruling:**
+  [D18](open-decisions.md#d18--knowledge-base-reference-conventions-linking) (hybrid).
+* **Tool:** `.pi/tools/check_kb.py` — validates doc links + GitHub-rule anchors, flags bare
+  doc mentions, resolves every backtick source ref (full path, unique basename, ambiguous,
+  missing, or runtime file), checks cited line numbers are within the file, and with
+  `--index` regenerates [_references.md](_references.md). Standard library only;
+  flake8-clean against the repo's own `.flake8` (it would otherwise have failed the
+  `.github/workflows/python-ci.yml` complexity gate had `.pi/` been committed — the first draft's `check()`
+  scored 35 against a limit of 15).
+* **Method:** baseline run → 5 hand fixes for judgement calls → one-off migration script
+  (rewrote only code spans and prose; skipped headings, fenced blocks, existing links;
+  deleted after use) → re-run → **integrity proof**: after undoing the three intended
+  transforms, all 19 files were byte-identical to the pre-migration backup and every table
+  kept its row count.
+
+| Measure | Before | After |
+|---|---|---|
+| errors | 5 | 0 |
+| warnings | 289 | 0 |
+| doc→doc links added | — | 54 |
+| source refs normalised to full path (first use per section) | — | 225 |
+| decision IDs linked (first use per section) | — | 118 |
+
+### Real defects the checker found (not style)
+
+1. **Wrong path since session 1:** [birdweather-source.md](birdweather-source.md) cited
+   *tests/test_ebird_credentials.py* (quoted in italics because it does not exist); the file
+   is `frame/test_ebird_credentials.py`. No human
+   review pass (including Audits 1 and 2) caught it.
+2. **Two genuinely ambiguous refs** in [repo-map.md](repo-map.md): *config.php* and *spectrogram.php*
+   each exist in `scripts/` and `avian/api/`. Now `avian/api/config.php`,
+   `avian/api/spectrogram.php`.
+
+### Defects in the parent's own work, found and fixed during the migration
+
+1. `lstrip("./")` strips *characters*, not a prefix — it silently turned `.github/...` into
+   `github/...`. Fixed with an explicit prefix loop.
+2. **Status in decision headings made every decision link brittle**: the status is part of
+   the anchor, so ruling on D12 (`OPEN` → `ANSWERED`) would have broken every inbound link.
+   All 12 decision headings now carry status on a `**Status:**` line instead; inbound
+   anchors rewritten in 9 docs. Rule recorded at the top of the register.
+3. **The reverse index undercounted**: decision IDs were counted only outside links, so the
+   migration's own 118 decision links vanished from the index (D3 appeared cited by one doc).
+   The checker now counts link text.
+4. The heading-rewrite regex ended in `\s*$` under `re.M` and **swallowed the blank line**
+   after all 12 headings, merging each `**Status:**` line into the following paragraph.
+   Restored.
+
+### Conventions now enforced (also in [AGENTS.md](../../AGENTS.md))
+
+Doc→doc references are markdown links; source refs stay backtick `path:line` with the full
+repo path on first use per section; headings stay plain text; decision status never in a
+heading; `python .pi/tools/check_kb.py --index` must exit 0 at the end of every session.
+
+---
+
+## D19 build: kb-document skill and extension
+
+* **Date:** 2026-11-16 · **Executor:** parent · **Ruling:**
+  [D19](open-decisions.md#d19--make-the-documentation-duty-fire-automatically-skill-vs-extension)
+  (extension + skill; operator-chosen trigger words; trust to be approved on next start).
+* **Research basis (installed Pi 1.5.2 docs):** skills are listed by name + description and
+  loaded at the model\x27s discretion (`skills.md`: "A model might fail to load a relevant
+  skill"); extensions get deterministic hooks — `input` / `before_agent_start` see the raw
+  prompt and can inject a message, `agent_before_settle` can append entries and request one
+  continuation (`extensions.md`). Project `.pi/extensions|skills|prompts` load only after
+  project trust (`configuration.md`, `security.md`); AGENTS.md loads regardless. This repo had
+  **no saved trust decision** and `defaultProjectTrust` unset (⇒ ask).
+* **Built:** [SKILL.md](../skills/kb-document/SKILL.md) (single source of the procedure;
+  AGENTS.md now defers to it), `.pi/extensions/kb-document/index.ts` + pure `src/core.ts`,
+  `/kb-check` command, and `check_kb.py --verify-index` (no-write staleness check — needed
+  because the settle hook must not silently rewrite files).
+
+### Evidence
+
+| Check | Result |
+|---|---|
+| `node --test "test/*.test.ts"` (Node v25.1.0) | **20/20 pass** — 11 pure-logic (trigger words incl. negatives such as `document.querySelector`, *recordings*, URLs, fenced code; audit phrases; frontmatter strip; snapshot diff; bounded verdicts; root search never climbs past a `.git`), 9 wiring tests driving the real `index.ts` through a fake `pi` (injection, exit-0 decline semantics, retry cap = 2 then gives up, missing Python never blocks, inert outside the repo) |
+| Real Pi load: `node .pi/extensions/kb-document/test/verify-in-pi.mjs` | **PASS** — `pi --mode rpc --no-session -ne -e … -ns --skill …` + `get_commands` lists `extension:kb-check` and `skill:kb-document`, no load error; no model request made |
+| `check_kb.py --verify-index` | exit 0 on a fresh index; exit 1 naming `_references.md` after tampering; restored |
+| flake8 on `check_kb.py` with the repo `.flake8` | clean |
+
+### Defects found along the way
+
+1. First wiring test of `findRepoRoot` failed on Windows: expected `/r`, got `\r` — a
+   POSIX-only test expectation, not a logic bug; fixed with `path.join`.
+2. Mid-test, the shell ran under **cmd.exe**, so `T=…` never assigned; a tamper line was
+   appended to `_references.md` but the backup/restore failed. Recovered exactly by
+   regenerating the (generated) index, then re-run under `bash -lc`. Recorded as a shell trap
+   in AGENTS.md.
+
+### Not yet verified
+
+* Live behaviour in a trusted interactive session: that the injected message reaches the
+  model, that `ctx.ui.notify` appears, and that an `agent_before_settle` continuation fires
+  on a real failing check. Requires the operator to grant project trust (D19 ruling) and one
+  deliberate test: say "document this" with a broken link planted in a scratch KB doc.
+* Keyword false positives in real use (e.g. "record" as a noun) — tune `TRIGGERS` in
+  `src/core.ts` if it fires too often.
+
+---
+
+## D20 research: how the parent repo makes changes like ours
+
+* **Date:** 2026-11-16 · **Executor:** parent · **Trigger:** operator principle
+  [D20](open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo)
+  (align with upstream, smallest change). Output: [minimal-footprint.md](minimal-footprint.md).
+* **Method:** `git log -S` / `git show --stat` over upstream history, then direct reads of the
+  code paths each shrink relies on. No PHP available here, so PHP behaviour is argued from
+  the code and the language semantics and **flagged for execution** (R3).
+
+| Claim | Evidence | Status |
+|---|---|---|
+| Upstream's station midnight reset was `f1cb3add` (7 files, +112/−13) with tests in `1092b969` (`tests/test_midnight_reset.php` +85, `tests/test_midnight_reset.py` +23) | `git show --stat` | verified |
+| `$RESET_AT_MIDNIGHT` is used in exactly 2 places: the cache header and the `recentWindow` call | grep: `avian/api/birdnet-api.php:129` (set), `:169`, `:362` | verified ⇒ the station change can be 1 line |
+| Upstream's param idiom is `$_GET['x'] ?? default` with a cast or strict compare | `avian/api/birdnet-api.php:135,281,356,403-406,434,465,508` | verified |
+| An array param (`reset_at_midnight[]=1`) cannot satisfy `=== '1'` | PHP semantics: an array is never identical to a string | argued; not executed (no `php`) |
+| `recentWindow` with `hours=24` always clamps a today window to midnight | `avian/api/birdnet-api.php:104-116`: clamped iff `DATETIME(anchor,'-24 hours') <= DATETIME(anchor,'start of day')`; the anchor is within today, so always true; upstream test "24 hour window clamps after midnight" | argued + upstream-pinned; execute in R3 |
+| Upstream already re-signs from exactly what the page drew, in both capture paths | `frame/display.py:457-463`; `frame/shoot.py:272-275` sets `capture["species"]` from the response the page received | verified ⇒ D17's premise is already handled upstream |
+| The frame's default `hours` is 24 and is threaded to both the fetch and the capture | `frame/display.py:49,150,399` | verified |
+
+### Consequences recorded
+
+Parent-decided shrinks: D13 implementation (reuse `recentWindow`), D3 mechanics (1-line OR,
+upstream idiom), D14 detection (existing `midnight_clamped`), D15 (no code); D6 and the
+`Date =` optimisation dropped. Re-opened for the operator: D17 and D4's new-CI-job clause.
+
+### Defects in the parent's own work during this step
+
+1. The first attempt to append this section used a heredoc inside `bash -lc '...'`; the
+   apostrophe in "Upstream's" closed the quoting and bash aborted before running — nothing
+   was written. AGENTS.md already says to put large content in a file with the write tool;
+   this is the second time that rule would have prevented a failure.
+2. `check_kb.py`'s decision pattern was `D(1[0-9]|[1-9])`, capped at D19, so D20 was invisible
+   to the reverse index ("19 decision IDs cited" with 20 in the register). Widened to any one- or two-digit ID, and the checker now indexes only IDs that exist in the
+   register (an unknown ID is a warning) — which is how this very sentence, in its first
+   form, was caught creating a phantom decision ("D-99", hyphenated here so it is not
+   counted again).
+
+---
+
+## R2: does the parent's CI already run the PHP contract?
+
+* **Date:** 2026-11-16 · **Executor:** parent (web research, no child agent) · **Trigger:**
+  operator answer to the re-opened D4 CI clause: *"Decide after research R2."*
+* **Sources:** `actions/runner-images` — `images/ubuntu/Ubuntu2404-Readme.md` (image
+  `20261111.370.1`), `images/ubuntu/Ubuntu2604-Readme.md` (image `20261111.196.1`),
+  `images/ubuntu/scripts/build/install-php.sh`, `images/ubuntu/toolsets/toolset-2404.json`,
+  and issue #14748 (the `ubuntu-latest` → 26.04 notice). Local:
+  `.github/workflows/python-app.yml:17,32`, `tests/test_midnight_reset.py`.
+
+| Claim | Evidence | Status |
+|---|---|---|
+| Parent CI jobs run on `ubuntu-latest`; no parent workflow installs PHP | `.github/workflows/python-app.yml:17,32`; no `php` in `.github/workflows/` | verified locally |
+| `ubuntu-latest` (24.04) ships PHP 8.3.6 | Ubuntu2404 README "PHP Tools" | documented |
+| `ubuntu-latest` is moving to 26.04 in November 2026; 26.04 ships PHP 8.5.4 | runner-images announcement / issue #14748; Ubuntu2604 README | documented |
+| PHP's SQLite3 extension is installed on both | `install-php.sh` apt-installs a hard-coded module list including `php$version-sqlite3` for every toolset version; toolset 2404 lists `"versions": ["8.3"]` | documented (build script) |
+| ⇒ the parent's `build` job already executes `tests/test_midnight_reset.php` for real | `tests/test_midnight_reset.py` is `skipUnless(shutil.which("php"))`, and php is on PATH | **inferred** — not observed in a real parent CI run log; also assumes `build` is green today |
+
+**Consequence:** feature tests added to the parent's *existing* test files run in parent CI
+with no workflow change. Only the fake-station + fake-panel end-to-end harness needs the
+`.pi/` container. Final D4 CI-clause answer recorded in the register.
