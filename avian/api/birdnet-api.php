@@ -133,6 +133,7 @@ $educatorSavedRequest = educator_saved_scope_requested($_GET);
 $educatorPublicCapability = $educatorSavedRequest;
 $educatorIncludePrivateScope = $educatorDirectRequest && !$educatorSavedRequest;
 $action = $_GET['action'] ?? 'stats';
+$resetAtMidnight = $RESET_AT_MIDNIGHT || (($_GET['reset_at_midnight'] ?? null) === '1');
 $educatorScopeProbe = is_string($action) && $action === 'scope-probe';
 
 $db = null;
@@ -166,7 +167,7 @@ try {
 $educatorProfileForCache = educator_profile_state();
 $educatorCacheDisabled = !empty($educatorProfileForCache['valid'])
     && !empty($educatorProfileForCache['enabled']);
-header('Cache-Control: ' . (($educatorCacheDisabled || $RESET_AT_MIDNIGHT)
+header('Cache-Control: ' . (($educatorCacheDisabled || $resetAtMidnight)
     ? 'no-store'
     : 'public, max-age=30'));
 
@@ -359,7 +360,7 @@ switch ($action) {
             $db,
             $hours,
             $ctx,
-            $RESET_AT_MIDNIGHT,
+            $resetAtMidnight,
             $educatorScope !== null
         );
         $where = $window['where'];
