@@ -27,7 +27,7 @@
 | [D17](open-decisions.md#d17--the-local-mode-served-list-variant) | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | [D18](open-decisions.md#d18--knowledge-base-reference-conventions-linking) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [D19](open-decisions.md#d19--make-the-documentation-duty-fire-automatically-skill-vs-extension) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
-| [D20](open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) | [_index.md](_index.md), [code-conventions.md](code-conventions.md), [feature-midnight-reset.md](feature-midnight-reset.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
+| [D20](open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) | [_index.md](_index.md), [code-conventions.md](code-conventions.md), [feature-midnight-reset.md](feature-midnight-reset.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [D21](open-decisions.md#d21--may-the-parent-open-a-pr-inside-the-fork-so-the-parents-ci-runs) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 
 ## Knowledge docs (backlinks)
@@ -60,7 +60,7 @@
 | [r5-drawable-base-pose.provenance.md](../../.pi/outputs/r5-drawable-base-pose.provenance.md) | [verification-log.md](verification-log.md) |
 | [reset-after-midnight Plan v0.1.md](../../.pi/reset-after-midnight Plan v0.1.md) | [frame-refresh-decision.md](frame-refresh-decision.md) |
 | [reset-after-midnight Plan v0.2.md](../../.pi/reset-after-midnight Plan v0.2.md) | [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [verification-log.md](verification-log.md) |
-| [reset-after-midnight Plan v0.3.md](../../.pi/reset-after-midnight Plan v0.3.md) | [_index.md](_index.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
+| [reset-after-midnight Plan v0.3.md](../../.pi/reset-after-midnight Plan v0.3.md) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [SKILL.md](../../.pi/skills/kb-document/SKILL.md) | [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [AGENTS.md](../../AGENTS.md) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 
@@ -73,6 +73,9 @@
 | `.github/workflows/python-app.yml` | [code-conventions.md](code-conventions.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [repo-map.md](repo-map.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | `.github/workflows/python-ci.yml` | [code-conventions.md](code-conventions.md), [open-decisions.md](open-decisions.md), [repo-map.md](repo-map.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `.github/workflows/validate-bundle.yml` | [illustration-bundles.md](illustration-bundles.md), [repo-map.md](repo-map.md), [testing-and-ci.md](testing-and-ci.md) |
+| `.pi/handoff/context.md` | [orchestration.md](orchestration.md), [verification-log.md](verification-log.md) |
+| `.pi/handoff/ledger.md` | [orchestration.md](orchestration.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
+| `.pi/handoff/plan.md` | [orchestration.md](orchestration.md), [verification-log.md](verification-log.md) |
 | `.pi/research/pre-v03/stubs/fcntl.py` | [verification-log.md](verification-log.md) |
 | `.pi/research/pre-v03/test_characterize_today.py` | [_index.md](_index.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `.pi/research/r3/clamp_check.php` | [verification-log.md](verification-log.md) |

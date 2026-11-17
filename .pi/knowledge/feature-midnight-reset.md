@@ -20,7 +20,7 @@ valid across plan revisions.
 > Where this section and that doc disagree, **that doc wins**; the items are annotated in place.
 
 Rulings live in [open-decisions.md](open-decisions.md); this is the shape they imply.
-Building is **still not authorised**. Items marked ⚑ below were opened by Audit 2 and
+~~Building is **still not authorised**.~~ *Superseded 2026-11-17: G0 lifted for Plan v0.3 W1–W3.* Items marked ⚑ below were opened by Audit 2 and
 are now **ruled** ([D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)–[D16](open-decisions.md#d16--no-validated-list-fetch-failed-or---no-signature-with-the-flag-on), 2026-11-16) — read each ⚑ against its register entry. Audit evidence:
 [verification-log.md](verification-log.md#audit-2-reviewer-pass-over-the-settled-design).
 

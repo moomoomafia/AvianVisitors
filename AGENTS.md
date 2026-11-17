@@ -158,8 +158,11 @@ Any report must name the environment and list what was **not** executed.
 ## Feature freeze (current branch)
 
 Branch `feature/birdframe-midnight-reset`. The current plan is
-[`.pi/reset-after-midnight Plan v0.3.md`](.pi/reset-after-midnight%20Plan%20v0.3.md) (v0.1/v0.2 kept for history). **Building the feature is
-NOT authorised** — that is an operator permission, and only the operator can lift it.
+[`.pi/reset-after-midnight Plan v0.3.md`](.pi/reset-after-midnight%20Plan%20v0.3.md) (v0.1/v0.2 kept for history). ~~**Building the feature is
+NOT authorised**~~ *Superseded 2026-11-17: gate G0 lifted by the operator for Plan v0.3 steps
+W1–W3 only; stages V and H, §8 deployment, pushes and PRs still need separate permission
+(see the gate amendment in [`.pi/knowledge/open-decisions.md`](.pi/knowledge/open-decisions.md)).*
+Building is an operator permission, and only the operator can widen it.
 Whether the *design* is settled is a separate question answered solely by the register's
 status table (open items are also marked ⚑ in
 [`.pi/knowledge/feature-midnight-reset.md`](.pi/knowledge/feature-midnight-reset.md) "Decided design"). Scout, document, review, question.

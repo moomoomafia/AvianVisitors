@@ -9,7 +9,9 @@ truth for evidence and rulings: [`.pi/knowledge/_index.md`](knowledge/_index.md)
 [decision register](knowledge/open-decisions.md), [minimal-footprint](knowledge/minimal-footprint.md),
 [verification log](knowledge/verification-log.md). Read [AGENTS.md](../AGENTS.md) first.
 
-> **Status: plan only. Building is NOT authorised** until the operator says so (§9, gate G0).
+> ~~**Status: plan only. Building is NOT authorised** until the operator says so (§9, gate G0).~~ *(superseded 2026-11-17)*
+> **Status (amended 2026-11-17): G0 lifted by the operator for W1–W3 only**; V, H, §8 and any
+> push/PR still need separate permission. Record: [open-decisions.md](knowledge/open-decisions.md).
 >
 > *Revision 2 (2026-11-16) after an Oracle review (verdict "ready with edits"): §4.2 now replaces
 > the signature fetch when the flag is on (exactly one station fetch per run); the no-bundle
@@ -221,7 +223,8 @@ runs `python .pi/tools/check_kb.py --index` (exit 0) at the end of each session.
 
 ## 9. Gates and open items
 
-* **G0 — building not authorised** until the operator says so.
+* ~~**G0 — building not authorised** until the operator says so.~~ **G0 lifted 2026-11-17** (W1–W3;
+  V and H separately gated; D21 deferred to V).
 * **Upstream PR:** strip `.pi/` and `AGENTS.md` first (D11c); whether to go upstream at all is
   undecided (D11a). The PR would carry only §4 and §5.
 * **Project trust:** approve the prompt so the `kb-document` extension loads (D19).

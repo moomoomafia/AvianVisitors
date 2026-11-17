@@ -81,9 +81,11 @@ unless you pass `cwd`/`worktree`. Two consequences:
 ## Gate before dispatching any Worker
 
 **All blocking decisions are ruled** ([D1](open-decisions.md#d1--may-a-forced-render-draw-an-empty-today-window-collage)–[D4](open-decisions.md#d4--what-environment-is-the-acceptance-gate), 2026-11-16 — see
-[open-decisions.md](open-decisions.md)), so Phase 3 is design-ready. **It is not yet
+[open-decisions.md](open-decisions.md)), so Phase 3 is design-ready. ~~**It is not yet
 authorised**: the operator has not approved building the feature, and their instruction
-stands until they say otherwise. When they do, copy the rulings verbatim into
+stands until they say otherwise.~~ *Superseded 2026-11-17: G0 lifted for Plan v0.3 W1–W3; this
+section's v0.2 phase/D4-container framing is superseded by Plan v0.3 §6/§7 and D20. The live
+ledger is `.pi/handoff/ledger.md` (one row per v0.3 §7 step).* When they do, copy the rulings verbatim into
 `plan.md` for the Worker handoff — do not re-ask a decided question, and if a ruling
 proves unimplementable, amend it in the register with evidence rather than deviating.
 **D4** fixes Phase 5's environment: a Debian dev container (php-cli, php-sqlite3, Python

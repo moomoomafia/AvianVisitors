@@ -18,18 +18,31 @@ Evidence behind these lives in
 **Gate status (2026-11-16, after the guided rulings): design-ready.** Audit 2
 ([verification-log.md](verification-log.md#audit-2-reviewer-pass-over-the-settled-design))
 opened D12–D16; all are now ruled (D15 parent-decided because the operator does not use
-Educators). **Plan v0.3 can be written.** Building the feature is separately **not
-authorised** by the operator.
+Educators). **Plan v0.3 can be written.** ~~Building the feature is separately **not
+authorised** by the operator.~~ *Superseded 2026-11-17 — G0 lifted by the operator (below).*
+
+**Gate G0 amendment (2026-11-17): building authorised for W1–W3 only.** Operator's go-ahead,
+quoted from the session request: *"Execute Gate G0 of [Plan v0.3](../reset-after-midnight%20Plan%20v0.3.md)
+§7 end-to-end on this host … then (5) dispatch W1 only (§4.1, the three-line station-API
+change) as a single fresh `worker` child in this session."* and *"G0 lifts only on the
+operator's explicit go-ahead, and per the answer this request is that go-ahead."* **Scope:**
+Plan v0.3 steps W1, W2, W3 (this session dispatches W1 only). **Still closed, each needing
+separate permission:** stage V (local runs recorded for push/CI), stage H (hardware pass on
+`birdpic`), §8 deployment, any push or PR. D21 is **deferred, still `OPEN`**: re-ask at stage V;
+nothing blocks W1–W3 because §6's local runs cover verification on this host and pushing a
+feature branch alone triggers no CI. No PR into the fork's `avian-visitors` branch. Recorded in
+[verification-log.md](verification-log.md#g0-lift-and-w1-dispatch). No new decision ID.
+
 
 | Status | IDs |
 |---|---|
 | `ANSWERED` (operator) | D1, D2, D3, D4 — 2026-11-16 (D2, D3, D4 carry Audit-2 amendments below) |
 | `ANSWERED` (operator, via small guiding questions) | D12, D13, D14, D16 — 2026-11-16 |
-| `OPEN`, blocking | **none** — design-ready for Plan v0.3 (building still not authorised) |
+| `OPEN`, blocking | **none** — design-ready for Plan v0.3 (~~building still not authorised~~ superseded 2026-11-17: G0 lifted for W1–W3; V/H closed) |
 | `PARENT-DECIDED` | D6 (dropped by D20), D7, D8, D9, D10, D15 |
 | `ANSWERED` (interim), housekeeping | D11 — hidden locally; upstream-vs-personal still undecided |
 | `ANSWERED` (principle, outranks parent-decisions) | D20 — minimal footprint, align with the parent repo |
-| `OPEN`, needed only at execution stage V | D21 — CI access via a PR inside the fork |
+| `OPEN`, needed only at execution stage V | D21 — CI access via a PR inside the fork (deferred 2026-11-17 at G0: re-ask at V) |
 | Re-asked under D20, now ruled | D4 CI clause — "No new workflow" (2026-11-16) |
 | `SUPERSEDED` | D17 — operator chose the parent repo's flow (2026-11-16); D5 → D14 |
 | `ANSWERED`, housekeeping | D18 — 2026-11-16 |
@@ -824,6 +837,10 @@ branch); (3) no CI — rely on local runs + the hardware pass.
 
 **Consequence if unanswered:** Plan v0.3's CI row cannot run; verification rests on local runs
 (stubbed `fcntl`, scoop PHP) and hardware.
+
+> **Deferred 2026-11-17 (at the G0 lift, operator):** stays `OPEN`; re-ask at stage V. Reason:
+> nothing blocks W1–W3 — §6's local runs cover verification on this host, and pushing a feature
+> branch alone triggers no CI. Do not open a PR into the fork's `avian-visitors` branch.
 
 ---
 

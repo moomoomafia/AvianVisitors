@@ -19,7 +19,7 @@ branch `feature/birdframe-midnight-reset`, main worktree
 
 ---
 
-**Status (2026-11-16): design-ready, building NOT authorised.** All blocking decisions are
+**Status (2026-11-17): G0 lifted — building authorised for W1–W3 only** (V, H still closed; ~~2026-11-16: design-ready, building NOT authorised~~ superseded 2026-11-17). All blocking decisions are
 ruled ([D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)–[D16](open-decisions.md#d16--no-validated-list-fetch-failed-or---no-signature-with-the-flag-on) answered via small guiding questions; see
 [open-decisions.md](open-decisions.md)). Next step: write Plan v0.3. Current shape:
 [feature-midnight-reset.md](feature-midnight-reset.md#decided-design-d1d4-ruled-2026-11-16-amended-by-audit-2).
@@ -47,8 +47,11 @@ every session; delete items when they close.
    you approve the project-trust prompt** on next start. Then do one live check: plant a
    broken link in a scratch KB doc, say "document this", and confirm the injected procedure
    and the end-of-run fix-up continuation. Until trusted, `/kb-check` is absent.
-5. **Building the feature is not authorised.** Separate from the design status; only the
-   operator can lift it.
+5. ~~**Building the feature is not authorised.**~~ *Superseded 2026-11-17:* **G0 lifted** for
+   W1–W3 ([gate amendment](open-decisions.md), [log](verification-log.md#g0-lift-and-w1-dispatch)).
+   Handoff committed in `.pi/handoff/` (plan, context, ledger). W1 dispatched this session; next
+   W2 then W3, one worker at a time. V and H need separate operator permission. Open for W1:
+   the §5 `edu_endpoint` question (handoff plan Q1).
 6. **R5 answered (2026-11-16): yes, reachable today** — a live community bundle has 22
    flight-only species; D12's "drawable" now means "unsuffixed slug is a masks key" ([R5 brief](../outputs/r5-drawable-base-pose.md)).
    No open research questions remain.
@@ -73,7 +76,7 @@ every session; delete items when they close.
    `hours=24` clamp proof and the param-shape claims in the `.pi/` container with `php`).
 9. **Plan v0.3 written and Oracle-reviewed (2026-11-16)** — [`Plan v0.3`](../reset-after-midnight%20Plan%20v0.3.md)
    revision 2; verdict "ready with edits", all applied ([Plan v0.3 Oracle review](verification-log.md#plan-v03-oracle-review)).
-   Next: operator gate **G0** (authorise building). **D21** (CI via a PR inside the fork) is open
+   ~~Next: operator gate **G0** (authorise building).~~ G0 lifted 2026-11-17 (W1–W3). **D21** (CI via a PR inside the fork) is open
    but only needed at execution stage V. *Earlier text:* write Plan v0.3 from the register +
    [minimal-footprint.md](minimal-footprint.md) (which overrides the older
    "Decided design" where they differ); then, when authorised, the harness in `.pi/` before
