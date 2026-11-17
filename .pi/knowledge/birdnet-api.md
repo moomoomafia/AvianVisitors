@@ -33,7 +33,8 @@ lower bound rather than adding a code path (`:353-356`).
   "station_date": "2026-09-02",   // the station's actual today
   "is_today": true,
   "anchor": "2026-09-02 15:30:00",// upper bound of the window, station local clock
-  "reset_at_midnight": false,      // did the station's display preference apply?
+  "reset_at_midnight": false,      // did the station's display preference apply? (after the
+                                   // R1 change: station flag OR ?reset_at_midnight=1, not scoped)
   "midnight_clamped": false,       // was this window actually clamped to start of day?
   "window_start": "2026-09-01 15:30:00",  // null when unbounded
   "species": [ {

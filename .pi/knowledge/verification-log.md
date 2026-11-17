@@ -366,3 +366,51 @@ upstream idiom), D14 detection (existing `midnight_clamped`), D15 (no code); D6 
 **Consequence:** feature tests added to the parent's *existing* test files run in parent CI
 with no workflow change. Only the fake-station + fake-panel end-to-end harness needs the
 `.pi/` container. Final D4 CI-clause answer recorded in the register.
+
+---
+
+## R1: station parameter variant (deep-research brief + reviewer)
+
+* **Date:** 2026-11-16 · **Workflow:** `deep-research` skill, adapted (output in `.pi/outputs/`
+  per D20; no `verifier` agent exists, so one `reviewer` child verified). **Brief:**
+  [../outputs/r1-station-param-variant.md](../outputs/r1-station-param-variant.md) (revision 2) ·
+  **provenance:** [../outputs/r1-station-param-variant.provenance.md](../outputs/r1-station-param-variant.provenance.md).
+* **Answer:** variant **B′** — one new local
+  `$resetAtMidnight = $RESET_AT_MIDNIGHT || (($_GET['reset_at_midnight'] ?? null) === '1')` in
+  the request-derived block of `avian/api/birdnet-api.php` (`:131-136`), swapped in at `:169`
+  (cache header) and `:362` (`recentWindow`). +1 line added, 2 modified. Ranking B′ > B > A > C.
+* **Evidence method:** parent gathered locally (scan of all top-level variables in
+  `avian/api/*.php`; `git show` of `116471c1` and `f1cb3add`; `git log -L` churn on lines
+  129/169/362; reads of the frame fetch and capture paths and of the Caddy and forwarding configs).
+* **Reviewer:** run `199f88cc-69de-4453-bf68-b7dac284e421`, read-only, no git, no `php`. Verdict
+  **OK with notes.**
+
+| Claim | Reviewer | Parent re-check | Effect on the brief |
+|---|---|---|---|
+| E1 UPPER_CASE = config only | PARTIAL — 18 names / 30 sites, not 15 / 24; missed `$EXTRACTED` (request-gated, server-env value) | held: `avian/api/export.php:450-459` | counts corrected; claim narrowed to "no client data" |
+| E2 camelCase request locals at `:131-136` | CONFIRMED | — | none |
+| E3/E4 cache-header idiom; reset ⇒ `no-store` | CONFIRMED in source; commit attribution unverifiable without git | parent's `git show` stands | none |
+| E5 no cache layer for the frame | CONFIRMED and strengthened (`route.fetch`, `avian/frontend/apt.js` `cache: 'no-store'`, no caching in forwarding configs) | — | strengthened |
+| E6 two consumers of `$RESET_AT_MIDNIGHT` | CONFIRMED in source; churn unverifiable without git | parent's `git log -L` stands | none |
+| E7 param read not testable like upstream | PARTIAL — **wrong**: upstream's `edu_endpoint` harness reaches the full endpoint | held: `tests/test_educator_backend.php:64-76,664-668` | corrected; test placement left to Plan v0.3 |
+| E8 `=== '1'` shape | CONFIRMED, but **omitted** PHP key mangling and last-wins duplicates, contradicting D3's amendment | held: [open-decisions.md](open-decisions.md) D3 amendment bullet 1 | acknowledged; D3 amended by D20/R1 |
+| Ranking | **P1:** C is not a fallback — it drops D3's `no-store` requirement; rank B′/B > A > C | agreed | re-ranked |
+| Missed variant | B′ (`$resetAtMidnight`), which is what the R1 row originally specified | held: [minimal-footprint.md](minimal-footprint.md) R1 row | B′ adopted; client-specific name `$frameResetRequested` dropped |
+
+### Findings recorded elsewhere
+
+* Every variant changes the meaning of the `reset_at_midnight` response field to "station flag
+  OR param, not scoped" — no reader in the repo; noted in [birdnet-api.md](birdnet-api.md).
+* A, B and B′ send `no-store` on **every** action carrying the param (header set before the
+  `switch`) — parity with the global flag; requests without the param are unchanged (D3 rule).
+
+### Propagation
+
+The parent's earlier claim "the whole station change can be one line" (D20 research section
+above) was superseded. It was updated in [_index.md](_index.md) (fact 16 and open threads),
+[minimal-footprint.md](minimal-footprint.md) (D3 mechanics row, R1 row, estimated diff),
+[feature-midnight-reset.md](feature-midnight-reset.md) item 3, and the register (D3 amendment). The D20 section above is kept as written, as history.
+
+### Still unverified
+
+E8's mangling/duplicate behaviour and the `hours=24` clamp are argued, not executed — R3.

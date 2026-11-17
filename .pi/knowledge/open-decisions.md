@@ -178,7 +178,12 @@ Mechanics (unchanged from the recommendation):
 > wrong or underspecified:
 >
 > 1. **Param values (F-M6):** not tri-state. Only the exact scalar `1` has an effect;
->    anything else (absent, `0`, arrays, folded aliases) is treated as absent. A `=0` must
+>    anything else (absent, `0`, arrays, folded aliases) is treated as absent.
+>    *Amended by D20/R1 (2026-11-16):* "folded aliases … treated as absent" is **dropped**.
+>    Upstream's idiom `($_GET['x'] ?? null) === '1'` rejects absent, `0`, other strings and
+>    arrays, but honours PHP key mangling (`reset.at.midnight=1`) and last-wins duplicates,
+>    exactly like every other upstream param. Harmless: the param only selects a read-only
+>    display window and any client can send the canonical name. See the R1 brief, E8. A `=0` must
 >    never be able to override the station's global flag — no requirement asks for that.
 > 2. **Caching:** "requests without the param keep `public, max-age=30`" is wrong — the
 >    global flag and Educators mode already force `no-store` (`avian/api/birdnet-api.php:165-171`).

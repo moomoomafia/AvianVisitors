@@ -25,7 +25,7 @@ ruled ([D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-de
 [open-decisions.md](open-decisions.md)). Next step: write Plan v0.3. Current shape:
 [feature-midnight-reset.md](feature-midnight-reset.md#decided-design-d1d4-ruled-2026-11-16-amended-by-audit-2).
 
-## Open threads (last updated 2026-11-16, after the D19 build)
+## Open threads (last updated 2026-11-16, after R1)
 
 Written for a reader with zero memory of the conversation. Update this list at the end of
 every session; delete items when they close.
@@ -61,8 +61,9 @@ every session; delete items when they close.
 8. **[D20](open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) principle adopted (2026-11-16):** align with the parent repo, change the least
    code. [minimal-footprint.md](minimal-footprint.md) shrank the design. Re-asked rulings:
    D17 → **use the parent repo's flow** (superseded); D4's CI clause → **no new workflow**
-   (after R2: parent CI already runs PHP + SQLite3 on `ubuntu-latest`). R1 and R3 remain
-   (R1 = 1-line vs 3-line PHP variant; R3 = execute the `hours=24` clamp proof).
+   (after R2: parent CI already runs PHP + SQLite3 on `ubuntu-latest`). **R1 done**
+   (variant B′, [brief](../outputs/r1-station-param-variant.md)); R3 remains (execute the
+   `hours=24` clamp proof and the param-shape claims in the `.pi/` container with `php`).
 9. **Next natural step:** write Plan v0.3 from the register +
    [minimal-footprint.md](minimal-footprint.md) (which overrides the older
    "Decided design" where they differ); then, when authorised, the harness in `.pi/` before
@@ -183,5 +184,6 @@ Three frame data sources, one renderer:
     of our planned new code unnecessary: `recentWindow` with `hours=24` *always* clamps a
     today window to midnight (`avian/api/birdnet-api.php:104-116`), and `frame/display.py`
     already re-signs from exactly what the browser was served
-    (`frame/display.py:457-463`). The whole station change can be one line at
-    `avian/api/birdnet-api.php:129`. See [minimal-footprint.md](minimal-footprint.md).
+    (`frame/display.py:457-463`). The whole station change is three lines (R1 variant B′:
+    one new `$resetAtMidnight` local + two one-token swaps in `avian/api/birdnet-api.php`).
+    See [minimal-footprint.md](minimal-footprint.md).

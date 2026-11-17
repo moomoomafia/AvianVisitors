@@ -31,9 +31,11 @@ are now **ruled** ([D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-f
    `species_source != "birdweather" and shoot is True` ([D2](open-decisions.md#d2--which-frame-modes-does-the-feature-apply-to) amended — an empty
    `species_source` alone also matches `image` mode). `birdweather` and `image`/`image_url`
    are unsupported and documented; the flag there is a logged no-op.
-3. **API** — *D20 minimal form: a single line at `avian/api/birdnet-api.php:129` ORs
-   `($_GET['reset_at_midnight'] ?? null) === '1'` into `$RESET_AT_MIDNIGHT`, so the existing
-   cache header (`:169`) and `recentWindow` call (`:362`) follow; the frame sends `hours=24`;
+3. **API** — *R1 form (variant B′, 2026-11-16): a new local
+   `$resetAtMidnight = $RESET_AT_MIDNIGHT || (($_GET['reset_at_midnight'] ?? null) === '1')` in
+   the request-derived block of `avian/api/birdnet-api.php` (`:131-136`), swapped in at the
+   cache header (`:169`) and the `recentWindow` call (`:362`) — 3 lines, runtime-identical to
+   the earlier 1-line fold into `$RESET_AT_MIDNIGHT` but keeping that name config-only; the frame sends `hours=24`;
    no new SQL branch, no echo field, detection on the existing `midnight_clamped`. The text
    below is the pre-D20 design, kept for the record:* additive, request-scoped param on `action=recent`; only the exact value `1`
    has an effect (anything else = absent); absent ⇒ identical SQL and headers; educator

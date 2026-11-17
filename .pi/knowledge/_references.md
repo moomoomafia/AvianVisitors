@@ -53,6 +53,8 @@
 | [test-environment.md](test-environment.md) | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [testing-and-ci.md](testing-and-ci.md) | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [orchestration.md](orchestration.md), [repo-map.md](repo-map.md), [verification-log.md](verification-log.md) |
 | [verification-log.md](verification-log.md) | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [test-environment.md](test-environment.md), [AGENTS.md](../../AGENTS.md) |
+| [r1-station-param-variant.md](../../.pi/outputs/r1-station-param-variant.md) | [_index.md](_index.md), [minimal-footprint.md](minimal-footprint.md), [verification-log.md](verification-log.md) |
+| [r1-station-param-variant.provenance.md](../../.pi/outputs/r1-station-param-variant.provenance.md) | [verification-log.md](verification-log.md) |
 | [reset-after-midnight Plan v0.1.md](../../.pi/reset-after-midnight Plan v0.1.md) | [frame-refresh-decision.md](frame-refresh-decision.md) |
 | [reset-after-midnight Plan v0.2.md](../../.pi/reset-after-midnight Plan v0.2.md) | [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [SKILL.md](../../.pi/skills/kb-document/SKILL.md) | [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
@@ -87,7 +89,7 @@
 | `avian/api/educator-scope.php` | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `avian/api/educator-state.php` | [open-decisions.md](open-decisions.md), [test-environment.md](test-environment.md), [verification-log.md](verification-log.md) |
 | `avian/api/educator-store.php` | [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
-| `avian/api/export.php` | [repo-map.md](repo-map.md) |
+| `avian/api/export.php` | [repo-map.md](repo-map.md), [verification-log.md](verification-log.md) |
 | `avian/api/generate.php` | [repo-map.md](repo-map.md) |
 | `avian/api/maintenance.php` | [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md) |
 | `avian/api/menu.php` | [repo-map.md](repo-map.md) |
