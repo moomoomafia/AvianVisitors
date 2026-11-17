@@ -114,7 +114,7 @@ when the species list is **empty** (`apt.js:3124`).
 
 > **Corrected (Audit 2):** this used to say "zero *drawable* species". Wrong: a
 > *non-empty* list whose species all lack masks does **not** draw an empty nest — every tile
-> is dropped (`apt.js:3181-3190`), `finishFrameRender` is never called (`:3359`),
+> is dropped (`apt.js:3179,3186`), `finishFrameRender` is never called (`:3359`),
 > `FRAME_READY` never fires, and the capture times out → `"could not get image"` → exit 1,
 > panel retained. Same for a tile left unplaced after the shrink passes. See [D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline).
 

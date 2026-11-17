@@ -50,10 +50,14 @@ every session; delete items when they close.
    and the end-of-run fix-up continuation. Until trusted, `/kb-check` is absent.
 5. **Building the feature is not authorised.** Separate from the design status; only the
    operator can lift it.
-6. **Unverified assumptions** carried forward (full list in
-   [verification-log.md](verification-log.md)): `getenv()` visibility of
-   `AVIAN_STATION_TIMEZONE` under FPM; index use through the unscoped `TEMP VIEW`;
-   Playwright 1.62.0 on Debian 12; how often a day's first detection lacks art. *(Closed
+6. **R5 answered (2026-11-16): yes, reachable today** — a live community bundle has 22
+   flight-only species; D12's "drawable" now means "unsuffixed slug is a masks key" ([R5 brief](../outputs/r5-drawable-base-pose.md)).
+   No open research questions remain.
+   **Still unverified, but no longer blocking:** how often a day's first detection lacks art
+   (urgency of D12 only); Playwright 1.62.0 on Debian 12 (only matters for the blocked D4
+   container). **Moot under [D20](open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo)** (the design no longer depends on them): `getenv()`
+   visibility of `AVIAN_STATION_TIMEZONE` under FPM, and index use through the unscoped
+   `TEMP VIEW` (the `Date =` optimisation was dropped). *(Closed
    since: GitHub runners have PHP + SQLite3 — R2; the clamp and param-shape claims — R3.)*
 7. **PHP now runs locally** (scoop, PHP 8.5; [R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php)): the parent's PHP suites and the R3
    checks execute for real. Still not executed: anything needing Linux (`frame/display.py`
@@ -174,7 +178,7 @@ Three frame data sources, one renderer:
     `TEMP VIEW` over it, `avian/api/educator-scope.php:486` — flattening is assumed, not proven.)
 13. **"Non-empty" ≠ "drawable".** In `local` mode the frame does not filter species by
     available art (`display.py:150`); `apt.js` silently drops maskless tiles
-    (`apt.js:3181-3190`) and only signals ready when something was placed (`:3359`). An
+    (`apt.js:3179,3186`) and only signals ready when something was placed (`:3359`). An
     all-undrawable list therefore **hangs capture to the deadline and exits 1**, it does
     not draw an empty nest (that needs an empty list, `:3124`). Exit 1 under
     `avian-bundle use`/`rollback` reverts the bundle.
@@ -192,6 +196,11 @@ Three frame data sources, one renderer:
     one new `$resetAtMidnight` local + two one-token swaps in `avian/api/birdnet-api.php`).
     See [minimal-footprint.md](minimal-footprint.md).
 
+18. **"Drawable" has two meanings upstream.** `ActiveBundle.drawable_slugs` /
+    `birdweather.drawable_slugs` are species-level (any pose); the collage draws only the base
+    pose or `-2` (15% roll) and drops the rest (`avian/frontend/apt.js:3164-3186`). A live
+    community bundle has 22 flight-only species. For "will it render?" test the unsuffixed slug
+    against the masks table, never `drawable_slugs` (R5).
 17. **PHP runs here now — in a *new* shell.** Scoop's PHP loads SQLite3 via the user env
     var `PHP_INI_SCAN_DIR` + `~/scoop/persist/php/cli/conf.d/zz-avian-sqlite3.ini`. A shell
     older than the install fails `tests/test_midnight_reset.py` with `Class "SQLite3" not

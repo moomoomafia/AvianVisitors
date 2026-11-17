@@ -43,7 +43,7 @@
 | [frame-pipeline.md](frame-pipeline.md) | [_index.md](_index.md), [verification-log.md](verification-log.md) |
 | [frame-refresh-decision.md](frame-refresh-decision.md) | [_index.md](_index.md), [frame-pipeline.md](frame-pipeline.md), [frame-render-capture.md](frame-render-capture.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | [frame-render-capture.md](frame-render-capture.md) | [_index.md](_index.md), [frame-pipeline.md](frame-pipeline.md) |
-| [illustration-bundles.md](illustration-bundles.md) | [_index.md](_index.md) |
+| [illustration-bundles.md](illustration-bundles.md) | [_index.md](_index.md), [verification-log.md](verification-log.md) |
 | [minimal-footprint.md](minimal-footprint.md) | [_index.md](_index.md), [code-conventions.md](code-conventions.md), [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [test-environment.md](test-environment.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [open-decisions.md](open-decisions.md) | [_index.md](_index.md), [code-conventions.md](code-conventions.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [test-environment.md](test-environment.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [orchestration.md](orchestration.md) | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
@@ -52,9 +52,11 @@
 | [station-clock-and-data.md](station-clock-and-data.md) | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [orchestration.md](orchestration.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [verification-log.md](verification-log.md) |
 | [test-environment.md](test-environment.md) | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [testing-and-ci.md](testing-and-ci.md) | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [orchestration.md](orchestration.md), [repo-map.md](repo-map.md), [verification-log.md](verification-log.md) |
-| [verification-log.md](verification-log.md) | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [AGENTS.md](../../AGENTS.md) |
+| [verification-log.md](verification-log.md) | [_index.md](_index.md), [feature-midnight-reset.md](feature-midnight-reset.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [r1-station-param-variant.md](../../.pi/outputs/r1-station-param-variant.md) | [_index.md](_index.md), [minimal-footprint.md](minimal-footprint.md), [verification-log.md](verification-log.md) |
 | [r1-station-param-variant.provenance.md](../../.pi/outputs/r1-station-param-variant.provenance.md) | [verification-log.md](verification-log.md) |
+| [r5-drawable-base-pose.md](../../.pi/outputs/r5-drawable-base-pose.md) | [_index.md](_index.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
+| [r5-drawable-base-pose.provenance.md](../../.pi/outputs/r5-drawable-base-pose.provenance.md) | [verification-log.md](verification-log.md) |
 | [reset-after-midnight Plan v0.1.md](../../.pi/reset-after-midnight Plan v0.1.md) | [frame-refresh-decision.md](frame-refresh-decision.md) |
 | [reset-after-midnight Plan v0.2.md](../../.pi/reset-after-midnight Plan v0.2.md) | [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [SKILL.md](../../.pi/skills/kb-document/SKILL.md) | [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
@@ -72,6 +74,7 @@
 | `.pi/research/r3/clamp_check.php` | [verification-log.md](verification-log.md) |
 | `.pi/research/r3/param_check.php` | [verification-log.md](verification-log.md) |
 | `.pi/research/r3/www/echo.php` | [verification-log.md](verification-log.md) |
+| `.pi/research/r5/manifest_scan.py` | [verification-log.md](verification-log.md) |
 | `.pi/skills/kb-document/SKILL.md` | [open-decisions.md](open-decisions.md) |
 | `.pi/tools/check_kb.py` | [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `AGENTS.md` | [AGENTS.md](../../AGENTS.md) |
@@ -82,7 +85,7 @@
 | `avian/api/birdnet-api.php` | [_index.md](_index.md), [birdnet-api.md](birdnet-api.md), [code-conventions.md](code-conventions.md), [config-reference.md](config-reference.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `avian/api/birdnet-status.php` | [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md) |
 | `avian/api/birdweather.php` | [repo-map.md](repo-map.md) |
-| `avian/api/bundle-assets.php` | [_index.md](_index.md), [illustration-bundles.md](illustration-bundles.md), [open-decisions.md](open-decisions.md), [repo-map.md](repo-map.md) |
+| `avian/api/bundle-assets.php` | [_index.md](_index.md), [illustration-bundles.md](illustration-bundles.md), [open-decisions.md](open-decisions.md), [repo-map.md](repo-map.md), [verification-log.md](verification-log.md) |
 | `avian/api/bundle-preview.php` | [illustration-bundles.md](illustration-bundles.md), [repo-map.md](repo-map.md) |
 | `avian/api/bundle-runtime.php` | [illustration-bundles.md](illustration-bundles.md), [repo-map.md](repo-map.md) |
 | `avian/api/bundle-species.php` | [illustration-bundles.md](illustration-bundles.md), [repo-map.md](repo-map.md) |
@@ -99,15 +102,16 @@
 | `avian/api/recording.php` | [repo-map.md](repo-map.md) |
 | `avian/api/spectrogram.php` | [open-decisions.md](open-decisions.md), [repo-map.md](repo-map.md), [verification-log.md](verification-log.md) |
 | `avian/api/wiki.php` | [repo-map.md](repo-map.md) |
-| `avian/frontend/apt.js` | [_index.md](_index.md), [birdnet-api.md](birdnet-api.md), [birdweather-source.md](birdweather-source.md), [code-conventions.md](code-conventions.md), [config-reference.md](config-reference.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [frame-render-capture.md](frame-render-capture.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
+| `avian/frontend/apt.js` | [_index.md](_index.md), [birdnet-api.md](birdnet-api.md), [birdweather-source.md](birdweather-source.md), [code-conventions.md](code-conventions.md), [config-reference.md](config-reference.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [frame-render-capture.md](frame-render-capture.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | `avian/frontend/assets/bundle-catalog/catalog-snapshot.js` | [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [AGENTS.md](../../AGENTS.md) |
 | `avian/frontend/dims.json` | [_index.md](_index.md), [birdweather-source.md](birdweather-source.md), [open-decisions.md](open-decisions.md) |
 | `avian/frontend/masks.json` | [_index.md](_index.md), [open-decisions.md](open-decisions.md) |
 | `avian/scripts/build_masks.py` | [illustration-bundles.md](illustration-bundles.md) |
 | `avian/scripts/bundle_canonical.py` | [illustration-bundles.md](illustration-bundles.md) |
+| `avian/scripts/bundle_export.py` | [verification-log.md](verification-log.md) |
 | `avian/scripts/bundle_moderate.py` | [illustration-bundles.md](illustration-bundles.md) |
 | `avian/scripts/bundle_publish.py` | [illustration-bundles.md](illustration-bundles.md) |
-| `avian/scripts/bundle_validate.py` | [illustration-bundles.md](illustration-bundles.md) |
+| `avian/scripts/bundle_validate.py` | [illustration-bundles.md](illustration-bundles.md), [minimal-footprint.md](minimal-footprint.md) |
 | `avian/scripts/cutout.py` | [illustration-bundles.md](illustration-bundles.md) |
 | `avian/scripts/pregen.py` | [illustration-bundles.md](illustration-bundles.md) |
 | `docs/bundle-catalog-migration.md` | [illustration-bundles.md](illustration-bundles.md) |

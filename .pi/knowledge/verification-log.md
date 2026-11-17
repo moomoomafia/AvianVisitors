@@ -103,9 +103,10 @@ will be cleaned; this file is the record.
 
 * `getenv('AVIAN_STATION_TIMEZONE')` visibility under real PHP-FPM (claim 9). Needs an
   HTTP-level check on a station or a container with the generated Caddy config.
+  *(2026-11-16: moot — under D20 the design uses no station timezone.)*
 * Everything the environment blocked: the PHP window contract
-  (`tests/test_midnight_reset.php`), the `frame/display.py`-dependent pytest set (`fcntl`),
-  and any e-ink behaviour. None of these were executed in this session — they are
+  (`tests/test_midnight_reset.php`) *(executed 2026-11-16: 20/20, [R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php))*, the
+  `frame/display.py`-dependent pytest set (`fcntl`), and any e-ink behaviour. None of these were executed in this session — they are
   **not** verified, and any report claiming otherwise should be challenged.
 * Hardware-only questions: heal suppression vs burn-in over a long empty stretch, and
   panel state after a power glitch mid-update.
@@ -136,7 +137,7 @@ caught things a second read of the same file did not.
 
 | # | Hypothesis | Verdict | Key evidence | Design consequence |
 |---|---|---|---|---|
-| H1 | Non-empty but undrawable today-window hangs capture | **CONFIRMED** | `frame/display.py:132-150` (local ignores `drawable`); `avian/frontend/apt.js:3181-3190` (maskless tiles dropped), `:1611-1614` (`loadMask` null); `:3359` (`finishFrameRender` needs `placed.length`); `:3124` (empty nest only when `!items.length`); `frame/shoot.py:517-521` timeout; `display.py:464-466`; `frame/bundle_runtime.py:1962-1972,1993-2000` revert | [D1](open-decisions.md#d1--may-a-forced-render-draw-an-empty-today-window-collage) must key on **drawable**, not empty → **[D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)**. Pre-existing for rolling windows; today-only makes it common. Mixed lists are fine. Second, pre-existing hang not worsened here: a tile still unplaced after 10 shrink passes (`x=-99999`) breaks `collagePlaced.length === placed.length` the same way. |
+| H1 | Non-empty but undrawable today-window hangs capture | **CONFIRMED** | `frame/display.py:132-150` (local ignores `drawable`); `avian/frontend/apt.js:3181-3190` (maskless tiles dropped; *drop is precisely `:3179,3186` — corrected by R5*), `:1611-1614` (`loadMask` null); `:3359` (`finishFrameRender` needs `placed.length`); `:3124` (empty nest only when `!items.length`); `frame/shoot.py:517-521` timeout; `display.py:464-466`; `frame/bundle_runtime.py:1962-1972,1993-2000` revert | [D1](open-decisions.md#d1--may-a-forced-render-draw-an-empty-today-window-collage) must key on **drawable**, not empty → **[D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)**. Pre-existing for rolling windows; today-only makes it common. Mixed lists are fine. Second, pre-existing hang not worsened here: a tile still unplaced after 10 shrink passes (`x=-99999`) breaks `collagePlaced.length === placed.length` the same way. |
 | H2 | `Date =` form vs `recentWindow` are two contracts | **CONFIRMED** | `avian/api/birdnet-api.php:91-99,104-116`; `tests/test_midnight_reset.php:38-40` pins "short window inside the day stays rolling"; `display.py:51` `hours` user-settable | Pick one → **[D13](open-decisions.md#d13--does-the-today-window-respect-the-hours-setting)**. Req 1 ("starting at 00:00") literally fits only the `Date =` form. |
 | H3 | Birdweather served-list pattern is drop-in for local | **PARTIAL** | `shoot.py:250-256` answers `recent` with `{hours, species, as_of}` only and everything else with `{}`; `apt.js:6065` `applySiteName` needs `site_name`; `tests/test_frame_capture.py:177-185` pins `educator_scope` pass-through | Needs a local variant: full response, other actions continued, flag-gated → **[D17](open-decisions.md#d17--the-local-mode-served-list-variant)**. Handshake (`frame_capture_id`, `shoot.py:272-275`) and `small_floor` unaffected; captured-signature invariant (`display.py:458-463`) becomes trivially true. |
 | H4 | [D5](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr)'s degraded-station signal is definitive | **REFUTED** | response `reset_at_midnight` = `global && !scoped` (`birdnet-api.php:90,95,118`); `midnight_clamped`/`window_start` always present (`:392-397`) | Distinct echo field + exit-code choice → **[D14](open-decisions.md#d14--how-is-an-un-updated-station-detected-and-with-what-exit-code-supersedes-d5)** (supersedes D5). |
@@ -192,11 +193,13 @@ parent-decided. Docs: [`_index.md`](_index.md), [`feature-midnight-reset.md`](fe
 
 ### Still unverified after Audit 2
 
-* Playwright 1.62.0 on Debian 12; whether the GitHub runner image ships `php` + sqlite3.
+* Playwright 1.62.0 on Debian 12; whether the GitHub runner image ships `php` + sqlite3
+  *(runner part answered by [R2](verification-log.md#r2-does-the-parents-ci-already-run-the-php-contract))*.
 * That SQLite flattens the unscoped `CREATE TEMP VIEW detections AS SELECT d.rowid AS
   detection_id, d.* FROM main.detections d` (`educator-scope.php:486`) and still uses
   `detections_Date_Time`. The Audit 1 `EXPLAIN QUERY PLAN` evidence was taken against the
   base table, not the view the API actually queries. Very likely; not proven.
+  *(2026-11-16: moot — the `Date =` optimisation was dropped under D20.)*
 * How often a day's first detection lacks illustration art (drives [D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)'s urgency).
 * Everything in Audit 1's "still unverified" list remains open.
 
@@ -413,7 +416,8 @@ above) was superseded. It was updated in [_index.md](_index.md) (fact 16 and ope
 
 ### Still unverified
 
-E8's mangling/duplicate behaviour and the `hours=24` clamp are argued, not executed — R3.
+~~E8's mangling/duplicate behaviour and the `hours=24` clamp are argued, not executed.~~
+Executed by [R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php) — all held.
 
 ---
 
@@ -468,3 +472,73 @@ yesterday's 23:59:59 bird). The product behaved correctly; the expectation was f
 The station change itself (R1 variant B′) is not implemented — building is not authorised — so
 the full endpoint with the real param (e.g. via upstream's `edu_endpoint` harness) is untested.
 Everything needing Linux (`fcntl`) or the D4 container is still blocked by the WSL2 finding.
+
+---
+
+## R5: drawable vs base pose (deep-research brief + reviewer + live-feed scan)
+
+* **Date:** 2026-11-16 · **Workflow:** `deep-research` skill, adapted (output in `.pi/outputs/`;
+  no `verifier` agent, so one `reviewer` child). **Brief:**
+  [../outputs/r5-drawable-base-pose.md](../outputs/r5-drawable-base-pose.md) (revision 2) ·
+  **provenance:** [../outputs/r5-drawable-base-pose.provenance.md](../outputs/r5-drawable-base-pose.provenance.md) ·
+  **scan:** `.pi/research/r5/manifest_scan.py`.
+* **Question:** can a species pass D12's "drawable" check (frame bundle `drawable_slugs`) yet be
+  dropped by the collage, recreating the 180-second capture hang?
+* **Answer:** **yes, and it is reachable today.** D12's predicate was refined (dated amendment in the
+  register): drawable ⇔ some species' unsuffixed slug is a key in the masks table the collage
+  loads.
+
+### Revision history: how the answer flipped
+
+| Step | Claim | Status |
+|---|---|---|
+| Revision 1 | "In principle yes; in practice no" — scan of the vendored catalog + station UI snapshot found 0 species without a base pose | **overstated** |
+| Reviewer (`b53c28e4-782b-48a4-bb3e-cd81d20e82c6`, read-only) | **OK with notes.** E1, E1b, E2, E5 confirmed. **P1:** the frame also installs from the **live community feed** (`refresh_catalog`, `frame/bundle_runtime.py:1949-1950,1152-1155`), which was not scanned. **P1:** the parent's exporter can emit flight-only species (`avian/scripts/bundle_export.py:400-401,847`). P2s: upstream's species-level precedent, the `avian/api/bundle-assets.php` route, the station predicate, line refs, scan robustness | — |
+| Parent re-check of the P1s | both held (read `frame/bundle_runtime.py:1945-1952,1152-1170,826-839`; `avian/scripts/bundle_export.py:398-409,845-848`) | confirmed |
+| Revision 2 scan (vendored + **live feed** + snapshot reference; https, host-pinned, SHA-256 verified, `species` list and `species_count` checked) | **12 unique manifests, 0 problems; `community-peterdeboer-nl-cacd91aeb7749fec` (329 species) has 22 flight-only species**; every other bundle has a base pose for every species | **reverses revision 1** |
+
+### Verified mechanics
+
+* Collage draws only the base slug or `-2`: `avian/frontend/apt.js:3164-3186` (`hasFlight` `:3166`,
+  roll `:3172` with `FLY_PROB = 0.15` `:1557`, fallback 2 → base only `:3178`, drop `:3179`,
+  `.filter(Boolean)` `:3186`); `loadMask` null when `MASKS[slug]` is absent (`:1611-1614`); numbered
+  variants appear only in the postcard picker (`:9439-9445`). Fresh browser per capture
+  (`frame/shoot.py:425,434`) ⇒ an independent 15% roll each run.
+* No validator or tool requires a base pose (frame install, authoring contract, station installer,
+  station PHP, station frontend), and the exporter can produce one — table in the brief, E2.
+* With a frame bundle, "has `perched`/`variant-1`" ⇔ "unsuffixed slug is a masks key"
+  (`frame/bundle_runtime.py:1455-1458,1883-1889`); `frame/shoot.py:470-482` routes the collage's *dims.json*,
+  *masks.json* and `avian/api/bundle-assets.php` requests to the bundle.
+
+### Decision recorded
+
+[D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline) amended
+(`PARENT-DECIDED`, refines "drawable" without changing D12a's ruling): option A, the collage's own
+drop test. Rejected: A′ ("drawn sometimes" — hangs ~85% of runs) and B (species-level
+`drawable_slugs` — unsafe for the Netherlands bundle). `ActiveBundle.drawable_slugs` stays
+species-level because upstream uses it for BirdWeather filtering.
+
+### Propagation
+
+Updated: the register (D12 amendment; two inline corrections),
+[feature-midnight-reset.md](feature-midnight-reset.md) (retention-guard predicate),
+[minimal-footprint.md](minimal-footprint.md) (drawable-decline row; R5 row),
+[_index.md](_index.md) (open thread 6; hard-won fact 18; line ref),
+[frame-refresh-decision.md](frame-refresh-decision.md) (line ref),
+[illustration-bundles.md](illustration-bundles.md) (`drawable_slugs` meaning). The stale citation
+*apt.js lines 3181-3190* for the drop was corrected to `avian/frontend/apt.js:3179,3186` wherever it
+was asserted (historical rows annotated, not rewritten).
+
+### Defects in the parent's own work
+
+1. Revision 1 scanned the station UI snapshot instead of the frame's real install sources — the
+   same "searched the wrong place, then generalised" pattern as the earlier empty-grep timezone
+   error. The reviewer caught it; the follow-up scan turned "unverified" into a positive finding.
+2. The scan's first form reported a malformed manifest as "0 species" instead of failing; fixed
+   (now fails on a missing `species` list, a SHA mismatch, a fetch error, or a count mismatch).
+
+### Still unverified
+
+* The live feed is a 2026-11-16 snapshot; option A is safe regardless of future bundles.
+* The station-default path's own masks table was not scanned.
+* Not implemented; nothing observed on a live station.

@@ -63,7 +63,9 @@ are now **ruled** ([D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-f
    make `use`/`rollback` revert the bundle selection and re-render
    (`frame/bundle_runtime.py:1962-1972`). Predicate (⚑ **D12**, ruled): *no drawable species*,
    not merely an empty list (a non-empty undrawable list hangs capture and exits 1).
-   Drawable = the active **frame bundle's** `drawable_slugs` (the operator's setup) else the
+   Drawable (refined by R5) = some species' **unsuffixed slug is a masks key** — with the
+   operator's frame bundle, a `perched`/`variant-1` pose; *was:* the active **frame bundle's**
+   `drawable_slugs` (the operator's setup) else the
    station's mask table; if that can't be determined, proceed as today. With the flag on,
    never capture without a validated, honoured list (⚑ **D16**, ruled: timer run skips with
    exit 0, forced run exits 1). Outdated station (⚑ **D14**, ruled): hold and **exit 1**.

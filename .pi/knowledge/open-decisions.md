@@ -395,9 +395,23 @@ Asked in small guiding steps (operator preference, 2026-11-16):
 `drawable_slugs` when a frame bundle is active, else the station's mask table; if the
 drawable set can't be determined, proceed as today.
 
+> **Amended 2026-11-16 by R5 (`PARENT-DECIDED`, refines "drawable"; [R5 brief](../outputs/r5-drawable-base-pose.md), [R5](verification-log.md#r5-drawable-vs-base-pose-deep-research-brief--reviewer--live-feed-scan)).**
+> "Drawable" now means what the collage actually draws on every capture: **some species in
+> today's window has its unsuffixed slug as a key in the masks table the collage will load**
+> (frame bundle: a `perched` or `variant-1` pose; station default: `slug in MASKS`, no suffix
+> stripping, masks not dims). *Basis:* the collage draws only the base pose or `-2` and drops the
+> tile otherwise (`avian/frontend/apt.js:3164-3186`; pose 2 only on a 15% roll); no validator
+> requires a base pose; and an installable bundle in the live community feed
+> (`community-peterdeboer-nl-cacd91aeb7749fec`) has **22 flight-only species**, which the
+> species-level `drawable_slugs` would call drawable while the capture hangs on ~85% of runs.
+> This implements D12a's ruling ("keep yesterday's collage" until the wall can show today's
+> bird) more faithfully; it does not change it. Computed locally — **`ActiveBundle.drawable_slugs`
+> stays species-level** (upstream uses it for BirdWeather filtering).
+
 **Why it blocks:** D1 as written declines on an *empty* list. But a non-empty list can be
 undrawable: in `local` mode `fetch_species` ignores `drawable` (`frame/display.py:132-150`),
-`renderCollage` drops tiles with no mask (`avian/frontend/apt.js:3181-3190`), and with zero placed tiles
+`renderCollage` drops tiles with no mask (`avian/frontend/apt.js:3179,3186`; cited as `:3181-3190`
+before R5), and with zero placed tiles
 `finishFrameRender` is never called (`apt.js:3359`) — so `FRAME_READY` never fires, capture
 runs the full 180 s deadline, and the run **exits 1**: every timer cycle, and under
 `avian-bundle use`/`rollback` exit 1 **reverts the bundle**. Pre-existing for rolling
@@ -407,6 +421,7 @@ windows; today-only makes it common because a day's first detection is often a s
 **Where a local frame can learn the drawable set:**
 
 * Frame bundle active: exact — `bundle.drawable_slugs` (`frame/bundle_runtime.py:2023-2025`).
+  *(Corrected by R5: species-level, so not exact — use the base-pose / masks-key test above.)*
 * No frame bundle: the station's tables — `avian/frontend/masks.json` (`apt.js:1294`) or, if the station
   selected a bundle, `avian/api/bundle-assets.php`'s active `masks` table
   (`avian/api/bundle-assets.php:41,106`). The frame clone's own `avian/frontend/dims.json` is the **wrong**

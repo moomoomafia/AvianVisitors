@@ -63,7 +63,7 @@ config 256 KiB, selection 2 MiB. Licenses allow-list at `:78`.
 | Member | Use in `frame/display.py` / `frame/shoot.py` |
 |---|---|
 | `.reference["revision"]` / `["selection_revision"]` | mixed into the refresh signature (`display.py:438-441`, `:459-463`) — a bundle change forces a redraw |
-| `.drawable_slugs` | passed as `fetch_species(..., drawable=…)` so the species list is filtered to the bundle, not the repo set |
+| `.drawable_slugs` | passed as `fetch_species(..., drawable=…)` so the species list is filtered to the bundle, not the repo set. **Species-level (any pose)** — not "the collage will draw it": a flight-only species is listed but dropped ~85% of captures (R5) |
 | `.resolve(sci, pose)` | cutout resolver ⇒ `shoot` fulfils `avian/api/cutout.php` requests from verified files (`shoot.py:307 _make_cutout_handler`) |
 | `.dims_path` / `.masks_path` | routed over `**/dims.json*` and `**/masks.json*` (`shoot.py:~490`) |
 | `.assets_response()` | served for `**/avian/api/bundle-assets.php*` (`shoot.py:367`) |
