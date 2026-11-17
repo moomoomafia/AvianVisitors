@@ -16,7 +16,8 @@ pytest frame/ -q                                 # bundle runtime, render, insta
 php tests/test_midnight_reset.php                # direct PHP contract
 ```
 
-`.flake8`: `max-line-length = 160`, `max-complexity = 15`. CI runs a second,
+`.flake8`: `max-line-length = 160`, `max-complexity = 15` (*not enforced in practice — measured 2026-11-16 with the repo's `.flake8`: upstream `frame/display.py` `run()` = 18, `frame/shoot.py` `_make_api_handler` = 16, `shoot()` = 46 — the 15 limit is **not enforced**: `.github/workflows/python-ci.yml` (plain `flake8`) runs only on PRs to `main`, the parent's default branch is `avian-visitors`, and `.github/workflows/python-app.yml` gates only `E9,F63,F7,F82` (complexity is `--exit-zero`)*).
+CI runs a second,
 exit-zero complexity pass (`--max-complexity=10`) for information.
 Python matrix in `.github/workflows/python-ci.yml`: **3.9 / 3.11 / 3.13** → keep frame Python
 3.9-compatible (`from __future__ import annotations`, no runtime `X | Y`, no
@@ -73,9 +74,22 @@ spec = importlib.util.spec_from_file_location("display", "frame/display.py")
 display = importlib.util.module_from_spec(spec); spec.loader.exec_module(display)
 ```
 
-As a pytest one-liner, drop the stub in a `conftest.py` at repo root (do **not**
-commit a root `conftest.py` that changes behaviour for CI without saying so — CI runs
-on Linux where the real module is used).
+~~As a pytest one-liner, drop the stub in a `conftest.py` at repo root.~~ **Superseded
+2026-11-16 (D20 — no files in the parent's tree):** use the stand-in module on
+`PYTHONPATH` instead, which runs the parent's own suites unmodified:
+
+```bash
+PYTHONPATH="$(cygpath -m .pi/research/pre-v03/stubs)" python -m pytest tests/test_frame_capture.py tests/test_frame_birdweather.py -q -p no:cacheprovider
+```
+
+Measured 2026-11-16: `tests/test_frame_birdweather.py` **18/18**; `tests/test_frame_capture.py`
+**76 passed, 7 failed** — all 7 are POSIX file-mode/symlink assertions Windows can't satisfy
+(`0o666` vs umask/chmod), none touch `run()`. Every refresh-decision test passes. The stand-in
+makes the render lock a no-op, so lock behaviour is CI-only. Details:
+[verification-log.md](verification-log.md#pre-v03-probes-drift-local-test-loop-capture-path-characterization).
+
+Today's-behaviour baseline (13 tests, all pass on unmodified code):
+`.pi/research/pre-v03/test_characterize_today.py` — run it with the same `PYTHONPATH`.
 
 Quick logic checks that need no hardware and no `fcntl`-free trick once stubbed:
 

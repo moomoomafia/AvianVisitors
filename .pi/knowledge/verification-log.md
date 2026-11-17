@@ -163,7 +163,7 @@ overriding the global flag ([D3](open-decisions.md#d3--station-api-additive-requ
 `Persistent=true` misattributed in 5 places; inert without `OnCalendar=` (fixed) ·
 [`station-clock-and-data.md`](station-clock-and-data.md) still said `as_of` "is UTC" (fixed) · line drift: preview
 return `frame/display.py:469-474`, `push_panel` `:477`, Cache-Control `avian/api/birdnet-api.php:169-171`
-(fixed) · a 3.11-only container doesn't exercise Python 3.9 · `run()` complexity vs flake8
+(fixed) · a 3.11-only container doesn't exercise Python 3.9 · `run()` complexity vs flake8 *(2026-11-16: moot — upstream `run()` is already 18 and the gate is not enforced for the parent's branch)*
 15 · date typo 2025→2026 in [`testing-and-ci.md`](testing-and-ci.md) (fixed).
 
 **Simpler-path notes** — [D7](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr)/[D9](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr) need no mechanism (no new `state.json` keys); [D6](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr) optional;
@@ -542,3 +542,82 @@ was asserted (historical rows annotated, not rewritten).
 * The live feed is a 2026-11-16 snapshot; option A is safe regardless of future bundles.
 * The station-default path's own masks table was not scanned.
 * Not implemented; nothing observed on a live station.
+
+---
+
+## Pre-v0.3 probes: drift, local test loop, capture path, characterization
+
+* **Date:** 2026-11-16 · **Executor:** parent · **Operator-selected:** items 1, 3, 5, 6 of the
+  pre-v0.3 list (2, 4, 7, 8 not selected). Artifacts (our tree only, D20):
+  `.pi/research/pre-v03/stubs/fcntl.py`, `.pi/research/pre-v03/test_characterize_today.py`.
+* **Unprompted findings from the scoping probe:** (a) the `.flake8` complexity limit is **not
+  enforced** for the parent's branch — upstream `run()` is already 18, `_make_api_handler` 16,
+  `shoot()` 46; `.github/workflows/python-ci.yml` runs only on PRs to `main` (the parent's default
+  branch is `avian-visitors`) and `.github/workflows/python-app.yml` gates only `E9,F63,F7,F82` —
+  so the inherited "extract a helper to stay under 15" premise was false and has been corrected in
+  six places; (b) `windowLabel` ("since midnight" when clamped) is used only in tooltips and the
+  Atlas (`avian/frontend/apt.js:3298,3521,5783`), never in the captured collage — the feature does
+  not change the frame's picture text.
+
+### Item 1 — upstream drift: none
+
+`git fetch upstream avian-visitors` (2026-11-16): the parent's tip is still `5950f807`
+(2026-10-22) — our base. Zero commits we lack. **Every line reference in the knowledge base is
+current against the parent.**
+
+### Item 3 — a local frame-test loop works with an `fcntl` stand-in
+
+`PYTHONPATH=.pi/research/pre-v03/stubs` (a no-op `fcntl.flock`, never in the parent's tree):
+
+| Suite | Without the stand-in | With it |
+|---|---|---|
+| `tests/test_frame_birdweather.py` | 14 passed, 4 errors | **18 passed** |
+| `tests/test_frame_capture.py` | 58 passed, 19 errors | **76 passed, 7 failed** |
+
+All 7 failures are POSIX file-mode or symlink assertions (`438` = `0o666`, Windows ignores umask
+and chmod bits): `test_new_capture_respects_process_umask` (3 subtests),
+`test_replacing_capture_preserves_existing_file_permissions` (3),
+`test_capture_does_not_follow_an_output_symlink` (asserts `0o600`). **None touch `run()`**; every
+refresh-decision test v0.3 will extend passes (`test_capture_failure_preserves_panel_state…`,
+`test_saved_signature_describes_captured_data…`, `test_captured_signature_keeps_the_exact_bundle_selection`,
+`test_signature_fetch_rejects_missing_species_not_as_empty`, `test_recent_errors_are_not_rewritten_as_success`,
+`test_valid_empty_response_and_scope_metadata_survive`, `test_unscoped_signature_stays_compatible…`,
+`test_station_identity_is_part_of_change_signature`). Caveat: the stand-in makes the render lock a
+no-op, so lock semantics are not tested locally; CI (Linux) stays authoritative.
+
+### Item 5 — the capture has exactly one injection point for the station param
+
+* The page fetches `recent` in three places, all through `scopedFetchJson` → `birdApiUrl`, which
+  always emits `hours=<number>` (`avian/frontend/apt.js:378-387`): `refreshStatsContext`
+  (`:5984`, with `date` only when `currentHours >= 1000000` and a stats date is chosen — never in a
+  fresh capture context, where `bird:window` defaults to 24, `:1035`), `refreshRecent` (`:6009`),
+  `refreshAll` (`:6028`).
+* `frame/shoot.py` routes `**/birdnet-api.php**` to `_make_api_handler` (`:448`), which intercepts
+  every URL containing `action=recent` (`:250`) and substitutes `hours=\d+` (`:258`). So **one
+  edit in that branch covers every `recent` request the page can make**; the substitution
+  preserves every other query parameter verbatim (characterization C8).
+
+### Item 6 — characterization of today's behaviour (13/13 pass on unmodified parent code)
+
+`.pi/research/pre-v03/test_characterize_today.py`, written in the parent's own test style
+(modules loaded by path, Playwright stubbed, `frame/display.py` collaborators patched):
+
+| ID | Today's behaviour (base `5950f807`) | Decision it bears on |
+|---|---|---|
+| C1 | **Empty window with yesterday's collage on the glass → capture renders `[]`, panel pushed, state saved with `signature([])`** — the core bug | D1/D12 |
+| C2 | `--force` redraws an unchanged window | D1 |
+| C3 | `--no-signature` never fetches in local mode; capture gets `species=None` | D16 |
+| C4 | `heal_hours` elapsed → redraw of an unchanged empty window | D7 |
+| C5 | unreadable state (`signature: None`) + empty window → redraw | D9 / restart |
+| C6 | local mode ignores `drawable` (`fetch_species`) | D12 / R5 |
+| C7 | `fetch_recent` returns only `species`; `midnight_clamped` etc. are discarded; URL is `…?action=recent&hours=24` | D14 |
+| C8 | capture rewrite substitutes `hours` and keeps other params (incl. a would-be `reset_at_midnight=1`) | D3 / D17 |
+| — | preserved behaviours: unchanged window skips without touching state; quiet hours skip a real change; a failed push never saves state; non-`recent` actions pass through; no `window_hours` ⇒ no rewrite | D8, D9 |
+
+These tests assert **today's** outcomes; v0.3's tests should show C1–C5 flip under
+`reset_at_midnight = true` and stay identical with it `false` (req 12).
+
+### Still unverified
+
+Items 2 (parent CI health), 4 (upstream `edu_endpoint` harness on Windows PHP), 7 (station-default
+masks scan) and 8 (throwaway spike) were not selected.

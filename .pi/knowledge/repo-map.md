@@ -114,7 +114,8 @@ the checkout** — it talks HTTP.
   `playwright install --with-deps chromium` and runs
   `tests/test_frame_capture_browser.py` only.
 * `.github/workflows/python-ci.yml` lints with `flake8` (root `.flake8`: `max-line-length=160`,
-  `max-complexity=15`) on Python **3.9 / 3.11 / 3.13** — so frame Python must stay
+  `max-complexity=15`) on Python **3.9 / 3.11 / 3.13** *(on PRs to `main` only — the parent's default
+  branch is `avian-visitors`, so this job does not gate parent PRs; measured 2026-11-16)* — so frame Python must stay
   3.9-compatible (`from __future__ import annotations`, no `X | Y` at runtime).
 * `tests/` naming: `test_*.py` (pytest), `test_*.php` (PHP scripts, run via a thin
   Python subprocess wrapper, skipped when `php` is absent), `smoke_*.mjs` /

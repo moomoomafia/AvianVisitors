@@ -25,7 +25,7 @@ ruled ([D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-de
 [open-decisions.md](open-decisions.md)). Next step: write Plan v0.3. Current shape:
 [feature-midnight-reset.md](feature-midnight-reset.md#decided-design-d1d4-ruled-2026-11-16-amended-by-audit-2).
 
-## Open threads (last updated 2026-11-16, after R1)
+## Open threads (last updated 2026-11-16, after the pre-v0.3 probes)
 
 Written for a reader with zero memory of the conversation. Update this list at the end of
 every session; delete items when they close.
@@ -195,13 +195,18 @@ Three frame data sources, one renderer:
     (`frame/display.py:457-463`). The whole station change is three lines (R1 variant B′:
     one new `$resetAtMidnight` local + two one-token swaps in `avian/api/birdnet-api.php`).
     See [minimal-footprint.md](minimal-footprint.md).
-
+17. **PHP runs here now — in a *new* shell.** Scoop's PHP loads SQLite3 via the user env
+    var `PHP_INI_SCAN_DIR` + `~/scoop/persist/php/cli/conf.d/zz-avian-sqlite3.ini`. A shell
+    older than the install fails `tests/test_midnight_reset.py` with `Class "SQLite3" not
+    found` — environment, not product. WSL2/Docker can't start (`HCS_E_HYPERV_NOT_INSTALLED`).
 18. **"Drawable" has two meanings upstream.** `ActiveBundle.drawable_slugs` /
     `birdweather.drawable_slugs` are species-level (any pose); the collage draws only the base
     pose or `-2` (15% roll) and drops the rest (`avian/frontend/apt.js:3164-3186`). A live
     community bundle has 22 flight-only species. For "will it render?" test the unsuffixed slug
     against the masks table, never `drawable_slugs` (R5).
-17. **PHP runs here now — in a *new* shell.** Scoop's PHP loads SQLite3 via the user env
-    var `PHP_INI_SCAN_DIR` + `~/scoop/persist/php/cli/conf.d/zz-avian-sqlite3.ini`. A shell
-    older than the install fails `tests/test_midnight_reset.py` with `Class "SQLite3" not
-    found` — environment, not product. WSL2/Docker can't start (`HCS_E_HYPERV_NOT_INSTALLED`).
+19. **Local frame-test loop (2026-11-16):** `PYTHONPATH=.pi/research/pre-v03/stubs` (a no-op
+    `fcntl` stand-in) runs the parent's frame suites unmodified on Windows — birdweather 18/18,
+    capture 76 passed + 7 POSIX-permission failures that never touch `run()`. The today-baseline
+    for v0.3 is `.pi/research/pre-v03/test_characterize_today.py` (13/13). The parent is still at
+    our base `5950f807` (no drift), and its `.flake8` complexity limit is not enforced
+    (upstream `run()` = 18).

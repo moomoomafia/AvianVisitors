@@ -609,7 +609,9 @@ Amends D3's mechanics; does not change the ruling.
 * The fetch helper returns the **whole response**, not `data["species"]` (needed by D14
   and D6). Add a flag-only helper rather than changing `fetch_recent` / `fetch_species`, so
   existing mocks and req 12 are untouched.
-* `run()` gains several branches; plan a helper to stay under flake8 `max-complexity = 15`.
+* ~~`run()` gains several branches; plan a helper to stay under flake8 `max-complexity = 15`.~~
+  *Corrected 2026-11-16:* measured 2026-11-16 with the repo's `.flake8`: upstream `frame/display.py` `run()` = 18, `frame/shoot.py` `_make_api_handler` = 16, `shoot()` = 46 — the 15 limit is **not enforced**: `.github/workflows/python-ci.yml` (plain `flake8`) runs only on PRs to `main`, the parent's default branch is `avian-visitors`, and `.github/workflows/python-app.yml` gates only `E9,F63,F7,F82` (complexity is `--exit-zero`). Under D20, add the feature's branch(es) in upstream's style;
+  do not restructure `run()`.
 
 Basis: house style (additive, flag-gated, minimal blast radius) and the pinned tests above.
 

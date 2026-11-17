@@ -29,7 +29,7 @@ query params as `$_GET['x'] ?? default` with a cast or strict compare
   stays whole`). A new comment should read like that, not restate the code.
 * Python 3.9-compatible (CI matrix 3.9/3.11/3.13). `dict.get` defaults over
   dataclasses for config; `try: import tomllib except ModuleNotFoundError: import tomli`.
-* flake8: 160 cols, complexity 15 (CI nags above 10).
+* flake8: 160 cols, complexity 15 (CI nags above 10). *Correction (2026-11-16):* measured 2026-11-16 with the repo's `.flake8`: upstream `frame/display.py` `run()` = 18, `frame/shoot.py` `_make_api_handler` = 16, `shoot()` = 46 — the 15 limit is **not enforced**: `.github/workflows/python-ci.yml` (plain `flake8`) runs only on PRs to `main`, the parent's default branch is `avian-visitors`, and `.github/workflows/python-app.yml` gates only `E9,F63,F7,F82` (complexity is `--exit-zero`). New code should still be simple, but D20 forbids restructuring upstream functions to meet it.
 
 ## Defensive input handling — the house pattern
 
