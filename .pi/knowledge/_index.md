@@ -43,12 +43,10 @@ every session; delete items when they close (their history lives in the register
    W3 docs (`ec5cdc7d`), review R ([log](verification-log.md#review-r-full-product-diff): F1 High,
    a capture straddling the station's midnight could push the empty nest) and its fixes W2R
    (`0046db23`, [log](verification-log.md#w2r-review-r-fixes), Plan v0.5 §4.7). K1 green on
-   `0046db23`. `origin` is at `5f90208c`. **Waiting on the operator:** D22 (T1), D27 (K2), a push,
+   `0046db23`. T1 smoke alarm for W1 (`db9ff938`, D22 answered, [log](verification-log.md#t1-smoke-alarm-for-w1-d22)).
+   `origin` is at `5f90208c`. **Waiting on the operator:** D27 (K2), a push,
    then D21 for stage V. Handoffs are built with `.pi/scripts/build_handoff.py`.
 1. **Open decisions** ([register](open-decisions.md)):
-   [D22](open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param) (a committed parent test
-   for W1; ~~recommended: one clock-independent `edu_endpoint` case~~ amended 2026-11-17: that helper
-   is only in a suite CI never runs; measure a CI-run variant first, else record the gap),
    [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) (K2's midnight
    clock; recommended: per-run `TZ` offset; Chromium ignores it),
    [D21](open-decisions.md#d21--may-the-parent-open-a-pr-inside-the-fork-so-the-parents-ci-runs) (CI

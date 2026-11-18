@@ -98,7 +98,7 @@
 | `.pi/research/r3/www/echo.php` | [verification-log.md](verification-log.md) |
 | `.pi/research/r5/manifest_scan.py` | [verification-log.md](verification-log.md) |
 | `.pi/research/w1/recent_param_probe.php` | [open-decisions.md](open-decisions.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
-| `.pi/scripts/build_handoff.py` | [_index.md](_index.md), [next-actions.md](next-actions.md), [verification-log.md](verification-log.md) |
+| `.pi/scripts/build_handoff.py` | [_index.md](_index.md), [verification-log.md](verification-log.md) |
 | `.pi/scripts/check_kb.py` | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `.pi/skills/kb-document/SKILL.md` | [open-decisions.md](open-decisions.md) |
 | `AGENTS.md` | [AGENTS.md](../../AGENTS.md) |
@@ -190,7 +190,7 @@
 | `tests/test_frame_birdweather.py` | [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `tests/test_frame_capture.py` | [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `tests/test_frame_capture_browser.py` | [repo-map.md](repo-map.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
-| `tests/test_midnight_reset.php` | [birdnet-api.md](birdnet-api.md), [code-conventions.md](code-conventions.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [minimal-footprint.md](minimal-footprint.md), [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
+| `tests/test_midnight_reset.php` | [birdnet-api.md](birdnet-api.md), [code-conventions.md](code-conventions.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `tests/test_midnight_reset.py` | [_index.md](_index.md), [birdnet-api.md](birdnet-api.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `tests/test_shifted_directory_migration.py` | [testing-and-ci.md](testing-and-ci.md) |
 | `tests/test_site_name_api.php` | [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |

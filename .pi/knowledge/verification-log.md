@@ -1248,3 +1248,43 @@ as an accepted Low residual: the station always selects `Sci_Name AS sci`
 `import fcntl` before doing anything (Windows). Untracked `__pycache__` removed.
 **Not executed:** K2, hardware; a bundle-active variant of the F1 test (same `has_drawable_bird` path
 as the existing bundle test).
+
+## T1: smoke alarm for W1 (D22)
+
+**Who:** parent agent, 2026-11-17, on the operator's ruling *"d22, leave smoke alarm behind. Continye
+with your recommendation"* (measure the CI-run variant first). **Result:** local commit `db9ff938`
+`test(api): request-level check for reset_at_midnight=1 on recent (Plan v0.5 T1)`, not pushed:
+`tests/test_midnight_reset.py` +33/−1 (one new method plus imports). No product code touched.
+
+**Measurement (scratch script in K1, deleted after):** the smallest real `recent` request needs no
+educator store when Educators is disabled: `educator_resolve_scope` returns early after the lock
+and state check (`avian/api/educator-scope.php:153-160`). Needed: an empty lock file, a state file
+`v1\t0\t7`, a `birds.db` with a `detections` table, and six env vars (`AV_EDUCATOR_LOCK_FILE`,
+`AV_EDUCATOR_STATE_FILE`, `AV_EDUCATOR_BIRDS_DB`, `AV_REQUIRE_AUTH=0`,
+`AV_EDUCATOR_STATE_TEST_METADATA`, `AV_EDUCATOR_STORE_TEST_METADATA`). Dropping
+`AV_EDUCATOR_STORE_TEST_METADATA` gives `educator lock is missing or unsafe`; the maintenance-file
+override is not needed.
+
+**Placement (parent-decided, house style):** `tests/test_midnight_reset.py`, the parent's own CI-run
+midnight wrapper (`.github/workflows/python-app.yml` `build` runs bare `pytest`), with its existing
+`skipUnless(shutil.which("php"))` idiom; the request is made with `php -r` like
+`tests/test_educator_security.py:216-237`. Not `tests/test_educator_backend.php` (no CI wrapper; aborts on
+Linux, D28) and not `tests/test_midnight_reset.php` (it loads the API as a library, `:4-5`, which
+returns before W1's lines at `avian/api/birdnet-api.php:127`). **Deviation:** plan §7 assigns T1 to a
+worker; the parent wrote it because the measurement prototype was already the test (33 lines).
+
+**What it asserts (clock-independent):** without the param `midnight_clamped` is false; with
+`reset_at_midnight=1` it is true and `window_start` ends ` 00:00:00`. A 24-hour window always crosses
+the station's midnight, so this holds at any time of day (`avian/api/birdnet-api.php:109-113`).
+
+**Verification:**
+
+* K1 on the staged change: exit 0, all PASS; `tests/test_midnight_reset.py` 2 passed.
+* A/B: the new test on base `5950f807`'s API **fails** at the `reset_at_midnight=1` assertion (1 failed,
+  1 passed); on HEAD it passes. CONFIRMED discriminating.
+* Windows (scoop PHP 8.5, `PHP_INI_SCAN_DIR` exported): 2 passed, after fixing a bug in the first draft:
+  `with sqlite3.connect(...)` commits but does not close, so Windows could not delete the temp
+  `birds.db` (`WinError 32`). Now closed explicitly.
+* `uvx flake8 tests/test_midnight_reset.py`: clean.
+
+**Not executed:** the parent's real CI (needs D21); a re-review of T1 (plan §7 asks for a short one).

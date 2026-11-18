@@ -18,14 +18,13 @@ Rules:
 
 ## Pending
 
-1. **Trigger:** the operator answers any of D22, D27, or "push" (opened 2026-11-17; the `ask_user`
-   batch timed out unanswered after W2R).
-   **Action:** D22 = measure (a2) → size a CI-run case in `tests/test_midnight_reset.php`, report, then
-   (if approved) write the T1 handoff with `.pi/scripts/build_handoff.py`, dispatch one
-   worker, K1 A/B (fails on `5950f807`, passes on HEAD). D27 ruled → build K2 in `.pi/` (fake
+1. **Trigger:** the operator answers ~~D22,~~ D27 or "push" (opened 2026-11-17; the `ask_user`
+   batch timed out unanswered after W2R). *D22 part done 2026-11-17: T1 `db9ff938`,
+   [log](verification-log.md#t1-smoke-alarm-for-w1-d22).*
+   **Action:** D27 ruled → build K2 in `.pi/` (fake
    station + fake `inky` + midnight scenarios incl. the F1 straddle). Push authorised →
-   `git push origin feature/birdframe-midnight-reset` (local was 8 commits ahead of `5f90208c`).
-   Recommendations: D22 ~~(a)~~ measure (a2) first, else (b) (amended 2026-11-17); D27 per-run `TZ` offset.
+   `git push origin feature/birdframe-midnight-reset` (`origin` is at `5f90208c`).
+   Recommendation: D27 per-run `TZ` offset.
    **Log to:** the register entries (quote the ruling), [verification-log.md](verification-log.md),
    `.pi/handoff/ledger.md`.
 

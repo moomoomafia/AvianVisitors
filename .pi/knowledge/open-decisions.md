@@ -43,7 +43,7 @@ feature branch alone triggers no CI. No PR into the fork's `avian-visitors` bran
 | `ANSWERED` (interim), housekeeping | D11 — hidden locally; upstream-vs-personal still undecided |
 | `ANSWERED` (principle, outranks parent-decisions) | D20 — minimal footprint, align with the parent repo |
 | `OPEN`, needed only at execution stage V | D21 — CI access via a PR inside the fork (deferred 2026-11-17 at G0: re-ask at V) |
-| `OPEN`, not blocking W2 (opened 2026-11-17, post-W1 review) | D22 — commit a parent test for W1's request param (was handoff Q1) |
+| `ANSWERED 2026-11-17` (operator) | D22 — commit a parent test for W1's request param: **yes** ("leave smoke alarm behind"); done as T1 `db9ff938` |
 | `ANSWERED 2026-11-17` (operator) | D23 — commit the pending `.pi/` changes before W2: (a) one local docs commit, no push |
 | `ANSWERED` (operator), harness | D25 — harden kb-document: build commitment gate + session priming + rule (2026-11-17) |
 | `ANSWERED 2026-11-17` (operator) | D24 — D4 re-confirmed: Docker container in `.pi/` is the local gate (virtualization verified) |
@@ -984,7 +984,13 @@ needed" exit) and false negatives. It raises the floor; it does not guarantee co
 
 ### D22 — Commit a parent test for W1's request param?
 
-**Status:** `OPEN` (opened 2026-11-17; supersedes the unnumbered Q1 in `.pi/handoff/plan.md`)
+**Status:** `ANSWERED 2026-11-17`. Operator: *"d22, leave smoke alarm behind. Continye with your
+recommendation"*, i.e. add the test, following the amended recommendation: measure the CI-run
+variant (a2) in `tests/test_midnight_reset.php` first, then build it as step T1. Parent's reading:
+if (a2) proves unreasonably large, stop and report before committing. **Done 2026-11-17:** (a2) was
+small; it lives in the CI-run `tests/test_midnight_reset.py` (+33/−1), local commit `db9ff938`,
+[T1 log](verification-log.md#t1-smoke-alarm-for-w1-d22). ~~`OPEN` (opened 2026-11-17;
+supersedes the unnumbered Q1 in `.pi/handoff/plan.md`)~~
 
 **Why it matters:** Plan v0.3 §5's `tests/test_midnight_reset.php` row says to add one
 `edu_endpoint` case if cheap, otherwise to record the gap. W1 did neither; it left the choice to
