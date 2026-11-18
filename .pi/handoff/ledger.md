@@ -16,5 +16,5 @@ only (~~v0.3~~, ~~v0.4~~ superseded 2026-11-17; v0.4 added P2 and T1; v0.5 added
 | W2R | §4.7 review fixes | worker | done 2026-11-17, local commit `0046db23` | R | +22/−17 in 4 files; parent: K1 green (92 passed), F1/F2 tests fail before / pass after | F3 residual accepted (Low); re-review only if T1 lands |
 | T1 | smoke alarm for W1 (D22) | parent | done 2026-11-17, local commit `db9ff938` | W1, D22 | `tests/test_midnight_reset.py` +33/−1 (request-level, CI-run); K1 green; fails on base `5950f807`; Windows 2 passed; re-review: ready, Low fixes in `cde2bc47` | — |
 | V | §6 local runs; push only if authorised | parent | closed (needs separate permission) | R | — | D21 re-ask here |
-| O | Drift/ruling audit | oracle | not started | V | — | — |
+| O | Drift/ruling audit (D30 loop, run before V) | oracle | done 2026-11-17: HAPPY at round 2 | K2 | round 1 (mission `20f8ba04`): O1-1 "mic" wording + O1-2 repro exit, O1-4/5 comments, fixed by worker `3b22f0b8` in `e18f304d`; round 2 (mission `530de6d3`): HAPPY, O2-1/2 left (D20) | — |
 | H | Hardware pass on `birdpic` | operator + parent | closed (needs separate permission) | O | — | — |

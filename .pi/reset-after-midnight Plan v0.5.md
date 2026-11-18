@@ -320,7 +320,7 @@ untracked files).
 | W2R | worker | §4.7 review-R fixes (F1, F2, F4, F7 code + tests; F5, F6 docs), one local commit (added 2026-11-17) | parent re-runs K1; the F1 test fails on `ec5cdc7d` and passes after; flag-off behaviour unchanged — **done**, `0046db23`; K1 92 passed; F3 residual accepted |
 | T1 | ~~worker~~ parent | only if D22 rules for a test (amended 2026-11-17: measure a CI-run case first) | case passes on HEAD, fails on base `5950f807` (K1 A/B); a short re-review if it lands — **done 2026-11-17**, `db9ff938`: `tests/test_midnight_reset.py` +33/−1, K1 green, fails on base ([log](knowledge/verification-log.md#t1-smoke-alarm-for-w1-d22)); re-reviewed: ready, Low fixes in `cde2bc47` |
 | V | parent | §6 runs; CI only if the operator authorises it on the fork (D21) | results recorded in the verification log |
-| O | oracle | drift/ruling audit of the result | verdict recorded |
+| O | oracle | drift/ruling audit of the result | verdict recorded — **done 2026-11-17, before V** (D30): a review/fix loop; round 1 NOT HAPPY (2 Low must-fix, fixed in `e18f304d`), round 2 **HAPPY** ([round 1](knowledge/verification-log.md#oracle-loop-round-1), [round 2](knowledge/verification-log.md#oracle-loop-round-2)) |
 | H | operator + parent | hardware pass on `birdpic` (§6) | checklist recorded |
 
 G0 covers W1–W3 only. Whether T1 falls under it is part of the D22 ruling. The parent records
@@ -350,8 +350,9 @@ current, and runs `python .pi/scripts/check_kb.py --index` (exit 0) at the end o
   * ~~**D27** (blocks K2 only): how K2 makes "just after midnight" happen. Recommended: a per-run
     POSIX `TZ` offset (verified for SQLite, PHP's SQLite and Python; **Chromium ignores it**).~~
     *Answered 2026-11-17 (TZ shift); K2 built, `6eb0658b`, 7 passed.*
-  * **D30** (open): which stage next after K2: O (Oracle audit), V (CI, needs D21; pushed `a66fe045`) or H
-    (hardware). Recommended: O first.
+  * ~~**D30** (open): which stage next after K2: O (Oracle audit), V (CI, needs D21; pushed `a66fe045`) or H
+    (hardware). Recommended: O first.~~ *Answered 2026-11-17: O as a loop; done, Oracle HAPPY at round 2.*
+    Next: V (needs D21) or H (operator at `birdpic`; §8 deployment needs its own yes).
   * **D21** (stage V only): CI via a PR inside the fork into its `avian-visitors`.
   * **D28** (outside the feature): file the parent-bug issue; draft ready in
     [bug-d28-educator-store-lost-lock.md](knowledge/bug-d28-educator-store-lost-lock.md).

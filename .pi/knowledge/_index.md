@@ -49,11 +49,12 @@ every session; delete items when they close (their history lives in the register
    `0046db23`. T1 smoke alarm for W1 (`db9ff938`, D22 answered, [log](verification-log.md#t1-smoke-alarm-for-w1-d22)).
    K2 end-to-end midnight scenarios (`6eb0658b`, D27 = TZ shift, 7 passed, [log](verification-log.md#k2-end-to-end-midnight-scenarios)).
    **Pushed:** `origin` is at `a66fe045` (2026-11-17, [push record](verification-log.md#push-to-origin-after-k2));
-   later record-only commits may follow it. **Waiting on the operator:**
-   [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) (next stage: O recommended), then
-   D21 for stage V. Handoffs are built with `.pi/scripts/build_handoff.py`.
+   later record-only commits may follow it. **Oracle audit O done** (D30 loop): round 1 fixes in
+   `e18f304d` (journal message says "mic"), round 2 HAPPY
+   ([round 2](verification-log.md#oracle-loop-round-2)); these commits are local, not pushed.
+   **Waiting on the operator:** a push, then V (needs D21) or H (hardware). Handoffs are built with
+   `.pi/scripts/build_handoff.py`.
 1. **Open decisions** ([register](open-decisions.md)):
-   [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) (next stage after K2),
    [D21](open-decisions.md#d21--may-the-parent-open-a-pr-inside-the-fork-so-the-parents-ci-runs) (CI
    via a PR inside the fork; stage V),
    [D28](open-decisions.md#d28--report-the-educator-store-lost-lock-bug-upstream) (file the parent

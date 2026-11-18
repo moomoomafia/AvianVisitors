@@ -18,15 +18,14 @@ Rules:
 
 ## Pending
 
-1. **Trigger:** the operator answers
-   [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) (opened 2026-11-17). *Answered
-   2026-11-17: O as a review/fix loop, in progress; see the "Oracle loop" sections of the
-   verification log. If a session ends mid-loop: resume from the last round logged there.*
-   **Action:** O → dispatch `oracle` for a drift/ruling audit of `git diff 5950f807 HEAD -- avian frame
-   tests` against Plan v0.5 §4/§7, D1–D3, D12–D17, D20 and the safety rails; re-verify its counter-claims;
-   log it. V → needs D21 first (the branch is pushed). H → write the hardware checklist from plan §6 for the
-   operator; §8 deployment needs its own yes.
-   **Log to:** the D30 entry, [verification-log.md](verification-log.md), `.pi/handoff/ledger.md`.
+1. **Trigger:** the operator says to push the post-Oracle commits (opened 2026-11-17).
+   **Action:** `git push origin feature/birdframe-midnight-reset`, verify with `git ls-remote origin`.
+   **Log to:** [verification-log.md](verification-log.md) and the open threads.
+2. **Trigger:** the operator picks the next stage: V (answer D21) or H (hardware) (opened 2026-11-17).
+   **Action:** V → per D21, open a PR **inside the fork** into its `avian-visitors` branch (Actions
+   enabled), never the parent; read the CI result. H → write the hardware checklist from plan §6 for
+   the operator; §8 deployment needs its own yes.
+   **Log to:** D21 / the plan's V or H row, [verification-log.md](verification-log.md), `.pi/handoff/ledger.md`.
 
 ## Done
 
@@ -34,3 +33,5 @@ Rules:
    operator. Log: [post-reboot check](verification-log.md#post-reboot-virtualization-check-2026-11-17).
 2. 2026-11-17: push after K2: `5f90208c..a66fe045` to `origin`. Log:
    [push record](verification-log.md#push-to-origin-after-k2).
+3. 2026-11-17: D30 Oracle review/fix loop: HAPPY at round 2. Logs:
+   [round 1](verification-log.md#oracle-loop-round-1), [round 2](verification-log.md#oracle-loop-round-2).
