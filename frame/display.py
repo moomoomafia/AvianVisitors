@@ -451,7 +451,7 @@ def run(cfg, preview=None, force=False, use_signature=True, mat_box=False):
         print(f"active bundle validation failed: {error}", file=sys.stderr)
         return False
     active = reset_at_midnight_active(cfg)
-    if cfg.get("reset_at_midnight") and not active:
+    if cfg.get("reset_at_midnight") is True and not active:
         print("reset_at_midnight applies only to local mode; ignored")
     if active:
         # Today's birds come from one station-clamped list, on every path: an
@@ -460,7 +460,7 @@ def run(cfg, preview=None, force=False, use_signature=True, mat_box=False):
             payload = fetch_recent_payload(cfg["base_url"], 24, cfg["timeout"], _auth(cfg), reset_at_midnight=True)
         except Exception as e:
             print(f"recent fetch failed: {e}", file=sys.stderr)
-            return not force and use_signature  # the timer retries; a forced run reports it
+            return not (force or preview) and use_signature  # the timer retries; a forced run reports it
         if payload.get("midnight_clamped") is not True:
             print("station did not apply the midnight window - update the station (Tools > Pull latest), "
                   "or an Educators capture is active", file=sys.stderr)
@@ -471,15 +471,9 @@ def run(cfg, preview=None, force=False, use_signature=True, mat_box=False):
             print("no drawable bird since midnight; keeping the current collage")
             if not preview:
                 return True
-        if use_signature:
-            sig = signature(species, "")
-            if bundle is not None:
-                sig = hashlib.sha256(
-                    (sig + ":" + bundle.reference.get("selection_revision", bundle.reference["revision"])).encode()
-                ).hexdigest()[:16]
-    elif use_signature:
+    if use_signature:
         try:
-            species = fetch_species(
+            species = species if active else fetch_species(
                 cfg,
                 _auth(cfg),
                 drawable=None if bundle is None else bundle.drawable_slugs,
@@ -516,6 +510,10 @@ def run(cfg, preview=None, force=False, use_signature=True, mat_box=False):
     except Exception as e:
         print(f"could not get image: {e}", file=sys.stderr)  # keep last panel image
         return False
+    if active and not preview and "species" in capture and not has_drawable_bird(capture["species"], bundle):
+        # the page asked again after the station's midnight: never push its empty nest
+        print("no drawable bird since midnight; keeping the current collage")
+        return True
     img = mat_and_center(img, cfg["mat"], cfg["opening"])
     if preview:
         out = quantize_spectra6(img)

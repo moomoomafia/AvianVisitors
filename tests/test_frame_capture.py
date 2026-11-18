@@ -270,10 +270,11 @@ class FrameCaptureTests(unittest.TestCase):
             self.assertTrue(self.display.run(cfg, force=True))
         self.assertEqual(saved, ["58d0ae600e086fb2"])
 
-    def run_reset_frame(self, today, *, state=None, bundle=None, quiet=False, rolling=SPECIES, now=NOW, cfg=None, **options):
+    def run_reset_frame(self, today, *, state=None, bundle=None, quiet=False, rolling=SPECIES, now=NOW, cfg=None, captured=None, **options):
         """One display.run() in local mode with reset_at_midnight on (unless `cfg` says otherwise).
         `today` is the station's midnight payload, an exception the fetch raises, or None for the
-        real fetch_recent_payload. `rolling` is what the rolling-window fetch_species would return."""
+        real fetch_recent_payload. `rolling` is what the rolling-window fetch_species would return.
+        `captured` is the list the page loads, when it differs from the decided one."""
         cfg = {**self.display.DEFAULTS, "shoot": True, "reset_at_midnight": True, **(cfg or {})}
         if state is None:
             state = {"signature": self.display.signature(SPECIES), "last_refresh": NOW - 3600}
@@ -288,7 +289,7 @@ class FrameCaptureTests(unittest.TestCase):
         def obtain(_cfg, species, _bundle=None, *, capture=None):
             result.obtained.append(species)
             if capture is not None and species is not None:
-                capture["species"] = species
+                capture["species"] = species if captured is None else captured
             return Image.new("RGB", (20, 20))
 
         def push(*_args):
@@ -377,7 +378,7 @@ class FrameCaptureTests(unittest.TestCase):
 
     def test_reset_at_midnight_fetch_failure_skips_a_timer_run_and_fails_a_forced_one(self):
         for options, ok in (({}, True), ({"force": True}, False), ({"use_signature": False}, False),
-                            ({"force": True, "use_signature": False}, False)):
+                            ({"force": True, "use_signature": False}, False), ({"preview": "preview.png"}, False)):
             with self.subTest(**options):
                 result = self.run_reset_frame(OSError("station unreachable"), **options)
                 self.assertIs(result.ok, ok)
@@ -393,6 +394,12 @@ class FrameCaptureTests(unittest.TestCase):
         result.fetch.assert_called_once_with(
             self.display.DEFAULTS["base_url"], 24, self.display.DEFAULTS["timeout"], None, reset_at_midnight=True)
         result.fetch_species.assert_not_called()
+
+    def test_reset_at_midnight_keeps_the_collage_when_the_capture_crosses_midnight(self):
+        result = self.run_reset_frame(midnight(TODAY), captured=[])
+        self.assertIs(result.ok, True)
+        self.assertEqual((result.obtained, result.pushed, result.saved), ([TODAY], 0, []))
+        self.assertIn("no drawable bird since midnight; keeping the current collage", result.log)
 
     def test_reset_at_midnight_decides_and_captures_from_the_clamped_list_not_the_rolling_one(self):
         rolling = SPECIES + TODAY  # last night's crow is still inside a rolling 24 h window
