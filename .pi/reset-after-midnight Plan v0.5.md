@@ -14,8 +14,9 @@ Read [AGENTS.md](../AGENTS.md) first.
 
 > **Status (2026-11-17): G0 lifted for W1–W3.** W1 built and reviewed; the K1 Linux test container
 > is built and green on HEAD. ~~**Next: P2 (regenerate the handoff from this plan), then W2.**~~
-> *Updated 2026-11-17: P2, W2, W3, review R and its fixes (W2R) are done; K1 is green on `0046db23`.
-> Next needs the operator: ~~D22 (T1)~~ (done: T1 `db9ff938`), D27 (K2), a push, then D21 for stage V.*
+> *Updated 2026-11-17: P2, W2, W3, review R and its fixes (W2R), T1 and K2 are done; K1 and K2 are green.*
+> *Earlier wording: P2, W2, W3, review R and its fixes (W2R) are done; K1 is green on `0046db23`.
+> Next needs the operator: ~~D22 (T1)~~ (done: T1 `db9ff938`), ~~D27 (K2)~~ (done: K2 `6eb0658b`), a push, then D21 for stage V.*
 > V, H, §8 and any further push/PR need separate permission.
 >
 > **What v0.5 changes, and why.** An **execution-state revision**: §1–§5 (objective, principle,
@@ -283,7 +284,7 @@ intended flips with the flag on and no change with it off; the R3 scripts and
 | Where | What | Expected / notes |
 |---|---|---|
 | **K1: local gate** (Linux container, D24/D26) | `bash .pi/k1/run.sh` (worktree: tracked + staged files) or `bash .pi/k1/run.sh <ref>`. Image: `.pi/k1/Dockerfile` on the parent's pinned `debian:bookworm-slim` (PHP 8.2, Python 3.11, Playwright 1.62.0 + Chromium), non-root user. Tree: `git -c core.autocrlf=false archive` piped into the container, never the bind-mounted CRLF worktree. ~4 min | exit 0 = every named suite passed and none skipped. Suites: PHP syntax, `tests/test_midnight_reset.php` (20), `tests/test_site_name_api.php` (6), `tests/test_educator_backend.php` (A/B: exactly the 18 base lines in `.pi/k1/educator-backend.baseline`), pytest `tests/test_midnight_reset.py`, `tests/test_frame_capture.py` (77 on HEAD before W2), `tests/test_frame_birdweather.py` (18), `tests/test_frame_capture_browser.py` (38), `tests/test_educator_security.py` (7), `frame/test_bundle_runtime.py` (42), the `.pi/` W1 probe, R3 clamp and characterization suites, flake8 fatal set |
-| **K2** (after W2; needs D27) | fake station (`php -S`, copied tree, provisioned Educators lock, synthetic `birds.db`) + headless fake `inky` + midnight scenarios | push/no-push asserted on the fake panel; still not the real glass |
+| **K2** (after W2; D27 = TZ shift) | `bash .pi/k2/run.sh [ref]` (~1 min, K1 image). ~~fake station (`php -S`, copied tree, provisioned Educators lock, synthetic `birds.db`)~~ *Built 2026-11-17 more cheaply:* the parent's `station` fixture idiom (`tests/test_frame_capture_browser.py`) with `recent` answered by the real PHP via `php -r` under a per-request `TZ` + synthetic `birds.db`; headless fake `inky`; 7 scenarios incl. the F1 midnight straddle and an outdated (base) station | push/no-push asserted on the fake panel; still not the real glass |
 | Windows pre-check | `PYTHONPATH=.pi/research/pre-v03/stubs python -m pytest tests/test_frame_capture.py tests/test_frame_birdweather.py`; scoop PHP for the PHP suites (stale shell: export `PHP_INI_SCAN_DIR`, recipe in [testing-and-ci.md](knowledge/testing-and-ci.md)) | fast feedback only; 7 POSIX-permission failures and 14/199 educator failures are Windows-only artefacts; **not evidence** |
 | Local | flake8 with the repo `.flake8` on changed files | complexity is advisory upstream (`run()` is 18 on base) |
 | CI (parent's existing `python-app.yml` on the fork) | `pytest` + `frame-capture` browser job | runs only on `main`/`test_me`/`avian-visitors` pushes or PRs; **the feature-branch push triggers nothing**. Real CI needs an operator-authorised PR *inside the fork* (D21) |
@@ -306,7 +307,7 @@ untracked files).
 | K1 | parent | `.pi/` Linux test container | **done**; base and HEAD baselines recorded ([K1 log](knowledge/verification-log.md#k1-build-and-baseline)) |
 | P2 | parent | regenerate `.pi/handoff/plan.md` + `context.md` from **this v0.5**, header rule "where verbatim ruling text conflicts with §4, §4 wins"; update the ledger | **done 2026-11-17** (`031a33f3`) |
 | W2 | worker | §4.2–4.4 frame change + §5 frame tests, one local commit | parent re-runs K1: new tests pass, nothing else changes against the K1 HEAD baseline; characterization flips as expected with the flag on and nothing changes with it off — **done**, `dece12cf`; K1 91 passed |
-| K2 | parent | fake station + fake panel + scenarios | needs D27; the midnight scenarios assert push/no-push |
+| K2 | parent | fake station + fake panel + scenarios | needs D27; the midnight scenarios assert push/no-push — **done 2026-11-17**, `6eb0658b`: 7 passed; F1 fails on pre-W2R frame, 6 fail on base frame ([log](knowledge/verification-log.md#k2-end-to-end-midnight-scenarios)) |
 | W3 | worker | §4.5 docs | README paragraph at `frame/README.md:89`/`:91` + config line, end-user voice — **done**, `ec5cdc7d` |
 | R | reviewer | review the full diff vs this plan, D20 and every ruling | no unresolved High findings — **done**: ready with edits, F1 High + F2–F7 Low ([log](knowledge/verification-log.md#review-r-full-product-diff)) |
 | W2R | worker | §4.7 review-R fixes (F1, F2, F4, F7 code + tests; F5, F6 docs), one local commit (added 2026-11-17) | parent re-runs K1; the F1 test fails on `ec5cdc7d` and passes after; flag-off behaviour unchanged — **done**, `0046db23`; K1 92 passed; F3 residual accepted |

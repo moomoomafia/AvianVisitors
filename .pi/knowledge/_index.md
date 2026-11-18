@@ -47,7 +47,8 @@ every session; delete items when they close (their history lives in the register
    a capture straddling the station's midnight could push the empty nest) and its fixes W2R
    (`0046db23`, [log](verification-log.md#w2r-review-r-fixes), Plan v0.5 §4.7). K1 green on
    `0046db23`. T1 smoke alarm for W1 (`db9ff938`, D22 answered, [log](verification-log.md#t1-smoke-alarm-for-w1-d22)).
-   `origin` is at `5f90208c`. **Waiting on the operator:** D27 (K2), a push,
+   K2 end-to-end midnight scenarios (`6eb0658b`, D27 = TZ shift, 7 passed, [log](verification-log.md#k2-end-to-end-midnight-scenarios)).
+   `origin` is at `5f90208c`. **Waiting on the operator:** ~~D27 (K2)~~ (done), a push,
    then D21 for stage V. Handoffs are built with `.pi/scripts/build_handoff.py`.
 1. **Open decisions** ([register](open-decisions.md)):
    [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) (K2's midnight
@@ -243,4 +244,10 @@ Three frame data sources, one renderer:
     (`frame/shoot.py:66-75`). Across the station's midnight that capture is empty and was pushed.
     Any "never blank" rule must therefore be re-checked on `capture["species"]` after the capture,
     not only before it (Plan v0.5 §4.7 step f, `0046db23`;
-    [W2R](verification-log.md#w2r-review-r-fixes)).
+    [W2R](verification-log.md#w2r-review-r-fixes)). Confirmed end to end by K2: before the fix the
+    empty nest really was pushed ([K2 log](verification-log.md#k2-end-to-end-midnight-scenarios)).
+26. **Fake the station's clock per request, not per process** (K2, 2026-11-17). Answer `recent`
+    with the real PHP via `php -r` and a fresh `TZ=XXX<offset>` on each call (local = UTC − offset;
+    SQLite `localtime` honours it to the second). A list of clock readings lets midnight fall
+    *between* two requests of one run, which makes timing races deterministic. Chromium ignores `TZ`;
+    it does not matter while the page never decides the window. `.pi/k2/test_k2_midnight.py`.

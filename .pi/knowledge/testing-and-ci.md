@@ -24,6 +24,16 @@ Python matrix in `.github/workflows/python-ci.yml`: **3.9 / 3.11 / 3.13** → ke
 `match`). `tomllib` needs the `tomli` backport on 3.9 (already in
 `frame/requirements-frame.txt`).
 
+## K2: end-to-end midnight scenarios
+
+Added 2026-11-17 ([D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen)).
+`bash .pi/k2/run.sh [ref]` (K1 image, ~1 min) runs `.pi/k2/test_k2_midnight.py`: the real
+`display.run` + `shoot` + headless Chromium against a fake station whose `recent` is the real PHP
+under a per-request `TZ`, with `.pi/k2/fake_inky` counting panel pushes. Base `5950f807`'s `avian/` is
+extracted to `/tmp/base` for the outdated-station case. 7 scenarios; results and A/B in the
+[K2 log](verification-log.md#k2-end-to-end-midnight-scenarios). Like K1, it sees committed or staged
+files only.
+
 ## K1: the local Linux gate
 
 Added 2026-11-17 ([D24](open-decisions.md#d24--re-confirm-d4-container-as-the-local-gate-once-virtualization-works),

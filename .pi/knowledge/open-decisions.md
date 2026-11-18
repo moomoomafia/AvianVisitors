@@ -1087,7 +1087,9 @@ new files must be committed or staged before a K1 run (parent-decided). Run as a
 **Status:** `ANSWERED 2026-11-17`. Operator: *"Lets try time zone shift trip first. If we run into
 issues there, we can continue working our way through other options."* So: build K2 with option (a);
 if it hits a blocker, record the evidence here and fall back to (b) libfaketime, then (c).
-~~`OPEN` (opened 2026-11-17; blocks K2 only)~~
+~~`OPEN` (opened 2026-11-17; blocks K2 only)~~ **Result 2026-11-17: (a) worked first time; no fallback
+needed.** K2 (`6eb0658b`) moves the station clock per request, so midnight can fall between the frame's
+fetch and the page's request; [K2 log](verification-log.md#k2-end-to-end-midnight-scenarios).
 
 **Why:** `recent` has no clock seam. Today is SQLite `'now','localtime'`
 (`avian/api/birdnet-api.php:281,294-296`; ~~`:280`~~ is the function header), and the frame's quiet hours and heal use Python's

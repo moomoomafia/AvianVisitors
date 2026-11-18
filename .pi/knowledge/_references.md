@@ -34,7 +34,7 @@
 | [D24](open-decisions.md#d24--re-confirm-d4-container-as-the-local-gate-once-virtualization-works) | [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [D25](open-decisions.md#d25--harden-kb-document-so-commitments-and-operator-statements-are-recorded-automatically) | [_index.md](_index.md), [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [D26](open-decisions.md#d26--container-scope-phasing-and-build-authorisation) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
-| [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) | [_index.md](_index.md), [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [verification-log.md](verification-log.md) |
+| [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) | [_index.md](_index.md), [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | [D28](open-decisions.md#d28--report-the-educator-store-lost-lock-bug-upstream) | [_index.md](_index.md), [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md), [open-decisions.md](open-decisions.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | [D29](open-decisions.md#d29--operator-standing-permissions-and-working-preferences) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md) |
 
@@ -88,9 +88,10 @@
 | `.pi-tasks/TASK_0001.md` | [open-decisions.md](open-decisions.md) |
 | `.pi-tasks/env-notes.md` | [open-decisions.md](open-decisions.md) |
 | `.pi/handoff/context.md` | [orchestration.md](orchestration.md), [verification-log.md](verification-log.md) |
-| `.pi/handoff/ledger.md` | [next-actions.md](next-actions.md), [orchestration.md](orchestration.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
+| `.pi/handoff/ledger.md` | [orchestration.md](orchestration.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | `.pi/handoff/plan.md` | [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [verification-log.md](verification-log.md) |
 | `.pi/k1/suite.sh` | [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
+| `.pi/k2/test_k2_midnight.py` | [_index.md](_index.md), [testing-and-ci.md](testing-and-ci.md) |
 | `.pi/research/d28/wal_lock_repro.php` | [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `.pi/research/pre-v03/stubs/fcntl.py` | [verification-log.md](verification-log.md) |
 | `.pi/research/pre-v03/test_characterize_today.py` | [_index.md](_index.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
@@ -116,7 +117,7 @@
 | `avian/api/bundle-species.php` | [illustration-bundles.md](illustration-bundles.md), [repo-map.md](repo-map.md) |
 | `avian/api/bundles.php` | [illustration-bundles.md](illustration-bundles.md), [repo-map.md](repo-map.md) |
 | `avian/api/config.php` | [config-reference.md](config-reference.md), [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [verification-log.md](verification-log.md) |
-| `avian/api/cutout.php` | [_index.md](_index.md), [illustration-bundles.md](illustration-bundles.md), [repo-map.md](repo-map.md) |
+| `avian/api/cutout.php` | [_index.md](_index.md), [illustration-bundles.md](illustration-bundles.md), [repo-map.md](repo-map.md), [verification-log.md](verification-log.md) |
 | `avian/api/educator-scope.php` | [_index.md](_index.md), [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md), [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `avian/api/educator-state.php` | [open-decisions.md](open-decisions.md), [test-environment.md](test-environment.md), [verification-log.md](verification-log.md) |
 | `avian/api/educator-store.php` | [_index.md](_index.md), [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md), [feature-midnight-reset.md](feature-midnight-reset.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
@@ -131,6 +132,7 @@
 | `avian/frontend/apt.js` | [_index.md](_index.md), [birdnet-api.md](birdnet-api.md), [birdweather-source.md](birdweather-source.md), [code-conventions.md](code-conventions.md), [config-reference.md](config-reference.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [frame-render-capture.md](frame-render-capture.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | `avian/frontend/assets/bundle-catalog/catalog-snapshot.js` | [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [AGENTS.md](../../AGENTS.md) |
 | `avian/frontend/dims.json` | [_index.md](_index.md), [birdweather-source.md](birdweather-source.md), [open-decisions.md](open-decisions.md) |
+| `avian/frontend/index.html` | [verification-log.md](verification-log.md) |
 | `avian/frontend/masks.json` | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `avian/scripts/build_masks.py` | [illustration-bundles.md](illustration-bundles.md) |
 | `avian/scripts/bundle_canonical.py` | [illustration-bundles.md](illustration-bundles.md) |
@@ -190,7 +192,7 @@
 | `tests/test_educator_security.py` | [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `tests/test_frame_birdweather.py` | [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `tests/test_frame_capture.py` | [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
-| `tests/test_frame_capture_browser.py` | [repo-map.md](repo-map.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
+| `tests/test_frame_capture_browser.py` | [repo-map.md](repo-map.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `tests/test_midnight_reset.php` | [birdnet-api.md](birdnet-api.md), [code-conventions.md](code-conventions.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `tests/test_midnight_reset.py` | [_index.md](_index.md), [birdnet-api.md](birdnet-api.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `tests/test_shifted_directory_migration.py` | [testing-and-ci.md](testing-and-ci.md) |

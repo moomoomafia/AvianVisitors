@@ -1311,3 +1311,54 @@ read **`:110-114`** (`$clamped = $enabled && … && $rolling <= $midnight`, read
 
 **Fix commit:** `cde2bc47`, `tests/test_midnight_reset.py` +3/−1;
 Windows 2 passed, K1 2 passed, base API still fails (1 failed, 1 passed); flake8 clean.
+
+## K2: end-to-end midnight scenarios
+
+**Who:** parent agent, 2026-11-17, on D27 = TZ shift first (*"Lets try time zone shift trip first. If we
+run into issues there, we can continue working our way through other options."*). **Result:** `.pi/k2/`
+(local commit `6eb0658b`): `test_k2_midnight.py`,
+`fake_inky/inky/` (3 small files), `run.sh`. Nothing in the parent's tree. **Run:** `bash .pi/k2/run.sh
+[ref]` (K1 image, ~1 min): **7 passed** on HEAD at the first attempt. **The TZ shift worked; no fallback to
+libfaketime was needed.**
+
+**Design (cheaper than the planned `php -S` station; D20 reuse):**
+
+* **Fake station** = the parent's own `station` fixture idiom (`tests/test_frame_capture_browser.py:35-145`:
+  a Python `http.server` serving the real `avian/frontend/index.html` + assets, `cutout.php` from
+  `avian/assets/illustrations`, `bundle-assets.php` 404), except `action=recent` is answered by the
+  **real** `avian/api/birdnet-api.php` through `php -r` with the T1 environment (Educators disabled, temp
+  lock/state, synthetic `birds.db`). This avoids `php -S` (SAPI `cli-server` ignores the test overrides,
+  and the Educators lock would need provisioning; [test-environment.md](test-environment.md)).
+* **Station clock (D27 option a):** each `recent` request runs PHP with `TZ=XXX<offset>` so SQLite's
+  `'now','localtime'` (`avian/api/birdnet-api.php:281`) reads a chosen wall time. The fixture takes a
+  **list** of clock readings, one per request, so it can move midnight **between** the frame's own
+  decision fetch and the page's request: the review's F1 race becomes deterministic instead of timing-based.
+  The frame's own clock is not shifted (quiet hours off; heal not due), and Chromium's clock is irrelevant
+  because the page never decides the window.
+* **Fake panel:** `.pi/k2/fake_inky` on `PYTHONPATH` replaces `inky.auto.auto` and
+  `inky.inky_el133uf1.Inky`, which `push_panel` imports lazily (`frame/display.py:330-345`); every
+  `show()` is recorded, so "panel untouched" is `pushes == 0`.
+* **Outdated station:** `run.sh` extracts base `5950f807`'s `avian/` to `/tmp/base` and one scenario
+  serves `recent` from it.
+
+**Scenarios and results (HEAD, real `display.run` + real `shoot` + headless Chromium 151):**
+
+| Scenario | Station clock | Expected | HEAD | frame from `ec5cdc7d` (pre-F1 fix) | frame from base `5950f807` |
+|---|---|---|---|---|---|
+| quiet night, timer / `--force` / bundle use (`force`, no signature) | D 00:05, only yesterday's bird | run True, 0 pushes, state unchanged | pass ×3 | pass ×3 | **fail ×3** |
+| first bird after midnight | D 00:05, yesterday crow + today jay 00:03 | 1 push; every `recent` (frame + page) is clamped and lists only the jay | pass | pass | **fail** |
+| capture crosses midnight (F1) | D−1 23:59:50 for the frame's fetch, D 00:00:10 for the page | 0 pushes, state unchanged | pass | **fail: `(True, 1, True)`, the empty nest was pushed** | **fail** |
+| control, flag off, empty window | D 00:05 | parent behaviour: 1 push (blank) | pass | pass | pass |
+| outdated station (base API) | D 00:05 | run False (exit 1), 0 pushes | pass | pass | **fail** |
+
+**What this proves:** the feature's core rules hold end to end with the real browser, and the fake
+panel would see a blank push (control). **F1 is confirmed end to end:** before W2R the frame really pushed
+the empty nest across midnight; after W2R it holds. Previously F1 was proven only by reading and a unit
+test with a stubbed capture.
+
+**Not proven by K2:** real glass, timing on a Zero 2 W, `Cache-Control` (headers are inert under `php -r`;
+hardware `curl`), a flight-only species with a frame bundle (no bundle in K2; unit-tested in
+`tests/test_frame_capture.py`), DST days (TZ offsets have no DST rules; recentWindow's arithmetic is
+DST-free per the T1 re-review), and the frame and station clocks disagreeing (the frame clock was not
+shifted). Whether the collage's JS uses the page's local `Date` remains unchecked, but no scenario
+depended on it.

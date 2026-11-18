@@ -48,6 +48,13 @@ would follow an established pattern, not invent one.
 
 ## Layer 2 — the station simulator (the real prize)
 
+> **Built 2026-11-17 as K2, more cheaply than below** ([K2 log](verification-log.md#k2-end-to-end-midnight-scenarios)):
+> no `php -S` and no lock provisioning. The parent's own `station` fixture idiom
+> (`tests/test_frame_capture_browser.py:35-145`, Python `http.server` serving the real frontend) answers
+> `action=recent` with the **real** `avian/api/birdnet-api.php` via `php -r` (Educators disabled, temp
+> lock/state, synthetic `birds.db`), and a per-request POSIX `TZ` moves the station's clock (D27).
+> The rest of this section is the original design, kept for history.
+
 > **Amended 2026-11-16 (Audit 2, F-H6) — read before building.** The fake station below
 > is harder than first written. Parent re-verified each point:
 >
@@ -114,6 +121,9 @@ un-hear a bird, you cannot make midnight arrive, and you cannot re-run the same
 boundary case twice.
 
 ## Layer 3 — panel emulation: what's actually possible
+
+> **Built 2026-11-17:** the headless recording fake (option 1 below) is `.pi/k2/fake_inky/` (not in
+> `tests/`, per D20); it records each `show()` so K2 asserts push counts.
 
 **Upstream `inky.mock` cannot emulate this panel.** Verified from `pimoroni/inky@master`:
 

@@ -18,15 +18,11 @@ Rules:
 
 ## Pending
 
-1. **Trigger:** the operator answers ~~D22, D27~~ or "push" *(D27 answered 2026-11-17: TZ shift first; K2 in progress)* (opened 2026-11-17; the `ask_user`
-   batch timed out unanswered after W2R). *D22 part done 2026-11-17: T1 `db9ff938`,
-   [log](verification-log.md#t1-smoke-alarm-for-w1-d22).*
-   **Action:** D27 ruled → build K2 in `.pi/` (fake
-   station + fake `inky` + midnight scenarios incl. the F1 straddle). Push authorised →
-   `git push origin feature/birdframe-midnight-reset` (`origin` is at `5f90208c`).
-   Recommendation: D27 per-run `TZ` offset.
-   **Log to:** the register entries (quote the ruling), [verification-log.md](verification-log.md),
-   `.pi/handoff/ledger.md`.
+1. **Trigger:** the operator says to push (opened 2026-11-17; D22 and D27 parts done: T1 `db9ff938`,
+   K2 `6eb0658b`).
+   **Action:** `git push origin feature/birdframe-midnight-reset` (`origin` is at `5f90208c`; never
+   `upstream`), then verify with `git ls-remote origin`. Pushing the feature branch triggers no CI.
+   **Log to:** [verification-log.md](verification-log.md) (push record) and the open threads.
 
 ## Done
 
