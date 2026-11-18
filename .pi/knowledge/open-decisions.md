@@ -50,7 +50,7 @@ feature branch alone triggers no CI. No PR into the fork's `avian-visitors` bran
 | `ANSWERED 2026-11-17` (operator) | D24 — D4 re-confirmed: Docker container in `.pi/` is the local gate (virtualization verified) |
 | `ANSWERED 2026-11-17` (operator) | D26 — container phased: K1 now (authorised), then W2, then K2 (operator's "C1/C2", renamed) |
 | `OPEN` (opened 2026-11-17), not blocking | D28 — report the parent's educator-store lost-lock bug (found by K1) |
-| `OPEN` (opened 2026-11-17), blocks container phase K2 only | D27 — how the container makes "just after midnight" happen |
+| `ANSWERED 2026-11-17` (operator) | D27 — how the container makes "just after midnight" happen: **(a) per-run `TZ` shift first**, then (b)/(c) if it runs into issues |
 | Re-asked under D20, now ruled | D4 CI clause — "No new workflow" (2026-11-16) |
 | `SUPERSEDED` | D17 — operator chose the parent repo's flow (2026-11-16); D5 → D14 |
 | `ANSWERED`, housekeeping | D18 — 2026-11-16 |
@@ -1084,7 +1084,10 @@ new files must be committed or staged before a K1 run (parent-decided). Run as a
 
 ### D27 — How the container makes "just after midnight" happen
 
-**Status:** `OPEN` (opened 2026-11-17; blocks K2 only)
+**Status:** `ANSWERED 2026-11-17`. Operator: *"Lets try time zone shift trip first. If we run into
+issues there, we can continue working our way through other options."* So: build K2 with option (a);
+if it hits a blocker, record the evidence here and fall back to (b) libfaketime, then (c).
+~~`OPEN` (opened 2026-11-17; blocks K2 only)~~
 
 **Why:** `recent` has no clock seam. Today is SQLite `'now','localtime'`
 (`avian/api/birdnet-api.php:281,294-296`; ~~`:280`~~ is the function header), and the frame's quiet hours and heal use Python's

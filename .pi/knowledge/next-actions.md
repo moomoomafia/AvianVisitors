@@ -18,7 +18,7 @@ Rules:
 
 ## Pending
 
-1. **Trigger:** the operator answers ~~D22,~~ D27 or "push" (opened 2026-11-17; the `ask_user`
+1. **Trigger:** the operator answers ~~D22, D27~~ or "push" *(D27 answered 2026-11-17: TZ shift first; K2 in progress)* (opened 2026-11-17; the `ask_user`
    batch timed out unanswered after W2R). *D22 part done 2026-11-17: T1 `db9ff938`,
    [log](verification-log.md#t1-smoke-alarm-for-w1-d22).*
    **Action:** D27 ruled → build K2 in `.pi/` (fake
