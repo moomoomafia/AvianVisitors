@@ -207,6 +207,9 @@ authorisation; do not discard unrelated local changes.
   temp dir — pass `$(cygpath -m /tmp)` paths into Python. Very long heredocs can be cut
   off mid-command (the write silently doesn't happen): put large content in a file with
   the write tool, then process it. Don't leave scratch files or `__pycache__` in `.pi/`.
+  **Never put prose inside `bash -lc '...'` heredocs:** one apostrophe ends the outer quote and
+  bash then *executes* backtick spans from the text as commands (2026-11-17 it ran a test file as
+  a shell script; harmless only by luck). Write prose with the write/edit tools, then `cat >>`.
 * `.pi/` **and this `AGENTS.md`** are **committed on this branch** (D11c, pushed to the operator's
   fork `origin`). They **must be removed before any PR to the parent repo** (`upstream`, push
   disabled) — and so must the root `.pi-tasks/` directory the pi-task tool committed during G0

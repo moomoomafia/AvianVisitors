@@ -1118,3 +1118,47 @@ holds; `git diff --stat 5950f807 HEAD -- avian` = only `avian/api/birdnet-api.ph
 `avian-visitors` is still `5950f807` (no drift). Open threads in [_index.md](_index.md) rewritten (closed threads deleted;
 their history stays in the register and this log). **Not reviewed** by a subagent: the design text is byte-identical to the
 Oracle-reviewed v0.4 sections.
+
+## W2: frame change and tests
+
+**Who:** `worker`, 2026-11-17, mission `1ead0472-0bed-4ce5-b04e-548b68fc0298`, briefed only by the
+regenerated `.pi/handoff/plan.md` + `context.md` (Plan v0.5, P2). **Result:** local commit `dece12cf`
+`feat(frame): optional reset_at_midnight for local mode (Plan v0.5 W2)`, not pushed: `frame/display.py`
++56/−5, `frame/shoot.py` +7/−4, `tests/test_frame_capture.py` +239 (14 new tests).
+
+**Parent verification (same day):**
+
+* **Diff read against §4.2–§4.4:** `DEFAULTS["reset_at_midnight"] = False`; `fetch_recent_payload` with
+  `fetch_recent` as a one-line wrapper (`frame/display.py:92-107`); `reset_at_midnight_active` and
+  `has_drawable_bird` helpers; one `if active:` block in `run()` doing steps a–e, with the upstream
+  `if use_signature:` turned into `elif` and its body untouched; the bundle salt copied verbatim from
+  the upstream block; `obtain_image` passes `window_hours=24` and `reset_at_midnight` only when active;
+  `frame/shoot.py` `_make_api_handler` appends the param once after the `hours=` substitution, threaded
+  through `shoot()`. `sig`, `changed` and `species` flow into the unchanged gate, and the upstream
+  re-sign from the captured species list still runs. CONFIRMED against the plan.
+* **K1 on committed HEAD `dece12cf`:** exit 0, all PASS; `tests/test_frame_capture.py` 77 → **91 passed**;
+  characterization 13/13 (flag-off behaviour unchanged); educator backend A/B identical; browser 38.
+* **New tests discriminate:** the 14 new tests run in K1 against `frame/display.py` + `frame/shoot.py`
+  from `031a33f3` (pre-W2): **all 14 have failing (sub)tests** (39 failed lines). CONFIRMED.
+* **Worker's Windows pre-check:** 7 failed / 94 passed → 7 failed / 108 passed (same 7 POSIX failures).
+  Not re-run by the parent (K1 supersedes it).
+
+**Worker-reported deviations (accepted, cosmetic):** ASCII message text ("Tools > Pull latest", as in
+`frame/README.md:93`); the step (c) message goes to stderr, the decline lines to stdout.
+
+**Open for review R:**
+
+1. `run()` complexity 18 → **28** (flake8 advisory; the limit is not enforced upstream, and plan §4.2
+   forbids restructuring). A reviewer should judge whether D20 prefers a smaller shape.
+2. `--preview` when the step (a) fetch fails returns True and writes no preview file (§4.2 step b is
+   silent on preview).
+3. Species entries without `sci` with the flag on raise in `has_drawable_bird` (traceback, exit 1, panel
+   untouched); the station always sends `sci`.
+
+**Incident (parent, same session):** a `bash -lc '…'` heredoc containing an apostrophe broke the
+quoting, so bash executed backtick spans from the text as commands (including running
+`tests/test_frame_capture.py` as a shell script). All failed with "command not found" or a syntax
+error; `git status` showed only a partial append to this file, which was restored with
+`git checkout` and re-appended from a file. Rule added to [AGENTS.md](../../AGENTS.md) "Practical repo traps".
+
+**Not executed:** K2, hardware, parent CI.
