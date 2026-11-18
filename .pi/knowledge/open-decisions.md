@@ -1102,6 +1102,13 @@ precision). PHP `date()` stays UTC (`as_of`, `avian/api/birdnet-api.php:336`), m
 scenario, use Playwright `timezone_id` (IANA, whole hours via `Etc/GMT±N`). Not yet proven whether the
 collage path uses local `Date` (`avian/frontend/apt.js:3675,4184,4226` do in other views).
 
+> **Added 2026-11-17 (while explaining D27 to the operator):** with option (a), K2 would also test
+> review R's F1 race for real: start a run with the station's clock at about 23:59:50 so the frame's
+> own fetch sees yesterday's birds and the page's request lands after midnight. The fake panel must
+> then record **zero** pushes. Today F1 is covered only by a unit test with a stubbed capture
+> (`tests/test_frame_capture.py`, W2R). Option (c) "skip K2" leaves the midnight behaviour proven by
+> unit tests plus the hardware pass only.
+
 **Consequence if unanswered (D27):** K2 cannot test the rollover case, which is the feature's core.
 
 ### D29 — Operator standing permissions and working preferences
