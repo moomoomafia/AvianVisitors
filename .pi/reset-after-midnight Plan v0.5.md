@@ -207,7 +207,8 @@ design choice.
    no push, no save.
 2. **Step (b) and preview (F2).** `return not (force or preview) and use_signature`: a preview whose
    fetch failed reports failure (as the flag-off path does) instead of exiting 0 with no file.
-3. **Step (e) shape (F4, D20; also fixes F3).** Remove the duplicated signature/salt lines from the
+3. **Step (e) shape (F4, D20; ~~also fixes F3~~ partly: step (d) still reads `sci` unguarded, an
+   accepted Low residual, see [W2R](knowledge/verification-log.md#w2r-review-r-fixes)).** Remove the duplicated signature/salt lines from the
    `if active:` block and restore the upstream `if use_signature:` (not `elif`); change only its
    first statement to `species = species if active else fetch_species(...)`. Flag off: identical
    (`active` is False). Flag on: still one fetch, `fetch_species` not called, and a malformed entry

@@ -38,10 +38,13 @@ every session; delete items when they close (their history lives in the register
    (execution-state revision; design unchanged since v0.3). Built: **W1** (`428f3104`, station +3/−2,
    [post-W1 review](verification-log.md#post-w1-review-implementation-and-test-coverage)) and the
    **K1** Linux test container (`bash .pi/k1/run.sh [ref]`, green on HEAD,
-   [K1 log](verification-log.md#k1-build-and-baseline)). The branch is pushed to `origin`
-   (`5f90208c`). **Next per plan §7:** P2 (regenerate `.pi/handoff/` from v0.5) → **W2** (frame change
-   + tests, worker, one local commit) → K1 re-run → K2 (needs D27) → W3 (docs). V and H need
-   separate operator permission; every push needs the operator's say-so.
+   [K1 log](verification-log.md#k1-build-and-baseline)). **Also built, local commits not pushed:**
+   W2 frame code + 14 tests (`dece12cf`, [log](verification-log.md#w2-frame-change-and-tests)),
+   W3 docs (`ec5cdc7d`), review R ([log](verification-log.md#review-r-full-product-diff): F1 High,
+   a capture straddling the station's midnight could push the empty nest) and its fixes W2R
+   (`0046db23`, [log](verification-log.md#w2r-review-r-fixes), Plan v0.5 §4.7). K1 green on
+   `0046db23`. `origin` is at `5f90208c`. **Waiting on the operator:** D22 (T1), D27 (K2), a push,
+   then D21 for stage V. Handoffs are built with `.pi/scripts/build_handoff.py`.
 1. **Open decisions** ([register](open-decisions.md)):
    [D22](open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param) (a committed parent test
    for W1; recommended: one clock-independent `edu_endpoint` case),

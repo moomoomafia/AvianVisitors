@@ -12,8 +12,9 @@ only (~~v0.3~~, ~~v0.4~~ superseded 2026-11-17; v0.4 added P2 and T1; v0.5 added
 | W2 | §4.2–4.4 frame + §5 frame tests | worker | done 2026-11-17, local commit `dece12cf` | W1, P2, K1 | +302/−9 in 3 files, 14 new tests; parent: K1 green on `dece12cf` (91 passed), characterization 13/13, all new tests fail on pre-W2 code | review R: `run()` complexity 28, preview on fetch failure, missing `sci` |
 | K2 | fake station + fake panel + scenarios | parent | not started | W2, D27 | — | operator rules D27 first |
 | W3 | §4.5 docs | worker | done 2026-11-17, local commit `ec5cdc7d` | W2 | +4 lines (README paragraph, commented config line); parent: README test 14 passed in K1, TOML parses | — |
+| R | Review (full diff W1–W3) | reviewer | done 2026-11-17: ready with edits | W1, W2, W3 | F1 High (midnight-straddling capture pushes empty nest) + F2–F7 Low; parent re-checked; Plan v0.5 §4.7 | fixed in W2R |
+| W2R | §4.7 review fixes | worker | done 2026-11-17, local commit `0046db23` | R | +22/−17 in 4 files; parent: K1 green (92 passed), F1/F2 tests fail before / pass after | F3 residual accepted (Low); re-review only if T1 lands |
 | T1 | optional PHP case (Plan v0.4 §5, only if D22 = a) | worker | not started (D22 open) | W1 | added 2026-11-17 by Plan v0.4 | case must pass on HEAD and fail on base `5950f807` |
-| R | Review | reviewer | not started | W1, W2, W3 (+T1 if any) | — | — |
 | V | §6 local runs; push only if authorised | parent | closed (needs separate permission) | R | — | D21 re-ask here |
 | O | Drift/ruling audit | oracle | not started | V | — | — |
 | H | Hardware pass on `birdpic` | operator + parent | closed (needs separate permission) | O | — | — |

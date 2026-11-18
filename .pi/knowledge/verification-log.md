@@ -1201,7 +1201,7 @@ Python 3.9 clean; `frame/config_contract.py:51-121` does not reject unknown keys
 |---|---|---|---|---|
 | F1 | **High** | A refreshing run that straddles the station's midnight can push the empty-nest card: the decision uses the frame's fetch, the page re-requests `recent` (now clamped) seconds later, `FRAME_READY` accepts a zero-tile collage, and `run()` re-signs from `capture["species"] = []` and pushes. Breaks §1 / req 9. Not caught: the test stub echoes the decided list. | **CONFIRMED**: `frame/shoot.py:66-75` (empty collage is ready when `.nest-img` loaded), `frame/display.py:506-520` (re-sign then push, no drawable check), `frame/systemd/birdframe.timer:11` (phase-free 15 min) | fix: post-capture decline when active and the captured list has no drawable bird (return True, no push/save); test with a stub capturing `[]` |
 | F2 | Low | `--preview` with a failed fetch returns True and writes nothing (flag off would exit 1) | CONFIRMED by the W2 diff read (step b returns `not force and use_signature`) | fix: `return not (force or preview) and use_signature` + test subcase |
-| F3 | Low | species without `sci` raise outside any `try` with the flag on | CONFIRMED (W2 log item 3); station always sends `sci` (`avian/api/birdnet-api.php:370`) | resolved by F4 (signature back under upstream `try`) |
+| F3 | Low | species without `sci` raise outside any `try` with the flag on | CONFIRMED (W2 log item 3); station always sends `sci` (`avian/api/birdnet-api.php:370`) | ~~resolved by F4 (signature back under upstream `try`)~~ *partly refuted, see [W2R](#w2r-review-r-fixes): step (d) still reads `sci` outside a `try`; accepted Low residual* |
 | F4 | Low (D20) | duplicated bundle salt (`frame/display.py:474-479`) and `elif` restructure; smaller shape: keep upstream `if use_signature:` and change one line to `species = species if active else fetch_species(`; −6 lines, 2 fewer branches | shape read and judged equivalent for flag off (`active` False ⇒ upstream path unchanged) | apply |
 | F5 | Low (docs) | README lacks D14's required sentence that an outdated mic (or active Educators capture) undoes `avian-bundle` switches | **CONFIRMED**: D14 body ("Known consequence, to state in the README: under `avian-bundle use` an outdated station…") | add one clause |
 | F6 | Low (docs) | `frame/config.example.toml:27-28` say "station", which that file uses for BirdWeather; the BirdNET-Pi is "mic" there | not re-read line by line; accepted (W3 log notes the README uses "mic") | replace with "mic" |
@@ -1211,3 +1211,40 @@ Python 3.9 clean; `frame/config_contract.py:51-121` does not reject unknown keys
 window changes between the fetch and the capture" is true for *state* but missed the *panel*: the capture
 can be empty. The design gains step (f) (post-capture decline). Recorded in Plan v0.5 §4.2 as an amendment.
 **Unverified:** reviewer did not re-measure complexity (worker: 28); flake8 and K1 to be re-run after fixes.
+
+## W2R: review-R fixes
+
+**Who:** `worker`, 2026-11-17, mission `bb2924a6-07ae-40bb-bfc6-543e2dfa4e57`, briefed by the handoff
+regenerated with `.pi/scripts/build_handoff.py` (Plan v0.5 §4.7). **Result:** local commit `0046db23`
+`fix(frame): decline an empty midnight capture; review R fixes (Plan v0.5 W2R)`, not pushed; 4 files
++22/−17 (`frame/display.py`, `tests/test_frame_capture.py`, `frame/README.md`, `frame/config.example.toml`).
+
+**Parent verification (same day):**
+
+* **Diff read against §4.7:** F1 step (f) after the capture `try` (`active and not preview and "species"
+  in capture and not has_drawable_bird(...)` ⇒ print, return True, no push/save); F2
+  `return not (force or preview) and use_signature`; F4 duplicated salt removed, upstream
+  `if use_signature:` restored, and versus base `5950f807` the only change inside the upstream block is
+  `species = species if active else fetch_species(`; F7 `is True`; README clause on undone bundle
+  switches (D14/D15); config comments say "mic". CONFIRMED.
+* **K1 on committed `0046db23`:** exit 0, all PASS; `tests/test_frame_capture.py` **92 passed**;
+  characterization 13/13; educator A/B identical; browser 38.
+* **New tests discriminate:** with `frame/display.py` from `ec5cdc7d` (pre-fix) the new
+  `test_reset_at_midnight_keeps_the_collage_when_the_capture_crosses_midnight` FAILS and the new
+  preview subcase of the fetch-failure test FAILS; both pass at `0046db23`. CONFIRMED.
+* **Captured species are validated:** `frame/shoot.py:271-273` rejects any captured entry without a
+  non-empty string `sci`, so step (f) cannot crash on a missing name.
+* **flake8 (worker, `uvx flake8` 7.5.0):** fatal set clean; `run()` complexity 18 (base) → 28 (W2) →
+  **27**; the one E128 in the test file is upstream's (base line 498).
+
+**Correction (worker, re-checked by the parent):** the review-R entry said F4 resolves F3. **Partly
+refuted:** the signature now sits under the upstream `try`, but step (d)'s `has_drawable_bird`
+(`frame/display.py:129`) still reads `s["sci"]` outside any `try` when a frame bundle is active. A
+station entry without `sci` would raise (traceback, exit 1, panel untouched) instead of logging. Left
+as an accepted Low residual: the station always selects `Sci_Name AS sci`
+(`avian/api/birdnet-api.php:370`), and the failure is fail-static.
+
+**Worker housekeeping:** a mistyped shell variable once ran `python frame/display.py`, which exited at
+`import fcntl` before doing anything (Windows). Untracked `__pycache__` removed.
+**Not executed:** K2, hardware; a bundle-active variant of the F1 test (same `has_drawable_bird` path
+as the existing bundle test).
