@@ -19,7 +19,9 @@ Rules:
 ## Pending
 
 1. **Trigger:** the operator answers
-   [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) (opened 2026-11-17).
+   [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) (opened 2026-11-17). *Answered
+   2026-11-17: O as a review/fix loop, in progress; see the "Oracle loop" sections of the
+   verification log. If a session ends mid-loop: resume from the last round logged there.*
    **Action:** O → dispatch `oracle` for a drift/ruling audit of `git diff 5950f807 HEAD -- avian frame
    tests` against Plan v0.5 §4/§7, D1–D3, D12–D17, D20 and the safety rails; re-verify its counter-claims;
    log it. V → needs D21 first (the branch is pushed). H → write the hardware checklist from plan §6 for the

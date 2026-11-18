@@ -44,7 +44,7 @@ feature branch alone triggers no CI. No PR into the fork's `avian-visitors` bran
 | `ANSWERED` (principle, outranks parent-decisions) | D20 — minimal footprint, align with the parent repo |
 | `OPEN`, needed only at execution stage V | D21 — CI access via a PR inside the fork (deferred 2026-11-17 at G0: re-ask at V) |
 | `ANSWERED 2026-11-17` (operator) | D22 — commit a parent test for W1's request param: **yes** ("leave smoke alarm behind"); done as T1 `db9ff938` |
-| `OPEN` (opened 2026-11-17) | D30 — which stage next after K2: O (Oracle audit, recommended), V (CI; needs D21, push done) or H (hardware) |
+| `ANSWERED 2026-11-17` (operator) | D30 — next stage after K2: **O as a loop** (Oracle review → document → worker fixes → re-review until clean; max 3 rounds) |
 | `ANSWERED 2026-11-17` (operator), standing | D29 — operator standing permissions and working preferences (subagents allowed; plain explanations with "what you need from me") |
 | `ANSWERED 2026-11-17` (operator) | D23 — commit the pending `.pi/` changes before W2: (a) one local docs commit, no push |
 | `ANSWERED` (operator), harness | D25 — harden kb-document: build commitment gate + session priming + rule (2026-11-17) |
@@ -1146,7 +1146,16 @@ collage path uses local `Date` (`avian/frontend/apt.js:3675,4184,4226` do in oth
 
 ### D30 — Which stage next after K2: O, V or H?
 
-**Status:** `OPEN` (opened 2026-11-17, after K2; asked together with the push)
+**Status:** `ANSWERED 2026-11-17`. Operator: *"with commit and push complete. Use Oracle to review all
+the new work we have done for correctness, aligns with goal, has as small of footprint as possible
+wile still not compormising coding standards and best practices. Anything the oracle finds issue with
+should be documented, and then issue a worker to correct them. Do this loop until the Oracle is
+happy."* So: **O first, as a loop** (Oracle review → record findings → worker fixes → re-review).
+**Parent-decided guard rails:** scope = the product diff (`git diff 5950f807 HEAD -- avian frame tests`)
+plus our harness code (`.pi/k1/`, `.pi/k2/`, `.pi/scripts/build_handoff.py`, `.pi/research/d28/`);
+fix commits stay **local** (the operator's push covered the work already done; every push needs its own
+yes, D29); at most **3 rounds**, then stop and report to the operator rather than loop. ~~`OPEN` (opened
+2026-11-17, after K2; asked together with the push)~~
 
 **Why:** Plan v0.5 §7's remaining steps are V (§6 runs + parent CI on the fork), O (Oracle
 drift/ruling audit) and H (hardware pass on `birdpic`). W1–W3, review R + W2R, T1, K1 and K2 are done.

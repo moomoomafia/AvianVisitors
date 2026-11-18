@@ -101,7 +101,7 @@
 | `.pi/research/r3/www/echo.php` | [verification-log.md](verification-log.md) |
 | `.pi/research/r5/manifest_scan.py` | [verification-log.md](verification-log.md) |
 | `.pi/research/w1/recent_param_probe.php` | [open-decisions.md](open-decisions.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
-| `.pi/scripts/build_handoff.py` | [_index.md](_index.md), [verification-log.md](verification-log.md) |
+| `.pi/scripts/build_handoff.py` | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `.pi/scripts/check_kb.py` | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `.pi/skills/kb-document/SKILL.md` | [open-decisions.md](open-decisions.md) |
 | `AGENTS.md` | [AGENTS.md](../../AGENTS.md) |
