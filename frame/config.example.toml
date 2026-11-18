@@ -24,6 +24,8 @@ shoot = true
 # shoot = true         # this Pi renders the collage
 
 hours = 24             # window shown on the frame
+# reset_at_midnight = false  # local mode only: show birds since the station's midnight; keeps the
+#                            # last collage until today's first drawable bird; needs an updated station
 
 # --- Titles and look (used when this Pi renders, i.e. shoot = true) ----------
 shoot_title = "Avian Visitors"
