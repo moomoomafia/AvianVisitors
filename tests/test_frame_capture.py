@@ -20,6 +20,8 @@ import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SPECIES = [{"sci": "Corvus brachyrhynchos", "com": "American Crow", "n": 20}]
+TODAY = [{"sci": "Turdus migratorius", "com": "American Robin", "n": 2}]
+NOW = 1_800_000_000.0
 
 
 def load(name, path):
@@ -27,6 +29,11 @@ def load(name, path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def midnight(species, clamped=True):
+    """A station `recent` answer for reset_at_midnight=1 (clamped=False: an outdated station)."""
+    return {"species": species, "hours": 24, "midnight_clamped": clamped, "window_start": "2027-01-15 00:00:00"}
 
 
 class Response:
@@ -262,6 +269,238 @@ class FrameCaptureTests(unittest.TestCase):
                 contextlib.redirect_stdout(io.StringIO()):
             self.assertTrue(self.display.run(cfg, force=True))
         self.assertEqual(saved, ["58d0ae600e086fb2"])
+
+    def run_reset_frame(self, today, *, state=None, bundle=None, quiet=False, rolling=SPECIES, now=NOW, cfg=None, **options):
+        """One display.run() in local mode with reset_at_midnight on (unless `cfg` says otherwise).
+        `today` is the station's midnight payload, an exception the fetch raises, or None for the
+        real fetch_recent_payload. `rolling` is what the rolling-window fetch_species would return."""
+        cfg = {**self.display.DEFAULTS, "shoot": True, "reset_at_midnight": True, **(cfg or {})}
+        if state is None:
+            state = {"signature": self.display.signature(SPECIES), "last_refresh": NOW - 3600}
+        if today is None:
+            fetch = mock.Mock(wraps=self.display.fetch_recent_payload)
+        elif isinstance(today, Exception):
+            fetch = mock.Mock(side_effect=today)
+        else:
+            fetch = mock.Mock(return_value=today)
+        result = types.SimpleNamespace(obtained=[], pushed=0, saved=[])
+
+        def obtain(_cfg, species, _bundle=None, *, capture=None):
+            result.obtained.append(species)
+            if capture is not None and species is not None:
+                capture["species"] = species
+            return Image.new("RGB", (20, 20))
+
+        def push(*_args):
+            result.pushed += 1
+
+        log = io.StringIO()
+        quiet_hours = (contextlib.nullcontext() if quiet is None
+                       else mock.patch.object(self.display, "in_quiet_hours", return_value=quiet))
+        with mock.patch.object(self.bundle_runtime, "active_bundle", return_value=bundle), \
+                mock.patch.object(self.display, "load_state", return_value=state), \
+                mock.patch.object(self.display, "fetch_recent_payload", fetch), \
+                mock.patch.object(self.display, "fetch_species", return_value=rolling) as fetch_species, \
+                mock.patch.object(self.display, "obtain_image", side_effect=obtain), \
+                mock.patch.object(self.display, "fit_panel", side_effect=lambda image: image), \
+                mock.patch.object(self.display, "mat_and_center", side_effect=lambda image, *args: image), \
+                mock.patch.object(self.display, "push_panel", side_effect=push), \
+                mock.patch.object(self.display, "save_state", side_effect=lambda _path, sig, _now: result.saved.append(sig)), \
+                mock.patch.object(self.display.time, "time", return_value=now), \
+                quiet_hours, contextlib.redirect_stdout(log), contextlib.redirect_stderr(log):
+            result.ok = self.display.run(cfg, **options)
+        result.fetch, result.fetch_species, result.log = fetch, fetch_species, log.getvalue()
+        return result
+
+    def empty_day_paths(self):
+        showing = {"signature": self.display.signature(SPECIES), "last_refresh": NOW - 3600}
+        return (
+            ("timer", showing, {}),
+            ("--force", showing, {"force": True}),
+            ("--no-signature", showing, {"use_signature": False}),
+            ("avian-bundle use/rollback", showing, {"force": True, "use_signature": False}),
+            ("heal due", {"signature": self.display.signature([]), "last_refresh": NOW - 25 * 3600}, {}),
+            ("unreadable state", {"signature": None, "last_refresh": 0}, {}),
+        )
+
+    def test_reset_at_midnight_keeps_the_collage_on_every_path_while_today_is_empty(self):
+        for path, state, options in self.empty_day_paths():
+            with self.subTest(path=path):
+                result = self.run_reset_frame(midnight([]), state=state, **options)
+                self.assertIs(result.ok, True)
+                self.assertEqual((result.obtained, result.pushed, result.saved), ([], 0, []))
+                self.assertIn("no drawable bird since midnight; keeping the current collage", result.log)
+                result.fetch.assert_called_once_with(
+                    self.display.DEFAULTS["base_url"], 24, self.display.DEFAULTS["timeout"], None, reset_at_midnight=True)
+                result.fetch_species.assert_not_called()
+
+    def test_reset_at_midnight_off_keeps_the_empty_window_redraw(self):
+        for path, state, options in self.empty_day_paths():
+            with self.subTest(path=path):
+                result = self.run_reset_frame(None, state=state, rolling=[], cfg={"reset_at_midnight": False}, **options)
+                self.assertIs(result.ok, True)
+                self.assertEqual(result.obtained, [None if options.get("use_signature") is False else []])
+                self.assertEqual(result.pushed, 1)
+                self.assertEqual(len(result.saved), 1)
+                self.assertEqual(result.fetch_species.call_count, 0 if options.get("use_signature") is False else 1)
+                result.fetch.assert_not_called()
+                self.assertNotIn("reset_at_midnight", result.log)
+
+    def test_reset_at_midnight_counts_only_birds_with_a_base_pose_in_the_frame_bundle(self):
+        heron = {"sci": "Ardea herodias", "com": "Great Blue Heron", "n": 3}
+        crow = dict(SPECIES[0])
+        bundle = types.SimpleNamespace(
+            index={"assets": {"ardea-herodias": {"flight": {}}, "corvus-brachyrhynchos": {"perched": {}},
+                              "turdus-migratorius": {"variant-1": {}, "variant-2": {}}}},
+            drawable_slugs=frozenset({"ardea-herodias", "corvus-brachyrhynchos", "turdus-migratorius"}),
+            reference={"revision": "a" * 64},
+        )
+        flight_only = self.run_reset_frame(midnight([heron]), bundle=bundle)
+        self.assertIs(flight_only.ok, True)
+        self.assertEqual((flight_only.obtained, flight_only.pushed, flight_only.saved), ([], 0, []))
+        for drawable in (crow, TODAY[0]):
+            with self.subTest(drawable=drawable["sci"]):
+                mixed = self.run_reset_frame(midnight([heron, drawable]), bundle=bundle,
+                                             state={"signature": None, "last_refresh": NOW - 3600})
+                self.assertIs(mixed.ok, True)
+                self.assertEqual(mixed.obtained, [[heron, drawable]])
+                self.assertEqual((mixed.pushed, len(mixed.saved)), (1, 1))
+
+    def test_reset_at_midnight_holds_the_collage_when_the_station_ignores_the_window(self):
+        for payload in ({"species": TODAY, "hours": 24}, midnight(TODAY, clamped=False), midnight([], clamped=False)):
+            for options in ({}, {"force": True}, {"force": True, "use_signature": False}):
+                with self.subTest(payload=payload, **options):
+                    result = self.run_reset_frame(payload, **options)
+                    self.assertIs(result.ok, False)
+                    self.assertEqual((result.obtained, result.pushed, result.saved), ([], 0, []))
+                    self.assertIn("station did not apply the midnight window", result.log)
+
+    def test_reset_at_midnight_fetch_failure_skips_a_timer_run_and_fails_a_forced_one(self):
+        for options, ok in (({}, True), ({"force": True}, False), ({"use_signature": False}, False),
+                            ({"force": True, "use_signature": False}, False)):
+            with self.subTest(**options):
+                result = self.run_reset_frame(OSError("station unreachable"), **options)
+                self.assertIs(result.ok, ok)
+                self.assertEqual((result.obtained, result.pushed, result.saved), ([], 0, []))
+                result.fetch_species.assert_not_called()
+
+    def test_reset_at_midnight_first_drawable_bird_replaces_the_collage(self):
+        result = self.run_reset_frame(midnight(TODAY))
+        self.assertIs(result.ok, True)
+        self.assertEqual(result.obtained, [TODAY])
+        self.assertEqual(result.pushed, 1)
+        self.assertEqual(result.saved, [self.display.signature(TODAY)])
+        result.fetch.assert_called_once_with(
+            self.display.DEFAULTS["base_url"], 24, self.display.DEFAULTS["timeout"], None, reset_at_midnight=True)
+        result.fetch_species.assert_not_called()
+
+    def test_reset_at_midnight_decides_and_captures_from_the_clamped_list_not_the_rolling_one(self):
+        rolling = SPECIES + TODAY  # last night's crow is still inside a rolling 24 h window
+        unchanged = self.run_reset_frame(midnight(TODAY), rolling=rolling,
+                                         state={"signature": self.display.signature(TODAY), "last_refresh": NOW - 3600})
+        self.assertIs(unchanged.ok, True)
+        self.assertEqual((unchanged.obtained, unchanged.pushed), ([], 0))
+        changed = self.run_reset_frame(midnight(TODAY), rolling=rolling,
+                                       state={"signature": self.display.signature(rolling), "last_refresh": NOW - 3600})
+        self.assertEqual(changed.obtained, [TODAY])
+        self.assertEqual(changed.saved, [self.display.signature(TODAY)])
+        for result in (unchanged, changed):
+            result.fetch.assert_called_once()
+            result.fetch_species.assert_not_called()
+
+    def test_reset_at_midnight_first_bird_in_quiet_hours_waits_for_them_to_end(self):
+        quiet = self.run_reset_frame(midnight(TODAY), quiet=True)
+        self.assertIs(quiet.ok, True)
+        self.assertEqual((quiet.obtained, quiet.pushed, quiet.saved), ([], 0, []))
+        later = self.run_reset_frame(midnight(TODAY))
+        self.assertEqual((later.obtained, later.pushed), ([TODAY], 1))
+
+    def test_reset_at_midnight_preview_renders_but_never_touches_the_panel(self):
+        for payload in (midnight([]), midnight(TODAY, clamped=False)):
+            with self.subTest(payload=payload), tempfile.TemporaryDirectory() as directory:
+                preview = pathlib.Path(directory) / "preview.png"
+                result = self.run_reset_frame(payload, preview=str(preview))
+                self.assertIs(result.ok, True)
+                self.assertTrue(preview.is_file())
+                self.assertEqual(result.obtained, [payload["species"]])
+                self.assertEqual((result.pushed, result.saved), (0, []))
+
+    def test_reset_at_midnight_is_ignored_outside_local_mode(self):
+        for mode in ({"species_source": "birdweather", "zip": "49503"}, {"shoot": False, "image": "frame.png"}):
+            with self.subTest(mode=mode):
+                on = self.run_reset_frame(None, cfg=mode)
+                off = self.run_reset_frame(None, cfg=dict(mode, reset_at_midnight=False))
+                self.assertEqual((on.ok, on.obtained, on.pushed, on.saved), (off.ok, off.obtained, off.pushed, off.saved))
+                self.assertEqual(on.log.count("reset_at_midnight applies only to local mode; ignored"), 1)
+                self.assertNotIn("reset_at_midnight", off.log)
+                on.fetch.assert_not_called()
+
+    def test_reset_at_midnight_does_not_depend_on_the_frame_clock(self):
+        class FarDatetime(self.display.datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return cls(1999, 12, 31, 23, 59)
+
+        outcomes = {}
+        for now, clock in ((NOW, self.display.datetime), (4_000_000_000.0, FarDatetime)):
+            for name, payload in (("empty", midnight([])), ("bird", midnight(TODAY))):
+                with mock.patch.object(self.display.urllib.request, "urlopen", return_value=Response(payload)) as urlopen, \
+                        mock.patch.object(self.display, "datetime", clock):
+                    result = self.run_reset_frame(None, now=now, quiet=None)
+                outcomes.setdefault(name, set()).add(
+                    (urlopen.call_args[0][0].full_url, result.ok, len(result.obtained), result.pushed))
+        self.assertEqual(outcomes, {
+            "empty": {("http://birdnet.local/avian/api/birdnet-api.php?action=recent&hours=24&reset_at_midnight=1", True, 0, 0)},
+            "bird": {("http://birdnet.local/avian/api/birdnet-api.php?action=recent&hours=24&reset_at_midnight=1", True, 1, 1)},
+        })
+
+    def test_recent_payload_asks_for_the_midnight_window_and_fetch_recent_is_unchanged(self):
+        payload = midnight(TODAY)
+        with mock.patch.object(self.display.urllib.request, "urlopen", return_value=Response(payload)) as urlopen:
+            self.assertEqual(self.display.fetch_recent_payload("http://station/", 24, 5, reset_at_midnight=True), payload)
+            self.assertEqual(urlopen.call_args[0][0].full_url,
+                             "http://station/avian/api/birdnet-api.php?action=recent&hours=24&reset_at_midnight=1")
+            self.assertEqual(self.display.fetch_recent("http://station", 24, 5), TODAY)
+            self.assertEqual(urlopen.call_args[0][0].full_url, "http://station/avian/api/birdnet-api.php?action=recent&hours=24")
+
+    def test_api_handler_asks_the_station_for_its_midnight_window_once(self):
+        base = "http://station/avian/api/birdnet-api.php?action=recent"
+        for url in (f"{base}&hours=12&edu=saved", f"{base}&hours=12&edu=saved&reset_at_midnight=1"):
+            with self.subTest(url=url):
+                route = Route({"species": TODAY, "midnight_clamped": True})
+                route.request.url = url
+                self.shoot._make_api_handler(0.04, 24, None, reset_at_midnight=True)(route)
+                self.assertEqual(route.fetch_args["url"], f"{base}&hours=24&edu=saved&reset_at_midnight=1")
+                self.assertEqual(route.result["status"], 200)
+        route = Route({"species": TODAY})
+        self.shoot._make_api_handler(0.04, 24, None)(route)
+        self.assertEqual(route.fetch_args["url"], f"{base}&hours=24&edu=saved")
+        route = Route({})
+        route.request.url = "http://station/avian/api/birdnet-api.php?action=stats"
+        self.shoot._make_api_handler(0.04, 24, None, reset_at_midnight=True)(route)
+        self.assertTrue(route.continued)
+        self.assertFalse(hasattr(route, "fetch_args"))
+
+    def test_capture_asks_for_the_midnight_window_only_when_reset_is_active(self):
+        calls = []
+
+        def fake_shoot(_url, out, **kwargs):
+            calls.append((kwargs["window_hours"], kwargs["reset_at_midnight"]))
+            Image.new("RGB", (4, 4)).save(out)
+
+        module = types.ModuleType("shoot")
+        module.shoot = fake_shoot
+        with tempfile.TemporaryDirectory() as directory, mock.patch.dict(sys.modules, {"shoot": module}):
+            for flag in (True, False):
+                cfg = dict(self.display.DEFAULTS, shoot=True, hours=6, cache=directory, reset_at_midnight=flag)
+                self.display.obtain_image(cfg)
+        self.assertEqual(calls, [(24, True), (6, False)])
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(self.shoot, "_make_api_handler", wraps=self.shoot._make_api_handler) as handler:
+            self.capture_page(CapturePage("ready"), str(pathlib.Path(directory) / "shot.png"),
+                              window_hours=24, reset_at_midnight=True)
+        self.assertEqual(handler.call_args[0][1], 24)
+        self.assertIs(handler.call_args[0][5], True)
 
     def capture_page(self, page, output, capture=None, **options):
         browser = mock.Mock()

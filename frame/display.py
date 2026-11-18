@@ -47,6 +47,7 @@ DEFAULTS = {
     "bw_days": 7,           # BirdWeather lookback window, in days
     "bw_country": "us",     # geocoder country for the ZIP
     "hours": 24,
+    "reset_at_midnight": False,  # local mode only: birds since the station's midnight
     "image": "",            # local PNG written by the shooter
     "image_url": "",        # or a published screenshot URL
     "shoot": False,         # or capture inline (needs a browser; the 3 A+ and Zero 2 W both handle it)
@@ -88,8 +89,10 @@ def _bucket(n):
     return 8
 
 
-def fetch_recent(base, hours, timeout, auth=None):
+def fetch_recent_payload(base, hours, timeout, auth=None, reset_at_midnight=False):
     url = f"{base.rstrip('/')}/avian/api/birdnet-api.php?action=recent&hours={hours}"
+    if reset_at_midnight:
+        url += "&reset_at_midnight=1"
     req = urllib.request.Request(url, headers={"User-Agent": "AvianVisitors-frame/1.0"})
     if auth:
         req.add_header("Authorization", auth)
@@ -97,13 +100,33 @@ def fetch_recent(base, hours, timeout, auth=None):
         data = json.loads(r.read(2_000_000))
     if not isinstance(data, dict) or not isinstance(data.get("species"), list):
         raise ValueError("recent API has no species list")
-    return data["species"]
+    return data
+
+
+def fetch_recent(base, hours, timeout, auth=None):
+    return fetch_recent_payload(base, hours, timeout, auth)["species"]
 
 
 def signature(species, scope=""):
     items = sorted((slugify(s["sci"]), _bucket(int(s.get("n") or 1))) for s in species)
     material = [scope, items] if scope else items
     return hashlib.sha256(json.dumps(material).encode()).hexdigest()[:16]
+
+
+def reset_at_midnight_active(cfg):
+    """reset_at_midnight applies only where this Pi renders the station itself."""
+    return (cfg.get("reset_at_midnight") is True and cfg.get("species_source") != "birdweather"
+            and cfg.get("shoot") is True)
+
+
+def has_drawable_bird(species, bundle):
+    """The collage draws a tile only from a base pose and drops the rest, so a
+    frame bundle's flight-only species cannot finish a capture on its own.
+    Without a frame bundle every listed species counts."""
+    if bundle is None:
+        return bool(species)
+    assets = bundle.index["assets"]
+    return any({"perched", "variant-1"} & set(assets.get(slugify(s["sci"]), {})) for s in species)
 
 
 def birdweather_locator(cfg):
@@ -390,14 +413,15 @@ def obtain_image(cfg, species=None, bundle=None, *, capture=None):
         return Image.open(out).convert("RGB")
     if cfg["shoot"]:
         from shoot import shoot
+        active = reset_at_midnight_active(cfg)
         out = os.path.join(os.path.expanduser(cfg["cache"]), "shot.png")
         os.makedirs(os.path.dirname(out), exist_ok=True)
         shoot(cfg["base_url"], out, title=cfg["shoot_title"], subtitle=cfg["shoot_subtitle"],
               headline_px=cfg["shoot_headline_px"], eyebrow_px=cfg["shoot_eyebrow_px"],
               lowercase=cfg["shoot_lowercase"], mat=cfg["shoot_mat"],
               small_floor=cfg["shoot_small_floor"], count_exp=cfg["shoot_count_exp"], timeout_ms=cfg["timeout"] * 1000,
-              user=cfg["basic_user"], password=cfg["basic_pass"], window_hours=cfg["hours"],
-              bird_names=cfg["bird_names"], capture=capture, **bundle_options)
+              user=cfg["basic_user"], password=cfg["basic_pass"], window_hours=24 if active else cfg["hours"],
+              bird_names=cfg["bird_names"], capture=capture, reset_at_midnight=active, **bundle_options)
         return Image.open(out).convert("RGB")
     if bundle is not None:
         raise ValueError(
@@ -426,7 +450,34 @@ def run(cfg, preview=None, force=False, use_signature=True, mat_box=False):
     except Exception as error:
         print(f"active bundle validation failed: {error}", file=sys.stderr)
         return False
-    if use_signature:
+    active = reset_at_midnight_active(cfg)
+    if cfg.get("reset_at_midnight") and not active:
+        print("reset_at_midnight applies only to local mode; ignored")
+    if active:
+        # Today's birds come from one station-clamped list, on every path: an
+        # empty day must never repaint the wall, whatever triggered the run.
+        try:
+            payload = fetch_recent_payload(cfg["base_url"], 24, cfg["timeout"], _auth(cfg), reset_at_midnight=True)
+        except Exception as e:
+            print(f"recent fetch failed: {e}", file=sys.stderr)
+            return not force and use_signature  # the timer retries; a forced run reports it
+        if payload.get("midnight_clamped") is not True:
+            print("station did not apply the midnight window - update the station (Tools > Pull latest), "
+                  "or an Educators capture is active", file=sys.stderr)
+            if not preview:
+                return False
+        species = payload["species"]
+        if not has_drawable_bird(species, bundle):
+            print("no drawable bird since midnight; keeping the current collage")
+            if not preview:
+                return True
+        if use_signature:
+            sig = signature(species, "")
+            if bundle is not None:
+                sig = hashlib.sha256(
+                    (sig + ":" + bundle.reference.get("selection_revision", bundle.reference["revision"])).encode()
+                ).hexdigest()[:16]
+    elif use_signature:
         try:
             species = fetch_species(
                 cfg,

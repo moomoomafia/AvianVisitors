@@ -240,11 +240,12 @@ def _frame_url(url, bird_names):
     return urllib.parse.urlunsplit(parts._replace(query=urllib.parse.urlencode(query)))
 
 
-def _make_api_handler(floor_frac, window_hours, auth, species=None, capture=None):
+def _make_api_handler(floor_frac, window_hours, auth, species=None, capture=None, reset_at_midnight=False):
     """Re-window action=recent (to preview busy days) and floor the rarest
     counts so the packer draws them a little larger. With `species` set
     (--bird-weather), serve that list for recent and an empty body for the
-    other views, which have no backend in that mode."""
+    other views, which have no backend in that mode. `reset_at_midnight`
+    asks the station to start the window at its own midnight."""
     def handler(route):
         req = route.request
         if "action=recent" not in req.url:
@@ -256,6 +257,8 @@ def _make_api_handler(floor_frac, window_hours, auth, species=None, capture=None
                 data = {"hours": int(window_hours or 24), "species": species, "as_of": ""}
             else:
                 url = re.sub(r"hours=\d+", f"hours={int(window_hours)}", req.url) if window_hours else req.url
+                if reset_at_midnight and not re.search(r"[?&]reset_at_midnight=1(&|$)", url):
+                    url += "&reset_at_midnight=1"
                 kw = {"url": url}
                 if auth:
                     kw["headers"] = {**req.headers, "authorization": auth}
@@ -415,7 +418,7 @@ def shoot(url, out, *, title=None, subtitle=None, vw=600, vh=800, dsf=2,
           count_exp=0.4, cluster_pad=1, label_min_px=11, small_floor=0.04, window_hours=None,
           timeout_ms=45000, user=None, password=None, species=None, cutout_base=None,
           cutout_local=None, cutout_resolver=None, dims_path=None, masks_path=None,
-          bundle_assets=None, empty_text="listening for birds…", bird_names=False, capture=None):
+          bundle_assets=None, empty_text="listening for birds…", bird_names=False, capture=None, reset_at_midnight=False):
     size = _output_size(vw, vh, dsf)
     pad_side, pad_top, pad_bottom = int(vw * mat), int(vh * mat * 0.92), int(vh * mat)
     auth = "Basic " + base64.b64encode(f"{user}:{password or ''}".encode()).decode() if user else None
@@ -445,7 +448,7 @@ def shoot(url, out, *, title=None, subtitle=None, vw=600, vh=800, dsf=2,
                 misses = []
                 bundle_errors = []
                 observed = {}
-                page.route("**/birdnet-api.php**", _make_api_handler(small_floor, window_hours, auth, species, observed))
+                page.route("**/birdnet-api.php**", _make_api_handler(small_floor, window_hours, auth, species, observed, reset_at_midnight))
                 page.route("**/apt.js*", _make_js_handler(
                     cluster_xbias, cluster_ybias, count_exp, cluster_pad,
                     label_min_px, auth, misses))
