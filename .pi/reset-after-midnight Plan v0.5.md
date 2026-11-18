@@ -303,7 +303,7 @@ untracked files).
 | W3 | worker | §4.5 docs | README paragraph at `frame/README.md:89`/`:91` + config line, end-user voice — **done**, `ec5cdc7d` |
 | R | reviewer | review the full diff vs this plan, D20 and every ruling | no unresolved High findings — **done**: ready with edits, F1 High + F2–F7 Low ([log](knowledge/verification-log.md#review-r-full-product-diff)) |
 | W2R | worker | §4.7 review-R fixes (F1, F2, F4, F7 code + tests; F5, F6 docs), one local commit (added 2026-11-17) | parent re-runs K1; the F1 test fails on `ec5cdc7d` and passes after; flag-off behaviour unchanged — **done**, `0046db23`; K1 92 passed; F3 residual accepted |
-| T1 | ~~worker~~ parent | only if D22 rules for a test (amended 2026-11-17: measure a CI-run case first) | case passes on HEAD, fails on base `5950f807` (K1 A/B); a short re-review if it lands — **done 2026-11-17**, `db9ff938`: `tests/test_midnight_reset.py` +33/−1, K1 green, fails on base ([log](knowledge/verification-log.md#t1-smoke-alarm-for-w1-d22)); re-review pending |
+| T1 | ~~worker~~ parent | only if D22 rules for a test (amended 2026-11-17: measure a CI-run case first) | case passes on HEAD, fails on base `5950f807` (K1 A/B); a short re-review if it lands — **done 2026-11-17**, `db9ff938`: `tests/test_midnight_reset.py` +33/−1, K1 green, fails on base ([log](knowledge/verification-log.md#t1-smoke-alarm-for-w1-d22)); re-reviewed: ready, Low fixes in `cde2bc47` |
 | V | parent | §6 runs; CI only if the operator authorises it on the fork (D21) | results recorded in the verification log |
 | O | oracle | drift/ruling audit of the result | verdict recorded |
 | H | operator + parent | hardware pass on `birdpic` (§6) | checklist recorded |

@@ -103,7 +103,7 @@
 | `.pi/skills/kb-document/SKILL.md` | [open-decisions.md](open-decisions.md) |
 | `AGENTS.md` | [AGENTS.md](../../AGENTS.md) |
 | `README.md` | [repo-map.md](repo-map.md) |
-| `avian/api/admin-auth.php` | [feature-midnight-reset.md](feature-midnight-reset.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md) |
+| `avian/api/admin-auth.php` | [feature-midnight-reset.md](feature-midnight-reset.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [verification-log.md](verification-log.md) |
 | `avian/api/admin-state.php` | [repo-map.md](repo-map.md) |
 | `avian/api/archive.php` | [repo-map.md](repo-map.md) |
 | `avian/api/birdnet-api.php` | [_index.md](_index.md), [birdnet-api.md](birdnet-api.md), [code-conventions.md](code-conventions.md), [config-reference.md](config-reference.md), [feature-midnight-reset.md](feature-midnight-reset.md), [frame-refresh-decision.md](frame-refresh-decision.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [plan-review-midnight-reset.md](plan-review-midnight-reset.md), [repo-map.md](repo-map.md), [station-clock-and-data.md](station-clock-and-data.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |

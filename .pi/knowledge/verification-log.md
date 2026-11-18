@@ -1259,8 +1259,8 @@ with your recommendation"* (measure the CI-run variant first). **Result:** local
 **Measurement (scratch script in K1, deleted after):** the smallest real `recent` request needs no
 educator store when Educators is disabled: `educator_resolve_scope` returns early after the lock
 and state check (`avian/api/educator-scope.php:153-160`). Needed: an empty lock file, a state file
-`v1\t0\t7`, a `birds.db` with a `detections` table, and six env vars (`AV_EDUCATOR_LOCK_FILE`,
-`AV_EDUCATOR_STATE_FILE`, `AV_EDUCATOR_BIRDS_DB`, `AV_REQUIRE_AUTH=0`,
+`v1\t0\t7`, a `birds.db` with a `detections` table, and ~~six~~ five env vars (`AV_EDUCATOR_LOCK_FILE`,
+`AV_EDUCATOR_STATE_FILE`, `AV_EDUCATOR_BIRDS_DB`, ~~`AV_REQUIRE_AUTH=0`~~ (unused, dropped after the re-review),
 `AV_EDUCATOR_STATE_TEST_METADATA`, `AV_EDUCATOR_STORE_TEST_METADATA`). Dropping
 `AV_EDUCATOR_STORE_TEST_METADATA` gives `educator lock is missing or unsafe`; the maintenance-file
 override is not needed.
@@ -1275,7 +1275,8 @@ worker; the parent wrote it because the measurement prototype was already the te
 
 **What it asserts (clock-independent):** without the param `midnight_clamped` is false; with
 `reset_at_midnight=1` it is true and `window_start` ends ` 00:00:00`. A 24-hour window always crosses
-the station's midnight, so this holds at any time of day (`avian/api/birdnet-api.php:109-113`).
+the station's midnight, so this holds at any time of day (`avian/api/birdnet-api.php:110-114`; ~~`:109-113`~~
+corrected by the [T1 re-review](#t1-re-review)).
 
 **Verification:**
 
@@ -1288,3 +1289,25 @@ the station's midnight, so this holds at any time of day (`avian/api/birdnet-api
 * `uvx flake8 tests/test_midnight_reset.py`: clean.
 
 **Not executed:** the parent's real CI (needs D21); a re-review of T1 (plan §7 asks for a short one).
+
+### T1 re-review
+
+**Who:** `reviewer`, 2026-11-17, mission `ad69d3f2-9faa-48ea-919e-addd83db11f1`, read-only (no shell).
+**Verdict: ready**, six Low findings. Confirmed by the reviewer: the test reaches W1's request line
+(`avian/api/birdnet-api.php:136`) and would fail if it or the `recentWindow` argument were reverted;
+it is clock-independent at any time of day, across DST, and across a midnight between the two queries.
+
+| # | Finding | Parent re-check | Action |
+|---|---|---|---|
+| 1 | The no-param check reads the repo-root `birdnet.conf` (`$CONF_PATH`, `birdnet-api.php:36`); a checkout with a real `birdnet.conf` containing `RESET_AT_MIDNIGHT=1` would fail it. CI is safe (`birdnet.conf` is git-ignored). | accepted, not re-read | recorded as a **precondition**: run the test in a checkout without a station `birdnet.conf`; no product seam added (D20) |
+| 2 | `AV_EDUCATOR_MAINTENANCE_FILE` not overridden: one `lstat` of the real `/var/lib/avian-visitors/educators.maintenance` | accepted | **fixed** (temp path) |
+| 3 | `json.loads(result.stdout)` hides PHP errors | accepted | **fixed**: `assertEqual(result.returncode, 0, stdout + stderr)`, as in `tests/test_educator_security.py` |
+| 4 | `AV_REQUIRE_AUTH=0` unused on this path | CONFIRMED: `avian_lan_admin_auth_required` is reached only for direct-local requests (`avian/api/admin-auth.php:459,489`); the test uses `203.0.113.40` | **dropped**; still passes |
+| 5 | `Cache-Control: no-store` with the param (`birdnet-api.php:170`) is not covered: `header()` is inert under `php -r` | accepted | recorded as a **gap**; covered by K2 (`php -S`) or the hardware `curl` (plan §6 H) |
+| 6 | KB line refs wrong: guard "is :132", clamp ":108-112" | **partly refuted**: the guard is at `:127` (as logged); the clamp is at `:110-114`, so both the log's `:109-113` and the reviewer's `:108-112` were off | log citation corrected below |
+
+**Correction:** in the T1 section above, the clamp citation `avian/api/birdnet-api.php:109-113` should
+read **`:110-114`** (`$clamped = $enabled && … && $rolling <= $midnight`, read 2026-11-17).
+
+**Fix commit:** `cde2bc47`, `tests/test_midnight_reset.py` +3/−1;
+Windows 2 passed, K1 2 passed, base API still fails (1 failed, 1 passed); flake8 clean.
