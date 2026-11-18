@@ -2,6 +2,7 @@
 # K1 host runner (Plan v0.4 §6). Usage, from the repo root:
 #   bash .pi/k1/run.sh            # tracked files of the working tree (git stash create, else HEAD)
 #   bash .pi/k1/run.sh 5950f807   # any commit, e.g. the product base
+# A run on the base commit exits 1 by design: the educator suite reports BASE (its baseline file is not in a base archive); compare the summaries instead.
 # Never bind-mounts the CRLF worktree: an LF archive is piped into the container (fact 23).
 # Untracked files are NOT included: commit or `git add` new files first.
 set -euo pipefail

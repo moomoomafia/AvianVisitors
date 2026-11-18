@@ -60,4 +60,4 @@ $lost = $shipped['writer_sees'] !== (int)$shipped['other_process_sees'] || $ship
 $ok = $control['writer_sees'] === 2 && (int)$control['other_process_sees'] === 2;
 echo $lost ? "RESULT: shipped pattern LOSES/ERRORS a write; " : "RESULT: shipped pattern did not lose a write; ";
 echo $ok ? "control is consistent\n" : "control is NOT consistent\n";
-exit(0);
+exit($lost && $ok ? 0 : 1);

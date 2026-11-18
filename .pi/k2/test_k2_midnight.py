@@ -45,6 +45,7 @@ def tz_for(local):
 
 def day(offset_days=0):
     """The station's 'today' D (or D +/- n) for this test run, as a date."""
+    # The 10-minute margin keeps every offset tz_for() produces within glibc's 0..24:59:59 TZ range (25:00:00 is silently mis-parsed as -24 h).
     return (utc_now() - timedelta(minutes=10)).date() + timedelta(days=offset_days)
 
 

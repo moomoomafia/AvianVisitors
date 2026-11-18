@@ -47,7 +47,7 @@ DEFAULTS = {
     "bw_days": 7,           # BirdWeather lookback window, in days
     "bw_country": "us",     # geocoder country for the ZIP
     "hours": 24,
-    "reset_at_midnight": False,  # local mode only: birds since the station's midnight
+    "reset_at_midnight": False,  # local mode only: birds since the mic's midnight
     "image": "",            # local PNG written by the shooter
     "image_url": "",        # or a published screenshot URL
     "shoot": False,         # or capture inline (needs a browser; the 3 A+ and Zero 2 W both handle it)
@@ -462,7 +462,7 @@ def run(cfg, preview=None, force=False, use_signature=True, mat_box=False):
             print(f"recent fetch failed: {e}", file=sys.stderr)
             return not (force or preview) and use_signature  # the timer retries; a forced run reports it
         if payload.get("midnight_clamped") is not True:
-            print("station did not apply the midnight window - update the station (Tools > Pull latest), "
+            print("mic did not apply the midnight window - update the mic (Tools > Pull latest), "
                   "or an Educators capture is active", file=sys.stderr)
             if not preview:
                 return False

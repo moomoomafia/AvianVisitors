@@ -374,7 +374,7 @@ class FrameCaptureTests(unittest.TestCase):
                     result = self.run_reset_frame(payload, **options)
                     self.assertIs(result.ok, False)
                     self.assertEqual((result.obtained, result.pushed, result.saved), ([], 0, []))
-                    self.assertIn("station did not apply the midnight window", result.log)
+                    self.assertIn("did not apply the midnight window", result.log)
 
     def test_reset_at_midnight_fetch_failure_skips_a_timer_run_and_fails_a_forced_one(self):
         for options, ok in (({}, True), ({"force": True}, False), ({"use_signature": False}, False),
