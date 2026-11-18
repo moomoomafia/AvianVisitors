@@ -254,7 +254,7 @@ blocking W2):
 
 | Option | What | Trace |
 |---|---|---|
-| (a) recommended | one clock-independent case in an existing parent PHP test: two `edu_endpoint` calls (`tests/test_educator_backend.php:64-104`) on `recent`, `hours=24`, with and without `reset_at_midnight=1`, asserting only `midnight_clamped` and `window_start` ending `00:00:00` (true at any time of day for today, `avian/api/birdnet-api.php:109-113`). Store provisioned (`educator_store_open(true)`, `:178`), no capture running. | test lines only |
+| (a) ~~recommended~~ *amended 2026-11-17: `edu_endpoint` lives only in a suite CI never runs; split into a1/a2, see D22* | one clock-independent case in an existing parent PHP test: two `edu_endpoint` calls (`tests/test_educator_backend.php:64-104`) on `recent`, `hours=24`, with and without `reset_at_midnight=1`, asserting only `midnight_clamped` and `window_start` ending `00:00:00` (true at any time of day for today, `avian/api/birdnet-api.php:109-113`). Store provisioned (`educator_store_open(true)`, `:178`), no capture running. | test lines only |
 | (b) | record the gap; rely on the `.pi/` probe + R1's argument | none |
 | (c) | the full probe as a parent test (time-relative rows need a midnight guard → flake risk) | more test lines |
 

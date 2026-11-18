@@ -998,10 +998,21 @@ library guard (`avian/api/birdnet-api.php:127`). End-to-end coverage now exists 
 `edu_endpoint` calls on `recent`, `hours=24`, with and without `reset_at_midnight=1`, asserting
 only `midnight_clamped` and `window_start` ending `00:00:00`. That holds at any time of day
 (`avian/api/birdnet-api.php:109-113`), needs no time-relative rows, and needs the store
-provisioned (`educator_store_open(true)`) with no capture running (recommended: small, upstream
-idiom, guards the request path in Linux CI); (b) record the gap and rely on the `.pi/` probe + R1
+provisioned (`educator_store_open(true)`) with no capture running (~~recommended: small, upstream
+idiom, guards the request path in Linux CI~~); (b) record the gap and rely on the `.pi/` probe + R1
 argument (smallest trace); (c) the full probe as a parent test (more coverage, but time-relative
 rows need a midnight guard, so there's a flake risk).
+
+> **Amended 2026-11-17 (parent, while explaining D22 to the operator):** option (a)'s "guards the
+> request path in Linux CI" is **wrong as placed**. `edu_endpoint` exists only in
+> `tests/test_educator_backend.php:64`, and that suite has no CI wrapper (only
+> `tests/test_midnight_reset.php` is run, via `tests/test_midnight_reset.py:12`) and aborts on Linux
+> (D28). So (a) splits in two: **(a1)** the case in `tests/test_educator_backend.php`: a few lines,
+> but run only by hand (and on Linux only if placed before the abort at `:2114`); **(a2)** the case
+> in the CI-run `tests/test_midnight_reset.php`, which loads the API as a library
+> (`tests/test_midnight_reset.php:5`) and so needs its own small request harness to reach W1's lines
+> (size not measured). **Recommendation now:** measure (a2) first; take it if small, otherwise (b).
+> The original recommendation is struck above.
 
 **Consequence if unanswered:** W1 ships with no committed regression guard; a future upstream
 edit to the request block could silently drop the param and only the hardware pass would notice.

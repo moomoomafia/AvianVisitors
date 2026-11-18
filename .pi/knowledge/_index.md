@@ -47,7 +47,8 @@ every session; delete items when they close (their history lives in the register
    then D21 for stage V. Handoffs are built with `.pi/scripts/build_handoff.py`.
 1. **Open decisions** ([register](open-decisions.md)):
    [D22](open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param) (a committed parent test
-   for W1; recommended: one clock-independent `edu_endpoint` case),
+   for W1; ~~recommended: one clock-independent `edu_endpoint` case~~ amended 2026-11-17: that helper
+   is only in a suite CI never runs; measure a CI-run variant first, else record the gap),
    [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) (K2's midnight
    clock; recommended: per-run `TZ` offset; Chromium ignores it),
    [D21](open-decisions.md#d21--may-the-parent-open-a-pr-inside-the-fork-so-the-parents-ci-runs) (CI
