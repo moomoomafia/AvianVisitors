@@ -125,6 +125,12 @@ the H checklist (§6).
 
 > **Amended 2026-11-17 by review R** (see §4.7): step (b) for preview, step (e)'s shape, the
 > "ignored" line, and a new step (f) after the capture. The original text below is kept.
+>
+> **Amended 2026-11-17 by Oracle round 1 (O1-1):** step (c)'s message says **"mic"**, not "station"
+> (the frame's README, config example and upstream log call the BirdNET-Pi "the mic"; in
+> `frame/display.py` "station" means a BirdWeather station): "mic did not apply the midnight window -
+> update the mic (Tools > Pull latest), or an Educators capture is active" (ASCII, as already logged
+> for W2). [Round-1 log](knowledge/verification-log.md#oracle-loop-round-1).
 
 1. `DEFAULTS["reset_at_midnight"] = False` (`:42-70`).
 2. **One shared fetch.** Extract the body of `fetch_recent` (`:91-101`) into

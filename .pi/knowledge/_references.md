@@ -37,7 +37,7 @@
 | [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | [D28](open-decisions.md#d28--report-the-educator-store-lost-lock-bug-upstream) | [_index.md](_index.md), [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md), [open-decisions.md](open-decisions.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | [D29](open-decisions.md#d29--operator-standing-permissions-and-working-preferences) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md) |
-| [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) | [_index.md](_index.md), [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md) |
+| [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) | [_index.md](_index.md), [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 
 ## Knowledge docs (backlinks)
 
@@ -91,8 +91,9 @@
 | `.pi/handoff/context.md` | [orchestration.md](orchestration.md), [verification-log.md](verification-log.md) |
 | `.pi/handoff/ledger.md` | [next-actions.md](next-actions.md), [orchestration.md](orchestration.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | `.pi/handoff/plan.md` | [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [verification-log.md](verification-log.md) |
+| `.pi/k1/run.sh` | [verification-log.md](verification-log.md) |
 | `.pi/k1/suite.sh` | [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
-| `.pi/k2/test_k2_midnight.py` | [_index.md](_index.md), [testing-and-ci.md](testing-and-ci.md) |
+| `.pi/k2/test_k2_midnight.py` | [_index.md](_index.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
 | `.pi/research/d28/wal_lock_repro.php` | [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `.pi/research/pre-v03/stubs/fcntl.py` | [verification-log.md](verification-log.md) |
 | `.pi/research/pre-v03/test_characterize_today.py` | [_index.md](_index.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |

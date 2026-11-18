@@ -1372,3 +1372,36 @@ feature/birdframe-midnight-reset`: `5f90208c..a66fe045`, 25 commits (W2 `dece12c
 **Verified:** `git ls-remote origin refs/heads/feature/birdframe-midnight-reset` = `a66fe045…` = local
 HEAD; `upstream` push stays `DISABLED_NO_PUSH_TO_UPSTREAM`. No PR opened; a feature-branch push
 triggers no CI (`.github/workflows/python-app.yml` runs only on `main`/`test_me`/`avian-visitors`).
+
+## Oracle loop round 1
+
+**Who:** `oracle`, 2026-11-17, mission `20f8ba04-601e-437d-9f0c-0e8fd5f92e8c`, read-only, on HEAD `7084551a`
+([D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) loop). **Scope:** product diff
+`git diff 5950f807 HEAD -- avian frame tests` + harness (`.pi/k1/`, `.pi/k2/`, `.pi/scripts/build_handoff.py`,
+`.pi/research/d28/wal_lock_repro.php`). **Ran:** K1 exit 0; K2 7 passed; flake8 (upstream items + advisory
+`run()` complexity only; our `.pi/` Python clean). **Verdict: NOT HAPPY** (two Low fixes); no High or Medium.
+
+| ID | Sev | Scope | Finding | Parent re-check | Decision |
+|---|---|---|---|---|---|
+| O1-1 | Low | shipped | `frame/display.py:465` says "station did not apply … update the station"; the frame's docs and upstream's log say "mic" (`frame/README.md:91`, `frame/config.example.toml:27-28`, `frame/shoot.py:523`), and in `frame/display.py` "station" means a BirdWeather station (`:142,150,163`) | CONFIRMED (lines read) | **fix**: "mic did not apply the midnight window - update the mic (Tools > Pull latest), or an Educators capture is active"; `DEFAULTS` comment `:50` → "mic's midnight"; test `tests/test_frame_capture.py:377` asserts "did not apply the midnight window" |
+| O1-2 | Low | harness | `.pi/research/d28/wal_lock_repro.php:7` claims "Exit 0 = both modes behaved as described" but `:63` is an unconditional `exit(0)` (the first, mis-quoted run exited 0 too) | CONFIRMED | **fix**: `exit($lost && $ok ? 0 : 1);` |
+| O1-3 | Low, optional | harness | `.pi/scripts/build_handoff.py` uses a dummy `"\n## ZZZ"` end marker for "to end of file" | accepted | **skip** (churn, D20) |
+| O1-4 | Low, optional | harness | `.pi/k1/run.sh` advertises `run.sh 5950f807` but a base run always exits 1 (educator row is `BASE`, not PASS); undocumented | accepted | **fix** (one comment line) |
+| O1-5 | Low, optional | harness | `.pi/k2/test_k2_midnight.py` `day()`'s 10-minute margin is what keeps TZ offsets within glibc's 0–24:59:59; Oracle tested 25:00:00 is silently mis-parsed (−24 h); undocumented | accepted (Oracle's container test) | **fix** (one comment line) |
+
+**Checked and found correct (Oracle):** W1 (exact `'1'` only, cannot switch a station-wide ON off, scopes
+win, `$RESET_AT_MIDNIGHT` has no other users; upstream `windowLabel()` in `avian/frontend/apt.js:3608-3609`
+already labels a clamped window "since midnight"); flag-off equivalence (fetch wrapper, the one-expression
+change in the upstream signature block, `obtain_image`, handler, "ignored" line, step f gated on `active`);
+every draw path declines before the gate, (c) before (d), (f) after a successful capture and before
+preview/push; signature consistency (local-mode `fetch_species` does not filter by drawable,
+`frame/display.py:155-173`; `capture["species"]` copied before the floor mutation, `frame/shoot.py:274-277`);
+`has_drawable_bird` slug and base-pose match `frame/bundle_runtime.py:1233,2057-2058`; handler appends the
+param once (a page `=0` is overridden, PHP last wins); exit codes D14/D15/D16 and preview; README claims;
+tests discriminate; T1 clock-independent; Python 3.9-safe; **footprint: no removable shipped line**
+(5 files +68/−11; `run()` complexity 27 vs 18 base, unenforced, plan forbids restructuring). Harness: K1
+pinned digest, non-root, LF archive, skip = fail, Playwright pin check, educator A/B; K2 real chain under
+per-request TZ, fake Inky matches `push_panel`'s imports and `saturation` signature, control proves a blank
+push is visible, outdated station = base tree; `build_handoff.py` reproducible.
+
+**Plan impact:** O1-1 changes the user-facing wording of plan §4.2 step (c) (recorded as an amendment there).
