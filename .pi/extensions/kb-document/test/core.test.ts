@@ -110,12 +110,81 @@ test("verdict: pass, unavailable never blocks, bounded retries", () => {
 });
 
 test("findRepoRoot stops at the git root and never climbs past it", () => {
-	const files = new Set([path.join("/r", ".pi", "tools", "check_kb.py"), path.join("/r", ".git")]);
+	const files = new Set([path.join("/r", ".pi", "scripts", "check_kb.py"), path.join("/r", ".git")]);
 	const probe = { exists: (p: string) => files.has(p), join: path.join, dirname: path.dirname };
 	// path.join normalises separators per platform ("/r" -> "\\r" on Windows).
 	assert.equal(findRepoRoot(path.join("/r", "frame", "x"), probe), path.join("/r"));
 	// A home-like folder above a repo that lacks the tool must not be selected.
-	const other = new Set([path.join("/home", ".pi", "tools", "check_kb.py"), path.join("/home", "proj", ".git")]);
+	const other = new Set([path.join("/home", ".pi", "scripts", "check_kb.py"), path.join("/home", "proj", ".git")]);
 	const probe2 = { exists: (p: string) => other.has(p), join: path.join, dirname: path.dirname };
 	assert.equal(findRepoRoot(path.join("/home", "proj", "src"), probe2), null);
+});
+
+// --- D25: commitment gate + session priming -------------------------------------------
+
+import {
+	commitmentGate,
+	detectCommitments,
+	lastAssistantText,
+	MAX_COMMIT_ATTEMPTS,
+	nextActionsInjection,
+} from "../src/core.ts";
+
+// Real texts from the 2026-11-17 incident that motivated D25 (chat-only until challenged).
+const INCIDENT_REPLY = "When you're back, tell me \"virtualization's on\" and I'll run the checks, record them, then we take D24.";
+const INCIDENT_PROMPT = "I know for fact I want the frame config.toml file to have the setting reset-after-midnight.";
+const INCIDENT_ADVICE = "**After the reboot:** the open questions are D24. I'd use Docker for the container.";
+
+test("D25: the incident's promise, advice and operator statement are all detected", () => {
+	assert.ok(detectCommitments("ok", INCIDENT_REPLY).some((h) => h.label === "conditional promise"));
+	const advice = detectCommitments("", INCIDENT_ADVICE).map((h) => h.label);
+	assert.ok(advice.includes("after the reboot") && advice.includes("recommendation"), advice.join());
+	const op = detectCommitments(INCIDENT_PROMPT, "").map((h) => h.label);
+	assert.ok(op.includes("operator fact") && op.includes("operator preference"), op.join());
+	assert.ok(detectCommitments("", "Do you want me to build 1 + 2 + 3?").some((h) => h.label === "question to the operator"));
+});
+
+test("D25: plain work, past tense and code-only mentions are not commitments", () => {
+	for (const [p, r] of [
+		["fix the bug", "Done. 20/20 tests pass."],
+		["run the tests", "I recommended Docker earlier; nothing changed."],
+		["what does `when you` match?", "The regex `/when you/` matches it."],
+		["", "Use `I want` in the fixture: ```\nI'll remember\n```"],
+	]) {
+		assert.deepEqual(detectCommitments(p, r), [], `${p} / ${r}`);
+	}
+});
+
+test("D25: gate nudges once, honours opt-out, skips aborted runs and idle state", () => {
+	const s = { ...freshState(), baseline: {}, prompt: "", reply: INCIDENT_REPLY };
+	const r = commitmentGate(s, "completed");
+	assert.equal(r.kind, "nudge");
+	assert.ok(r.kind === "nudge" && /next-actions\.md/.test(r.message) && /No record needed:/.test(r.message));
+	assert.ok(r.kind === "nudge" && r.message.includes("tell me"), "quotes the offending line");
+	assert.equal(commitmentGate({ ...s, commitAttempts: MAX_COMMIT_ATTEMPTS }).kind, "skip");
+	assert.equal(commitmentGate({ ...s, reply: "No record needed: answered a factual question." }).kind, "skip");
+	assert.equal(commitmentGate({ ...s, reply: "**No record needed:** pure lookup." }).kind, "skip");
+	assert.equal(commitmentGate(s, "aborted").kind, "skip");
+	assert.equal(commitmentGate({ ...s, baseline: null }).kind, "skip");
+});
+
+test("D25: lastAssistantText takes the last assistant text, ignoring tools and thinking", () => {
+	const msgs = [
+		{ role: "user", content: "hi" },
+		{ role: "assistant", content: [{ type: "text", text: "first" }] },
+		{ role: "assistant", content: [{ type: "thinking", thinking: "x" }, { type: "text", text: "final" }, { type: "toolCall", name: "bash" }] },
+		{ role: "toolResult", content: [{ type: "text", text: "tool output" }] },
+	];
+	assert.equal(lastAssistantText(msgs), "final");
+	assert.equal(lastAssistantText([{ role: "assistant", content: [{ type: "toolCall" }] }]), "");
+	assert.equal(lastAssistantText(undefined), "");
+});
+
+test("D25: next-actions injects only a Pending section with items", () => {
+	const md = "# Next actions\n\nintro\n\n## Pending\n\n1. **Trigger:** x. **Action:** y.\n\n## Done\n\n- old\n";
+	const out = nextActionsInjection(md);
+	assert.ok(out && out.includes("**Trigger:** x") && !out.includes("old"));
+	assert.equal(nextActionsInjection("# Next actions\n\n## Pending\n\n_(none)_\n"), null);
+	assert.equal(nextActionsInjection("# no section\n"), null);
+	assert.ok(nextActionsInjection("## Pending\n- last item at EOF")?.includes("last item"));
 });

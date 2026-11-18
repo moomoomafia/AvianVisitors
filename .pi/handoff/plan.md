@@ -15,6 +15,13 @@ This session dispatches **W1 only**.
 
 ## Open numbered questions (unanswered by the operator — do not decide them)
 
+*(2026-11-17: **this handoff is derived from Plan v0.3, now superseded by Plan v0.4**
+(`.pi/reset-after-midnight Plan v0.4.md`). Regenerate it from v0.4 before dispatching W2 (v0.4
+step P2); until then v0.4 wins where they differ. Q1 below is registered as D22 in `.pi/knowledge/open-decisions.md`, still open. A
+new D23 (commit the pending `.pi/` changes before W2) must be settled before W2 is dispatched.
+Where a verbatim ruling body below conflicts with Plan §4, **§4 wins** — e.g. D15 holds via the
+D14 path with exit 1, not exit 0.)*
+
 1. **§5 conditional row, `tests/test_midnight_reset.php` (owned by W1).** Attempt upstream's
    `edu_endpoint` pattern (`tests/test_educator_backend.php:64-76`) to run the full `recent`
    endpoint with `reset_at_midnight=1` cheaply. If it works cheaply, the plan allows one case
@@ -55,7 +62,8 @@ Frame code never writes station config (D3/D10). No §4.2–§4.5 or §5 frame w
 Supporting rulings: **D2** local mode only (`species_source != "birdweather" and shoot is True`);
 **D3** additive request param + config toggle `reset_at_midnight`, default `false`; **D4** CI = the
 parent's existing jobs, no new workflow, hardware pass mandatory; **D11c** `.pi/` + `AGENTS.md`
-are on this branch and must be stripped before any PR to the parent; **D14** outdated station ⇒
+are on this branch and must be stripped before any PR to the parent (so must the root `.pi-tasks/`,
+D11 amendment 2026-11-17); **D14** outdated station ⇒
 hold + exit 1; **D15** Educators scope ⇒ hold (falls into the D14 path); **D16** station
 unreachable ⇒ timer skips (exit 0), forced run exits 1; **D20** minimal footprint.
 
@@ -199,7 +207,7 @@ nothing is pushed without the operator's say-so.
 | H | operator + parent | hardware pass on `birdpic` | checklist recorded |
 
 The parent records each step in `.pi/knowledge/verification-log.md`, keeps the register current, and
-runs `python .pi/tools/check_kb.py --index` (exit 0) at the end of each session.
+runs `python .pi/scripts/check_kb.py --index` (exit 0) at the end of each session.
 
 ## Recorded deviations (Plan v0.3 §9, verbatim)
 

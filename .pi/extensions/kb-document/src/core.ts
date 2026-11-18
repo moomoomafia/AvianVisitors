@@ -86,10 +86,14 @@ export interface SettleState {
 	baseline: Snapshot | null;
 	audit: boolean;
 	attempts: number;
+	/** D25: the user prompt that started the run, and the latest assistant reply text. */
+	prompt: string;
+	reply: string;
+	commitAttempts: number;
 }
 
 export function freshState(): SettleState {
-	return { baseline: null, audit: false, attempts: 0 };
+	return { baseline: null, audit: false, attempts: 0, prompt: "", reply: "", commitAttempts: 0 };
 }
 
 export type SettleAction =
@@ -127,7 +131,7 @@ export function verdict(state: SettleState, result: CheckResult, changed: string
 		`[kb-document extension] The knowledge-base check failed after this run ` +
 			`(attempt ${state.attempts + 1}/${MAX_FIX_ATTEMPTS}).`,
 		changed.length ? `Changed: ${changed.join(", ")}` : "Triggered by an audit request.",
-		"Fix every item below, then run `python .pi/tools/check_kb.py --index` unpiped and confirm exit 0.",
+		"Fix every item below, then run `python .pi/scripts/check_kb.py --index` unpiped and confirm exit 0.",
 		"",
 		...shown,
 		lines.length > shown.length ? `\u2026 and ${lines.length - shown.length} more` : "",
@@ -137,14 +141,128 @@ export function verdict(state: SettleState, result: CheckResult, changed: string
 	return { kind: "retry", message };
 }
 
-/** Walk up from `start` to the folder holding `.pi/tools/check_kb.py`; stop at a git root. */
+// ---------------------------------------------------------------------------
+// D25: commitment gate + session-start priming
+// ---------------------------------------------------------------------------
+
+type Pattern = { label: string; re: RegExp };
+
+/** Assistant-side: promises about the future, recommendations, questions put to the operator. */
+export const REPLY_PATTERNS: ReadonlyArray<Pattern> = [
+	{ label: "conditional promise", re: /\b(?:when|once|as soon as)\s+you(?:'re|\s+are)?\b/i },
+	{ label: "next session", re: /\b(?:next|new|fresh)\s+session\b/i },
+	{ label: "after the reboot", re: /\bafter\s+(?:the|your|a)\s+reboot\b/i },
+	{ label: "promise to remember", re: /\bI(?:'ll|\s+will)\s+(?:remember|keep\s+(?:that|this|it)\s+in\s+mind|pick\s+(?:it|this|that)\s+up|follow\s+up|come\s+back)\b/i },
+	{ label: "standing promise", re: /\b(?:from\s+now\s+on|going\s+forward|next\s+time)\b/i },
+	{ label: "recommendation", re: /\b(?:I\s+recommend|my\s+recommendation|I'd\s+(?:use|pick|choose|go\s+with)|my\s+preference)\b/i },
+	{ label: "question to the operator", re: /\b(?:do\s+you\s+want|shall\s+I|should\s+I)\b[^?\n]{0,160}\?/i },
+];
+
+/** User-side: preferences, rulings, facts about the setup. */
+export const PROMPT_PATTERNS: ReadonlyArray<Pattern> = [
+	{ label: "operator preference", re: /\bI\s+(?:want|prefer|need|decided|chose|installed|use|don't\s+use|do\s+not\s+use)\b/i },
+	{ label: "operator fact", re: /\bI\s+know\s+(?:for\s+(?:a\s+)?fact|that)\b/i },
+	{ label: "operator choice", re: /\bmy\s+(?:preference|choice|decision|setup)\b/i },
+	{ label: "team direction", re: /\b(?:let's|we(?:'ll|\s+will|\s+should))\s+(?:use|go\s+with|keep|switch|stick)\b/i },
+	{ label: "memory concern", re: /\bremember\b/i },
+	{ label: "standing rule", re: /\b(?:always|never)\s+(?:do|use|run|commit|push|ask)\b/i },
+];
+
+/** The model's explicit opt-out line. */
+export const NO_RECORD_RE = /^\s*(?:[*_>]+\s*)?no record needed:/im;
+export const MAX_COMMIT_ATTEMPTS = 1;
+
+export interface CommitmentHit {
+	side: "reply" | "prompt";
+	label: string;
+	excerpt: string;
+}
+
+function excerptAround(text: string, index: number): string {
+	const start = text.lastIndexOf("\n", index) + 1;
+	const endNl = text.indexOf("\n", index);
+	const line = text.slice(start, endNl === -1 ? undefined : endNl).trim().replace(/\s+/g, " ");
+	return line.length > 140 ? `${line.slice(0, 137)}...` : line;
+}
+
+function scan(text: string, side: CommitmentHit["side"], patterns: ReadonlyArray<Pattern>): CommitmentHit[] {
+	const prose = stripCode(text ?? "");
+	const hits: CommitmentHit[] = [];
+	for (const p of patterns) {
+		const m = p.re.exec(prose);
+		if (m) hits.push({ side, label: p.label, excerpt: excerptAround(prose, m.index) });
+	}
+	return hits;
+}
+
+/** Commitments in this run's reply and prompt (code and URLs ignored). Empty when none. */
+export function detectCommitments(prompt: string, reply: string): CommitmentHit[] {
+	return [...scan(reply, "reply", REPLY_PATTERNS), ...scan(prompt, "prompt", PROMPT_PATTERNS)];
+}
+
+export type CommitmentAction = { kind: "skip"; reason: string } | { kind: "nudge"; message: string };
+
+/** Called only when the KB is unchanged this run. */
+export function commitmentGate(state: SettleState, outcome?: string): CommitmentAction {
+	if (!state.baseline) return { kind: "skip", reason: "no user run in progress" };
+	if (outcome && outcome !== "completed") return { kind: "skip", reason: `run ${outcome}` };
+	if (state.commitAttempts >= MAX_COMMIT_ATTEMPTS) return { kind: "skip", reason: "already nudged" };
+	if (NO_RECORD_RE.test(state.reply)) return { kind: "skip", reason: "model opted out" };
+	const hits = detectCommitments(state.prompt, state.reply);
+	if (!hits.length) return { kind: "skip", reason: "nothing to record" };
+	return { kind: "nudge", message: buildCommitmentNudge(hits) };
+}
+
+export function buildCommitmentNudge(hits: CommitmentHit[]): string {
+	return [
+		"[kb-document extension \u2014 commitment gate, decision D25]",
+		"This run changed nothing in .pi/knowledge/ or AGENTS.md, but it contains:",
+		...hits.map((h) => `- ${h.side === "reply" ? "your reply" : "operator"} \u2014 ${h.label}: "${h.excerpt}"`),
+		"",
+		"Memory is volatile: a promise, recommendation, operator preference or open question that exists",
+		"only in chat is lost at the next session. Record it now: operator rulings, preferences, facts and",
+		"open questions in .pi/knowledge/open-decisions.md (quoted, dated); future promises as a",
+		"trigger -> action item in .pi/knowledge/next-actions.md. Then run",
+		"`python .pi/scripts/check_kb.py --index` and tell the operator in one line where it was recorded.",
+		"If nothing here needs recording, reply with one line starting `No record needed:` and the reason.",
+	].join("\n");
+}
+
+/** Plain text of the last assistant message in an `agent_end` message list. */
+export function lastAssistantText(messages: unknown): string {
+	if (!Array.isArray(messages)) return "";
+	for (let i = messages.length - 1; i >= 0; i--) {
+		const m: any = messages[i];
+		if (m?.role !== "assistant") continue;
+		if (typeof m.content === "string") return m.content;
+		if (!Array.isArray(m.content)) continue;
+		const text = m.content.filter((c: any) => c?.type === "text" && typeof c.text === "string").map((c: any) => c.text).join("\n");
+		if (text.trim()) return text;
+	}
+	return "";
+}
+
+/** The `## Pending` section of next-actions.md, wrapped for injection; null when it has no items. */
+export function nextActionsInjection(markdown: string): string | null {
+	const m = /^## Pending[^\n]*\n([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(markdown ?? "");
+	if (!m || !/^\s*(?:\d+\.|[-*])\s+\S/m.test(m[1])) return null;
+	return [
+		"[kb-document extension \u2014 session priming, decision D25]",
+		"Pending commitments from earlier sessions (.pi/knowledge/next-actions.md). If the operator's",
+		"message matches a trigger below, do that action first. Remove an item once it is done and logged.",
+		"",
+		m[1].trim(),
+	].join("\n");
+}
+
+/** Walk up from `start` to the folder holding `.pi/scripts/check_kb.py`; stop at a git root. */
 export function findRepoRoot(
 	start: string,
 	probe: { exists(path: string): boolean; join(...p: string[]): string; dirname(p: string): string },
 ): string | null {
 	let dir = start;
 	for (let i = 0; i < 64; i++) {
-		if (probe.exists(probe.join(dir, ".pi", "tools", "check_kb.py"))) return dir;
+		if (probe.exists(probe.join(dir, ".pi", "scripts", "check_kb.py"))) return dir;
 		if (probe.exists(probe.join(dir, ".git"))) return null; // reached repo root without the tool
 		const parent = probe.dirname(dir);
 		if (parent === dir) return null;

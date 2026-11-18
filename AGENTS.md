@@ -58,12 +58,20 @@ repo it is also enforced by a project extension
 [D19](.pi/knowledge/open-decisions.md#d19--make-the-documentation-duty-fire-automatically-skill-vs-extension)): when the user's prompt contains *document, record, write down, note this,
 register, decision, ruling* or asks *"was everything recorded?"*, the extension injects that
 skill into the turn; and when a run changes [`.pi/knowledge/`](.pi/knowledge/_index.md) or this file, it runs
-`check_kb.py --verify-index` and sends you back (at most twice) if the check fails. That
+`check_kb.py --verify-index` and sends you back (at most twice) if the check fails. Since
+[D25](.pi/knowledge/open-decisions.md#d25--harden-kb-document-so-commitments-and-operator-statements-are-recorded-automatically) (2026-11-17) it also
+**injects [`next-actions.md`](.pi/knowledge/next-actions.md) into the first prompt of every session**, and its
+**commitment gate** sends you back once when a run promises something, recommends, asks the
+operator, or hears an operator preference, without touching the KB. That
 extension and skill load **only after project trust is granted** — if you see no
 `/kb-check` command, they are not active and this file is all you have.
 
 * **Every finding goes in the knowledge base in the same session you made it** — before
   you write your summary to the user. A finding that exists only in chat is lost.
+* **Never promise future behaviour from memory (D25).** You will not remember. "When you say
+  X, I'll do Y" is allowed only once the item is in
+  [`next-actions.md`](.pi/knowledge/next-actions.md); operator preferences, setup facts, your
+  recommendations and questions to the operator go in the register in the same turn.
 * **Update the register it belongs to** (see next section). Registers are append/inline
   edit; do not create a new file per question.
 * **Cite `file:line`** for every claim, from a read you actually did. Line refs drift;
@@ -158,7 +166,8 @@ Any report must name the environment and list what was **not** executed.
 ## Feature freeze (current branch)
 
 Branch `feature/birdframe-midnight-reset`. The current plan is
-[`.pi/reset-after-midnight Plan v0.3.md`](.pi/reset-after-midnight%20Plan%20v0.3.md) (v0.1/v0.2 kept for history). ~~**Building the feature is
+[`.pi/reset-after-midnight Plan v0.4.md`](.pi/reset-after-midnight%20Plan%20v0.4.md) (2026-11-17: execution-state revision, design
+unchanged; ~~v0.3~~ and v0.1/v0.2 kept for history). ~~**Building the feature is
 NOT authorised**~~ *Superseded 2026-11-17: gate G0 lifted by the operator for Plan v0.3 steps
 W1–W3 only; stages V and H, §8 deployment, pushes and PRs still need separate permission
 (see the gate amendment in [`.pi/knowledge/open-decisions.md`](.pi/knowledge/open-decisions.md)).*
@@ -200,7 +209,8 @@ authorisation; do not discard unrelated local changes.
   the write tool, then process it. Don't leave scratch files or `__pycache__` in `.pi/`.
 * `.pi/` **and this `AGENTS.md`** are **committed on this branch** (D11c, pushed to the operator's
   fork `origin`). They **must be removed before any PR to the parent repo** (`upstream`, push
-  disabled). `.pi/ask-log/` must never be committed. *History:* they were previously hidden from git **locally** via `.git/info/exclude`
+  disabled) — and so must the root `.pi-tasks/` directory the pi-task tool committed during G0
+  (D11 amendment, 2026-11-17). `.pi/ask-log/` must never be committed. *History:* they were previously hidden from git **locally** via `.git/info/exclude`
   ([D11](.pi/knowledge/open-decisions.md#d11--commit-ignore-or-leave-untracked-pi-and-root-agentsmd)) — shared by every worktree; no git history, so only as safe as this disk.
   **Never run `git clean -x` or `-X` here: they delete ignored files** (the whole knowledge
   base). Committing them later needs `git add -f`, and only after the operator decides.

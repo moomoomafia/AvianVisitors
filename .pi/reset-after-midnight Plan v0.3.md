@@ -1,5 +1,8 @@
 # BirdFrame midnight reset — Plan v0.3
 
+> **Superseded 2026-11-17 by [Plan v0.4](reset-after-midnight%20Plan%20v0.4.md)** (execution-state
+> revision after the post-W1 review; §4.2–§4.6 design carried over unchanged). Kept for history.
+
 Repository: `AvianVisitors` (fork `moomoomafia/AvianVisitors`; parent `Twarner491/AvianVisitors`,
 push to parent disabled). Branch: `feature/birdframe-midnight-reset`. Product base: `5950f807`
 (= the parent's current tip, verified 2026-11-16).
@@ -56,7 +59,8 @@ lines).
 Supporting rulings: **D2** local mode only (`species_source != "birdweather" and shoot is True`);
 **D3** additive request param + config toggle `reset_at_midnight`, default `false`; **D4** CI = the
 parent's existing jobs, no new workflow, hardware pass mandatory; **D11c** `.pi/` + `AGENTS.md`
-are on this branch and must be stripped before any PR to the parent; **D14** outdated station ⇒
+are on this branch and must be stripped before any PR to the parent (so must the root `.pi-tasks/`,
+D11 amendment 2026-11-17); **D14** outdated station ⇒
 hold + exit 1; **D15** Educators scope ⇒ hold (falls into the D14 path); **D16** station
 unreachable ⇒ timer skips (exit 0), forced run exits 1; **D20** minimal footprint.
 
@@ -210,7 +214,7 @@ nothing is pushed without the operator's say-so.
 | H | operator + parent | hardware pass on `birdpic` | checklist recorded |
 
 The parent records each step in `.pi/knowledge/verification-log.md`, keeps the register current, and
-runs `python .pi/tools/check_kb.py --index` (exit 0) at the end of each session.
+runs `python .pi/scripts/check_kb.py --index` (exit 0; path moved from `.pi/tools/` 2026-11-17) at the end of each session.
 
 ## 8. Deployment (after merge to the operator's fork, when authorised)
 
@@ -225,7 +229,10 @@ runs `python .pi/tools/check_kb.py --index` (exit 0) at the end of each session.
 
 * ~~**G0 — building not authorised** until the operator says so.~~ **G0 lifted 2026-11-17** (W1–W3;
   V and H separately gated; D21 deferred to V).
-* **Upstream PR:** strip `.pi/` and `AGENTS.md` first (D11c); whether to go upstream at all is
+* **Before W2 (added 2026-11-17, post-W1 review):** D23 (commit the pending `.pi/` changes so the
+  worker cannot sweep them into a product commit) is open and needed first; D22 (a committed parent
+  test for W1's param, formerly Q1) is open but does not block W2.
+* **Upstream PR:** strip `.pi/`, `AGENTS.md` and the root `.pi-tasks/` (D11 amendment 2026-11-17) first (D11c); whether to go upstream at all is
   undecided (D11a). The PR would carry only §4 and §5.
 * **Project trust:** approve the prompt so the `kb-document` extension loads (D19).
 * **Not researched (operator deselected):** parent CI health; `edu_endpoint` on Windows PHP;

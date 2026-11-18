@@ -43,6 +43,10 @@ feature branch alone triggers no CI. No PR into the fork's `avian-visitors` bran
 | `ANSWERED` (interim), housekeeping | D11 — hidden locally; upstream-vs-personal still undecided |
 | `ANSWERED` (principle, outranks parent-decisions) | D20 — minimal footprint, align with the parent repo |
 | `OPEN`, needed only at execution stage V | D21 — CI access via a PR inside the fork (deferred 2026-11-17 at G0: re-ask at V) |
+| `OPEN`, not blocking W2 (opened 2026-11-17, post-W1 review) | D22 — commit a parent test for W1's request param (was handoff Q1) |
+| `ANSWERED 2026-11-17` (operator) | D23 — commit the pending `.pi/` changes before W2: (a) one local docs commit, no push |
+| `ANSWERED` (operator), harness | D25 — harden kb-document: build commitment gate + session priming + rule (2026-11-17) |
+| `ANSWERED 2026-11-17` (operator) | D24 — D4 re-confirmed: Docker container in `.pi/` is the local gate (virtualization verified) |
 | Re-asked under D20, now ruled | D4 CI clause — "No new workflow" (2026-11-16) |
 | `SUPERSEDED` | D17 — operator chose the parent repo's flow (2026-11-16); D5 → D14 |
 | `ANSWERED`, housekeeping | D18 — 2026-11-16 |
@@ -242,6 +246,15 @@ vs frame-only), and the Phase 4 review has nothing to check against.
 ### D4 — What environment is the acceptance gate?
 
 **Status:** `ANSWERED 2026-11-16`
+
+> **Drift flagged 2026-11-17 (operator asked "are we drifting into just doing it locally with
+> local PHP?"):** yes. This ruling (container = local gate) was never amended, but Plan v0.3 and
+> v0.4 §6 use the Windows host (stubbed `fcntl`, scoop PHP) as the local gate, because WSL2 could
+> not start (`HCS_E_HYPERV_NOT_INSTALLED`). The operator is enabling virtualization in BIOS
+> (needed for Docker anyway). Until this ruling is re-confirmed or amended, treat Windows runs as
+> **pre-checks only**. Re-confirmation is tracked as
+> [D24](#d24--re-confirm-d4-container-as-the-local-gate-once-virtualization-works). Plan v0.4 §6
+> is not yet changed.
 
 > **Clause ruled (operator, 2026-11-16, after research R2): "No new workflow."** Feature tests go
 > only into the parent's existing test files (`tests/test_midnight_reset.php`,
@@ -557,7 +570,11 @@ Original analysis retained below.
 >
 > **Decision (house style, fail-static):** option (a) — if the response shows an Educators
 > scope (`educator_scope` present) while the flag is on, **hold the previous collage, log
-> "educator capture active", exit 0**. Scope semantics win; the param never overrides a scope
+> "educator capture active", ~~exit 0~~**. *(Amended 2026-11-16 by the D20 note above: no
+> dedicated branch — the hold goes through the D14 path and **exits 1**, as Plan v0.3 §3/§4.2(c)
+> say. Marker added 2026-11-17 in the
+> [post-W1 review](verification-log.md#post-w1-review-implementation-and-test-coverage) because a
+> verbatim copy in the W2 handoff could mislead a blank worker.)* Scope semantics win; the param never overrides a scope
 > (that invariant is pinned by `tests/test_midnight_reset.php`). Revisit if the operator ever
 > starts using Educators. Needs one test, no hardware.
 
@@ -658,6 +675,13 @@ Basis: house style (additive, flag-gated, minimal blast radius) and the pinned t
 > removed before any pull request to the parent repo** (D11a, upstream vs personal, is still
 > undecided). Recommended alternative was a separate notes branch; not chosen.
 >
+> **Amendment (2026-11-17, parent-decided, basis: D11c's intent + D20 "leave as little
+> trace"):** the strip-before-PR list also covers the **root `.pi-tasks/` directory**. The
+> pi-task tool committed it outside `.pi/` during the G0 session (commits `69730fc1`,
+> `0e15473a`: `.pi-tasks/.ignore`, `.pi-tasks/TASK_0001.md`, `.pi-tasks/env-notes.md`). At the time of finding,
+> the branch was 10 commits ahead of `origin` (`git branch -vv`), so it had not been pushed.
+> Found in the [post-W1 review](verification-log.md#post-w1-review-implementation-and-test-coverage).
+>
 > **D11a — destination:** asked *"Send this upstream as a PR to Twarner491/AvianVisitors, or
 > keep it for your own frame?"* — **"Not decided yet."** (Still open; not blocking.)
 >
@@ -700,6 +724,12 @@ deleting it has a functional cost, not just a tidiness one. Related: children wr
 mechanical rewrites (54 doc links, 225 path normalisations, 118 decision links), verified
 to change nothing else. Details and the defects found along the way:
 [verification-log.md](verification-log.md#d18-migration-reference-refactor-and-checker).
+
+*Amended 2026-11-17: the checker moved from `.pi/tools/check_kb.py` to `.pi/scripts/check_kb.py`.
+Pi 1.5.2 treats any project `.pi/tools/` holding files other than fd/rg as deprecated
+custom tools and blocks startup with a "press any key" warning. The ruling quoted above
+keeps the old path. Details in
+[verification-log.md](verification-log.md#checker-relocation-pitools-to-piscripts).*
 
 Original analysis retained below.
 
@@ -841,6 +871,153 @@ branch); (3) no CI — rely on local runs + the hardware pass.
 > **Deferred 2026-11-17 (at the G0 lift, operator):** stays `OPEN`; re-ask at stage V. Reason:
 > nothing blocks W1–W3 — §6's local runs cover verification on this host, and pushing a feature
 > branch alone triggers no CI. Do not open a PR into the fork's `avian-visitors` branch.
+
+### D24 — Re-confirm D4: container as the local gate once virtualization works?
+
+**Status:** `ANSWERED 2026-11-17`: operator chose **"Docker container in .pi/ (Recommended)"**
+(option a; keep D4). ~~`OPEN` (opened 2026-11-17; not blocking W2 coding, blocking any "verified" claim at V)~~
+Consequence: build a `.pi/` Dockerfile on `debian:bookworm-slim`; Windows runs are quick pre-checks
+only. The container is not built yet.
+
+**Why:** see the D4 drift note. After the reboot, Docker/WSL2 should work, so D4's ruling
+becomes executable again.
+
+**Options:** (a) keep D4 as ruled: build the `.pi/` Debian container (per the Audit-2 amendment:
+Pillow + Playwright + pytest, fake `inky`, `php -r` harness or a provisioned lock, no clock
+seam for `recent`), run W2's tests there, and keep Windows as a fast pre-check (recommended:
+real `fcntl`, removes the 7 POSIX and 14 educator Windows-only failures, and needs no parent
+trace); (b) formally downgrade to Windows + Linux CI (needs D21) + hardware.
+
+**Root cause (operator, 2026-11-17):** a **new CPU** was installed and its BIOS virtualization
+setting is off. Docker containers previously started at boot and worked on this machine. So the
+first sign after enabling it is the operator's own containers coming up. The parent still runs
+the three checks below and records the output before relying on Docker. Assumption: no other
+cause (Hyper-V/VMP features were working before the CPU swap).
+
+**First check after the reboot:** `wsl --status`, `docker run --rm hello-world`, then
+`docker run --rm debian:bookworm-slim true`.
+
+> **Result (2026-11-17): all three PASS** (exit 0); bookworm also offers php 8.2 + php-sqlite3 +
+> Python 3.11. D4 is executable again. Evidence:
+> [post-reboot check](verification-log.md#post-reboot-virtualization-check-2026-11-17). Ruling
+> now put to the operator.
+
+> **Operator input (2026-11-17):** asked *"We use the Ubuntu WSL environment or Docker? Which
+> allows for the most testing locally before we move to the actual display?"* and stated *"we
+> should be able to do almost all the testing locally. Because we know the display works as
+> is."* Still `OPEN`: the operator has not chosen yet.
+>
+> **Parent recommendation: Docker** (a `.pi/` Dockerfile on `debian:bookworm-slim`, after the
+> `frame/Dockerfile.install-security` precedent). On Windows, Docker Desktop runs on WSL2 anyway,
+> so local coverage is the same, but Docker is pinned, disposable and reproducible, matches D4,
+> and leaves no trace. A hand-built WSL Ubuntu is fine for interactive poking but drifts.
+> **Local scope agreed in principle:** decision logic, the real station API on a fake
+> `birds.db`, the real headless capture, and a fake panel asserting push/no-push. **Hardware-only
+> residue:** a real midnight rollover, a power-cycle, Cache-Control from the real SAPI, and one
+> visual check.
+
+### D25 — Harden kb-document so commitments and operator statements are recorded automatically?
+
+**Status:** `ANSWERED 2026-11-17` — option (a), build 1+2+3. Operator, asked "Do you want me to
+build 1 + 2 + 3?": **"yes"**. ~~`OPEN` (opened 2026-11-17; proposal by the parent, operator asked for it)~~
+
+**Incident (operator's words):** *"That is a perfect example of hubris and assumptions where you
+tell me something that I agree and make sense, but knowing more, I know that you won't remember
+that once we reboot."* The parent promised "when you say virtualization's on, I'll run the checks"
+and wrote it to disk only when challenged. Earlier the same day, a whole answer (Docker vs WSL,
+where the change lives) also stayed chat-only until the operator asked "where are we recording
+these choices?".
+
+**Root cause (verified):** the D19 extension was active (trust granted for `C:\apps\birdNet` in
+`~/.pi/agent/trust.json`), but its two hooks cannot see this failure.
+`before_agent_start` matches only the **user's** words against trigger words
+(`.pi/extensions/kb-document/src/core.ts:9-18`). `agent_before_settle` runs the checker only
+**if** the KB changed (`.pi/extensions/kb-document/index.ts:95-100`), so it proves link hygiene,
+not completeness. Nothing inspects the **assistant's** output, and nothing re-primes a new
+session: priming depends on the model choosing to read [_index.md](_index.md).
+
+**Proposal (all in `.pi/`, no parent trace):**
+
+1. **Commitment gate** (`agent_before_settle`). Scan this run's final assistant text and the
+   user's prompt (code stripped, as `stripCode` does). On the assistant side, look for future
+   promises ("I'll …", "when you say/come back", "after the reboot", "next session"),
+   recommendations, and questions put to the operator. On the user side, look for preferences,
+   rulings and facts ("I want", "I know for a fact", "my preference", "I installed"). If either
+   matches and **no** KB file changed this run, request one continuation: record it in the
+   register / open threads, or state in one line why it needs no record. Pure, unit-tested
+   detector, max 1 attempt.
+2. **Session-start re-priming** (`before_agent_start` on the first user prompt of a session).
+   Inject a short new [next-actions.md](next-actions.md) (trigger → action list, like today's
+   FIRST ACTION box), so pending commitments reach a fresh session without relying on the
+   model to read [_index.md](_index.md).
+3. **Rule** in [AGENTS.md](../../AGENTS.md) and the skill: never promise future behaviour unless it is
+   already written to [next-actions.md](next-actions.md); say "recorded in X" instead of "I'll remember".
+4. **Optional safety net:** append each operator prompt + final reply (truncated) to a
+   git-ignored `.pi/journal/`, triaged at the next session start. Pi's own sessions are already
+   on disk and searchable (`session_search`), so this is redundant unless sessions get pruned.
+   Recommended: skip it.
+
+**Options:** (a) build 1+2+3 (recommended); (b) only 3, which is cheap but rules alone already
+failed here; (c) 1+2+3+4.
+
+**Consequence if unanswered:** the same failure recurs at the next commitment. Mitigation in
+the meantime: the FIRST ACTION box in [_index.md](_index.md).
+
+**Implemented 2026-11-17** (all in `.pi/`). Commitment gate: `commitmentGate`,
+`detectCommitments`, `lastAssistantText` in `.pi/extensions/kb-document/src/core.ts`, wired via
+`agent_end` + `agent_before_settle` in `.pi/extensions/kb-document/index.ts`. Priming:
+`nextActionsInjection` + `session_start` + first `before_agent_start`, reading
+[next-actions.md](next-actions.md) (the FIRST ACTION box moved there). Rule: SKILL.md rule 9 +
+[AGENTS.md](../../AGENTS.md). Tests 30/30 (20 old + 10 new, fixtures are this incident's real
+texts). Real-Pi headless load: PASS. Evidence:
+[verification-log.md](verification-log.md#d25-commitment-gate-and-session-priming).
+
+**Known limits:** a regex detector has false positives (mitigated by the one-line "no record
+needed" exit) and false negatives. It raises the floor; it does not guarantee completeness.
+
+### D22 — Commit a parent test for W1's request param?
+
+**Status:** `OPEN` (opened 2026-11-17; supersedes the unnumbered Q1 in `.pi/handoff/plan.md`)
+
+**Why it matters:** Plan v0.3 §5's `tests/test_midnight_reset.php` row says to add one
+`edu_endpoint` case if cheap, otherwise to record the gap. W1 did neither; it left the choice to
+the operator as Q1. The [post-W1 review](verification-log.md#post-w1-review-implementation-and-test-coverage)
+found that **no committed check, and no `.pi/` check before that review, executed the three new
+lines**. The R3 param check tests a copy of the expression, and the R3 clamp check stops at the
+library guard (`avian/api/birdnet-api.php:127`). End-to-end coverage now exists only in our tree
+(`.pi/research/w1/recent_param_probe.php`), which is not run by the parent's CI.
+
+**Options:** (a) add one clock-independent case to an existing parent PHP test: two
+`edu_endpoint` calls on `recent`, `hours=24`, with and without `reset_at_midnight=1`, asserting
+only `midnight_clamped` and `window_start` ending `00:00:00`. That holds at any time of day
+(`avian/api/birdnet-api.php:109-113`), needs no time-relative rows, and needs the store
+provisioned (`educator_store_open(true)`) with no capture running (recommended: small, upstream
+idiom, guards the request path in Linux CI); (b) record the gap and rely on the `.pi/` probe + R1
+argument (smallest trace); (c) the full probe as a parent test (more coverage, but time-relative
+rows need a midnight guard, so there's a flake risk).
+
+**Consequence if unanswered:** W1 ships with no committed regression guard; a future upstream
+edit to the request block could silently drop the param and only the hardware pass would notice.
+Does not block W2 (frame tests patch `fetch_recent_payload`, per Plan v0.3 §5).
+
+### D23 — Commit the pending `.pi/` changes before the W2 worker runs?
+
+**Status:** `ANSWERED 2026-11-17`: operator chose **"Commit .pi/ locally as one docs commit, no
+push (Recommended)"** (option a). ~~`OPEN` (opened 2026-11-17; needed before dispatching W2)~~
+The commit covers the whole `.pi/` tree plus [AGENTS.md](../../AGENTS.md); it never includes `.pi/ask-log/` (D11c).
+
+**Why it blocks W2:** the working tree holds modified, tracked `.pi/` files (checker relocation
+staged, KB edits, handoff ledger, kb-document extension). `worker` has `bash` and makes local
+commits; a `git commit -a` or `git add -u` would sweep these into the W2 product commit. The
+G0 handoff only warned children about *untracked* files. Commits need the operator's say-so
+([AGENTS.md](../../AGENTS.md) safety rails).
+
+**Options:** (a) the parent commits the `.pi/` changes locally as one docs commit before W2,
+no push (recommended); (b) leave them and tell the W2 worker to commit only explicit
+`frame/`/`tests/` paths; (c) `git stash` them (risky with the staged rename).
+
+**Consequence if unanswered:** W2's commit may mix KB/tooling changes into a product commit,
+which complicates the D11c strip before any parent PR.
 
 ---
 

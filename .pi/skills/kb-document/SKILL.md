@@ -42,6 +42,13 @@ documentation procedure for this repo. [AGENTS.md](../../../AGENTS.md) points he
 8. **Links:** doc→doc references are relative markdown links, never bare backtick names.
    Headings stay plain text. Prefer `:` over `—` in headings you intend to link (GitHub
    slugs keep double hyphens).
+9. **Never promise future behaviour from memory (D25).** "I'll remember", "when you say X,
+   I'll do Y", "after the reboot we'll…" are only allowed once the item is written in
+   `.pi/knowledge/next-actions.md` (trigger → action → log). Say "recorded in next-actions.md".
+   The same applies to the operator's preferences, facts about their setup, and recommendations
+   or questions you put to them: those go in the register **in the same turn**. The extension's
+   commitment gate sends you back once if a run says such things without touching the KB; if
+   nothing needs recording, answer with one line starting `No record needed:` and the reason.
 
 ## Procedure
 
@@ -56,7 +63,7 @@ Run this whenever the skill fires, and in full at the end of a session or when a
    and a grep for the *old* wording finds only struck-through or annotated copies.
 4. **Index.** `.pi/knowledge/_index.md` lists any new doc; add a hard-won fact where a
    discovery would cost the next agent real time.
-5. **Checker.** Run `python .pi/tools/check_kb.py --index` **unpiped** and require exit 0
+5. **Checker.** Run `python .pi/scripts/check_kb.py --index` **unpiped** and require exit 0
    (`… | tail` reports `tail`'s exit code, not the checker's).
 6. **Open threads.** Rewrite the dated "Open threads" section at the top of `_index.md` for
    a reader with zero memory of this conversation. Delete threads that closed.

@@ -37,6 +37,12 @@ Environment: Python 3.14.0, pytest 9.1.1, Pillow present, playwright importable,
 | `pytest tests/test_midnight_reset.py` | passed vacuously (skipped the PHP check — no `php`). **Since the scoop PHP install: `1 passed` for real in a new shell** ([R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php)) |
 | `pytest tests/` | **collection aborted: 15 errors** |
 | `pytest frame/` | **collection aborted: 4 errors** |
+| `php tests/test_educator_backend.php` (added 2026-11-17) | **14 of 199 fail on base `5950f807` and on HEAD, identical set** (tar/permission paths, e.g. "scoped tar is staged successfully…" 503). Pre-existing Windows failures, not ours. Linux CI is the gate ([post-W1 review](verification-log.md#post-w1-review-implementation-and-test-coverage)) |
+
+**PHP in a stale tool shell (2026-11-17):** read the user value from the registry inside
+`bash -lc`:
+`export PHP_INI_SCAN_DIR="$(powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable(\"PHP_INI_SCAN_DIR\",\"User\")" | tr -d "\r")"`.
+The `cmd.exe /c echo %PHP_INI_SCAN_DIR%` trick does not work here (it prints the cmd banner).
 
 Error causes, confirmed:
 
@@ -168,6 +174,15 @@ Three patterns already exist — reuse them rather than inventing one:
    for testing a new `recent` query param against a temp DB.
 3. **Lint PHP without executing it:** `php -l <file>` for every API file, gated on
    `shutil.which("php")` (`tests/test_educator_security.py:197-210`).
+4. **PHP-native endpoint driver (verified 2026-11-17):** `edu_endpoint` in
+   `tests/test_educator_backend.php:64-104` runs an endpoint via `proc_open([PHP_BINARY, '-r', …])`
+   with injected `$_GET`/`$_SERVER`. Before any unscoped `birdnet-api.php` call, provision the
+   store with `educator_store_open(true)` (`tests/test_educator_backend.php:178`), or the API
+   answers 503 "educator data store is missing or unsafe" (`avian/api/educator-store.php:166`).
+   Pitfalls: on Windows, `shell_exec` + `escapeshellarg` mangles the `-r` code ("Unclosed '('"),
+   so use the `proc_open` **array** form. Also `stats`/`recent` carry `anchor` and `as_of` = the
+   current second, so drop both before comparing two responses. Worked example:
+   `.pi/research/w1/recent_param_probe.php`.
 
 Time-dependent logic gets a clock override precedent from the educators code:
 `AV_EDUCATOR_NOW` (CLI-only, `avian/api/educator-store.php:420-427`). The related env

@@ -259,7 +259,8 @@ parent-decided. Docs: [`_index.md`](_index.md), [`feature-midnight-reset.md`](fe
 
 Doc→doc references are markdown links; source refs stay backtick `path:line` with the full
 repo path on first use per section; headings stay plain text; decision status never in a
-heading; `python .pi/tools/check_kb.py --index` must exit 0 at the end of every session.
+heading; ~~`python .pi/tools/check_kb.py --index`~~ `python .pi/scripts/check_kb.py --index` (moved 2026-11-17,
+see [below](#checker-relocation-pitools-to-piscripts)) must exit 0 at the end of every session.
 
 ---
 
@@ -711,7 +712,10 @@ Cache-Control at `:170`, `recentWindow` argument at `:363`. The worker confirmed
   response keys (`:95`, `:121`, `:394`) plus the new `$_GET` read; this is inherent in plan
   §4.1's verbatim line.
 
-**Q1 (`edu_endpoint`), the worker's finding, not yet re-run by the parent.** It works. A scratch
+**Q1 (`edu_endpoint`), the worker's finding, ~~not yet re-run by the parent~~.** *(Amended
+2026-11-17: re-run independently by the parent in the
+[post-W1 review](#post-w1-review-implementation-and-test-coverage) and confirmed; Q1 is now
+registered as [D22](open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param).)* It works. A scratch
 script outside the repo ran the full `recent` endpoint against a temp `birds.db`. With the
 param it returned `midnight_clamped=true` and only today's species; without it, or with `=0`,
 the rolling window; `stats` was unchanged. The worker reports ~0.1 s per call, unmeasured by the
@@ -729,3 +733,224 @@ added.
 
 Docker / D4 container; POSIX file-mode tests (7 known local failures); anything on `birdpic`;
 CI (D21 deferred); W2, W3, R, V, O, H.
+
+---
+
+## Checker relocation: .pi/tools to .pi/scripts
+
+* **Date:** 2026-11-17 · **Executor:** parent (no child agent) · **Trigger:** the operator
+  reported that `pi` in this worktree printed "Project tools/ directory contains custom
+  tools. Custom tools have been merged into extensions." and waited for a keypress.
+* **Root cause (verified by reading the installed source):** Pi 1.5.2's
+  `checkDeprecatedExtensionDirs` (`dist/migrations.js:220` in the managed install under
+  `~/.pi/agent/install/releases/1.5.2/`) warns when `<cwd>/.pi/tools/` holds anything
+  other than `fd`/`rg`/`fd.exe`/`rg.exe` or dotfiles. Our only entry was the D18 checker,
+  a Python script, not a Pi tool. The warning is cosmetic but blocks startup.
+* **Fix:** `git mv .pi/tools/check_kb.py .pi/scripts/check_kb.py` (staged, **not
+  committed**); empty `.pi/tools/` removed. No logic change: `ROOT` is
+  `pathlib.Path(__file__).resolve().parents[2]` (`.pi/scripts/check_kb.py:28`) and
+  `scripts` sits at the same depth as `tools`. Live references updated: the script's usage
+  text, the kb-document extension (`.pi/extensions/kb-document/index.ts`,
+  `.pi/extensions/kb-document/src/core.ts`, both test files),
+  [SKILL.md](../skills/kb-document/SKILL.md) step 5, [_index.md](_index.md),
+  `.pi/handoff/plan.md`, and Plan v0.3 §7. Historical text (the D18 ruling quote, the D18
+  section of this log) keeps the old path, with a dated amendment note.
+* **Verified:** `node --test "test/*.test.ts"` in `.pi/extensions/kb-document`, **20/20
+  pass** (Node v25.1.0). `python .pi/scripts/check_kb.py --verify-index` before the move:
+  exit 0. Startup check: `pi --list-models nonexistent-xyz </dev/null` returned straight
+  away with no deprecation warning. `.pi/tools` and `.pi/hooks` are both absent.
+  *What would falsify it:* the warning reappearing on a fresh interactive `pi` start here.
+  An interactive TUI start was **not** observed by the parent.
+* **Side observation, not changed:** pasting that warning into a prompt fired the
+  kb-document injection. The trigger was the word "Documentation" in pi's own output.
+  That matches the D19 trigger regex (`.pi/extensions/kb-document/src/core.ts:12`), which
+  ignores code and URLs but not pasted terminal text. It is a harmless false positive and
+  is left as is.
+
+---
+
+## Post-W1 review: implementation and test coverage
+
+* **Date:** 2026-11-17 · **Who:** parent session (Claude, Pi), no child agent · **Trigger:**
+  operator asked which parts of [Plan v0.3](../reset-after-midnight%20Plan%20v0.3.md) are built
+  and how well they are tested, before W2. **Environment:** Windows host, scoop PHP 8.5.12 with
+  `PHP_INI_SCAN_DIR` read from the user registry inside `bash -lc`; no WSL2/Docker, panel or CI.
+
+### What is built
+
+`git diff 5950f807 HEAD` outside `.pi/`: only `avian/api/birdnet-api.php` (+3/−2, commit
+`428f3104`) and three files under a root `.pi-tasks/` (commits `69730fc1`, `0e15473a`, written
+by the pi-task tool during G0). `frame/` and `tests/` are byte-identical to base. So W1 (§4.1)
+is done; W2, W3 and everything after are not started (matches `.pi/handoff/ledger.md`).
+
+### Per-claim verdicts
+
+* **Diff matches §4.1 verbatim: confirmed.** `avian/api/birdnet-api.php:136` is the new
+  `$resetAtMidnight` line, `:170` the Cache-Control swap, `:363` the `recentWindow` argument.
+  `recentWindow` is unchanged (`:82-124`). No other reader of `$RESET_AT_MIDNIGHT` remains
+  besides `:136`.
+* **R3 scripts prove the new lines: refuted as a coverage claim.** `.pi/research/r3/param_check.php`
+  tests a *copy* of the expression (`flag()`, `:16-18`). `.pi/research/r3/clamp_check.php:8`
+  requires the API in library mode, which returns at `avian/api/birdnet-api.php:127`, before
+  `:136`. Neither executes the three new lines. Before this review, the only end-to-end run
+  was the worker's discarded scratch script (W1 Q1, above).
+* **End-to-end behaviour: confirmed by the parent.** New `.pi/research/w1/recent_param_probe.php`
+  drives the real `recent` and `stats` endpoints through upstream's `edu_endpoint` idiom
+  (`tests/test_educator_backend.php:64-104`), with the store provisioned as upstream does
+  (`educator_store_open(true)`, `:178`). Results: no param = rolling 24 h incl. yesterday;
+  `=1` = today only, `midnight_clamped` true, `window_start` at `00:00:00`; `=0`, `=true`,
+  `=01`, array = ignored; `hours=72&reset_at_midnight=1` still clamped (D13);
+  `hours=1000000` not clamped (upstream parity); `stats` identical with and without the param.
+  **Discriminating:** 3 of 3 runs pass on HEAD; on base `5950f807` exactly the three
+  param-dependent checks fail. *Falsified by:* the probe passing on base, or failing on HEAD.
+* **Cache-Control `no-store` with the param: not verified.** `headers_list()` is empty under
+  CLI and `php -S` needs the Educators lock (hard-won fact 14). Low risk: one token, same
+  expression the global flag already uses.
+* **"Parent PHP tests pass" (W1 done-when): incomplete as recorded.** W1 ran
+  `tests/test_midnight_reset.php` (20 pass) and `tests/test_site_name_api.php` (6 pass), both
+  re-run here and passing. It did not run `tests/test_educator_backend.php`, the only parent
+  suite that runs `birdnet-api.php` end to end. That suite shows **14 of 199 failing on this
+  host, with an identical failure set on base and HEAD** (A/B via `git archive` into a temp
+  dir). They are pre-existing Windows failures (tar/permission paths, e.g. "scoped tar is staged
+  successfully…" 503), not W1. Linux CI is the real gate for that suite.
+* **Response field `reset_at_midnight` has no in-repo reader:** lowercase key not found in
+  `avian/frontend/apt.js` or `frame/` (rg, case-sensitive). Search-based, not a proof.
+
+### Gaps and inconsistencies found
+
+* **No committed test covers W1.** Q1 is still open. The probe shows a clock-independent
+  parent-test case is cheap: with `hours=24` on today, `midnight_clamped` is true whenever the
+  param is honoured (`avian/api/birdnet-api.php:109-113`), whatever the time. Asserting only
+  the echo fields (`midnight_clamped`, `window_start` ends `00:00:00`) needs no time-relative
+  rows and no midnight guard. Caveat: an active Educators capture auto-scopes unscoped calls,
+  so the case must sit where no capture is running.
+* **Flake source:** `stats` carries `anchor` = the current second, so comparing two calls
+  needs `anchor` and `as_of` removed (first probe run flaked on this).
+* **`.pi-tasks/` is committed at the repo root** (outside `.pi/`). D11c's strip-before-PR
+  rule names only `.pi/` and [AGENTS.md](../../AGENTS.md). It must also be stripped. Its commit `69730fc1` has a
+  multi-paragraph subject line.
+* **Stale wording:** [_index.md](_index.md) open thread 1 said D15 is "hold, exit 0"; the register's D20
+  amendment routes D15 into the D14 path (exit 1), and Plan v0.3 §3 agrees. Thread amended.
+* **W2 handoff risk:** `.pi/handoff/plan.md` is 837 lines and carries superseded ruling bodies
+  verbatim (e.g. D15's original "exit 0" text under its amendment, D17). A blank worker may
+  implement a superseded branch. Plan §4.2 step (c) is authoritative.
+
+### Recorded where
+
+Register: [D22](open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param) (Q1 given an
+ID), [D23](open-decisions.md#d23--commit-the-pending-pi-changes-before-the-w2-worker-runs) (commit
+pending `.pi/` before W2), D11 amendment (`.pi-tasks/` strip), D15 "exit 0" marked superseded.
+[_index.md](_index.md): status line, open threads, hard-won fact 21.
+[testing-and-ci.md](testing-and-ci.md): Windows educator-backend baseline and the endpoint recipe.
+Plan v0.3 §9 and `.pi/handoff/ledger.md` point at D22/D23. Probe kept at
+`.pi/research/w1/recent_param_probe.php` (untracked, our tree only).
+
+### Not executed
+
+Anything on Linux (`frame/display.py` suites beyond the stub loop, educator backend without
+the 14 Windows failures), Cache-Control under a real SAPI, CI, hardware. The frame suites were
+not re-run (no `frame/` or `tests/` change since the W1 log's 94-pass run).
+
+---
+
+## Plan v0.4: execution-state revision
+
+* **Date:** 2026-11-17 · **Who:** parent session (Claude, Pi), no child agent · **Trigger:**
+  operator asked whether the plan needs a new version after the post-W1 review.
+* **Verdict:** yes, but only for execution; the design is unchanged.
+  [Plan v0.4](../reset-after-midnight%20Plan%20v0.4.md) supersedes
+  [v0.3](../reset-after-midnight%20Plan%20v0.3.md). §4.2–§4.6 are carried over verbatim.
+  The changes are the six listed in v0.4's header: W1 done, D22 replaces the PHP test row,
+  §6 baselines and the hardware Cache-Control `curl`, step P2 and optional T1, the README anchor
+  fix, and D15 exit 1 plus `.pi-tasks/` in §3/§9.
+* **Anchors re-checked (sed reads against HEAD):** `frame/display.py` `:42` DEFAULTS, `:91`
+  `fetch_recent` (URL `…/avian/api/birdnet-api.php?action=recent&hours=` at `:92`), `:366`,
+  `:395-400`, `:418`, `:429`, `:438-441`, `:445`, `:457-463`, `:520-528`; `frame/shoot.py`
+  `:243`, `:258`, `:412`, `:448`; `frame/bundle_runtime.py:1883-1889`;
+  `frame/config.example.toml:26`; `tests/test_midnight_reset.php:33-36` — all still hold, as
+  expected, because `frame/` and `tests/` are unchanged since base.
+* **Correction:** v0.3 §4.5 placed the README paragraph "after the bird-names section (`:87`)".
+  The bird-names section is `frame/README.md:80-89`. `:87` is the `shoot_title` line, and `:89`
+  is the `--image-url` labels paragraph. The paragraph goes after `:89`, before "When updating a
+  paired mic and frame" (`:91`). This is a location fix only, not a design change.
+* **Not done:** no Oracle or reviewer pass on v0.4, because the design is unchanged and step R
+  reviews the full diff against it. `.pi/handoff/plan.md` is **not** regenerated yet; that is
+  step P2, after D23. It now carries a banner saying v0.4 wins where they differ.
+* **Pointers updated:** [AGENTS.md](../../AGENTS.md) feature-freeze paragraph, [_index.md](_index.md)
+  current-plan line and open thread 0, v0.3 superseded banner, `.pi/handoff/plan.md` banner,
+  `.pi/handoff/ledger.md` rows P2 and T1.
+
+---
+
+## D25: commitment gate and session priming
+
+* **Date:** 2026-11-17 · **Who:** parent session (Claude, Pi), no child agent · **Ruling:**
+  [D25](open-decisions.md#d25--harden-kb-document-so-commitments-and-operator-statements-are-recorded-automatically)
+  option (a), operator: "yes".
+* **Incident:** see D25. The extension was **active** (trust granted for `C:\apps\birdNet` in
+  `~/.pi/agent/trust.json`), yet a chat-only promise passed: its triggers read only the user's
+  words, and its end-of-run check ran only when the KB had changed.
+* **API facts used (read from the installed Pi 1.5.2 type declarations and docs):**
+  `agent_end` carries `messages`; an assistant message's `content` is an array of
+  text/thinking/toolCall parts (`pi-ai/dist/types.d.ts:382-384`). `agent_before_settle` carries
+  `entries`, `continue`, `outcome` (`pi-coding-agent/dist/core/extensions/types.d.ts:806-819`).
+  `session_start` has `reason` startup/reload/new/resume/fork (the Pi install's extensions doc,
+section "session_start").
+* **Built:** pure logic in `.pi/extensions/kb-document/src/core.ts` (`REPLY_PATTERNS` `:151`,
+  `PROMPT_PATTERNS` `:162`, `detectCommitments` `:199`, `commitmentGate` `:206`,
+  `lastAssistantText` `:232`, `nextActionsInjection` `:246`). Wiring in
+  `.pi/extensions/kb-document/index.ts` (`session_start` `:100`, `before_agent_start` `:105`,
+  `agent_end` `:137`, `agent_before_settle` `:142`). New [next-actions.md](next-actions.md).
+  SKILL.md rule 9 and [AGENTS.md](../../AGENTS.md) rule.
+* **Behaviour:**
+  * If the KB changed this run, the existing checker path applies (an edit counts as
+    recording).
+  * If the KB is unchanged and the reply or prompt matches, there is one continuation
+    (`MAX_COMMIT_ATTEMPTS = 1`).
+  * Opt-out: a line starting `No record needed:`.
+  * Aborted or errored runs are skipped.
+  * Priming happens once per session (reset on `session_start`). It shares one message with
+    the skill injection when both fire.
+* **Verified:**
+  * `node --test "test/*.test.ts"`: **30/30 pass**. The 20 old tests are unchanged except the
+    hook-list assertion (now 4 hooks). The 10 new tests use this incident's real texts as
+    fixtures and also cover negatives (past tense, code spans, plain work).
+  * `node test/verify-in-pi.mjs`: **PASS** (`success=true kb-check=true skill=true
+    loadError=false`): real Pi loads the modified extension headless.
+  * *Falsified by:* a fresh session's first prompt not showing the next-actions item, or a
+    chat-only promise settling without the `kb-document-commitment` message.
+* **Live check (2026-11-17, after the operator ran `/reload`):** **priming confirmed.** The
+  operator's first prompt ("reloaded") arrived with the `[kb-document extension — session
+  priming, decision D25]` block carrying the pending virtualization item verbatim. The trigger
+  correctly did not match "reloaded", so no checks were run. **Commitment gate: still not
+  observed live** (it needs a run that promises or recommends without a KB edit).
+* **Not verified (original wording):** a live interactive session. **This session still runs
+  the old extension code** (loaded at startup), so the gate and priming take effect only after
+  `/reload` or a new session. *(Priming since verified live; see above.)* False-positive and false-negative rates in real use are unmeasured: it is a regex
+  floor, not a guarantee.
+
+## Post-reboot virtualization check (2026-11-17)
+
+**Who:** parent agent, triggered by the operator ("you asked me to tell you when virtualization
+was up"), executing [next-actions.md](next-actions.md) item 1. **Method:** ran the three checks in
+order on this Windows host, stopping at the first failure (none failed). Raw output was read,
+not inferred.
+
+| Check | Result | Evidence |
+|---|---|---|
+| `wsl --status` | **PASS**, exit 0 | Default distribution Ubuntu, default version 2. |
+| `docker run --rm hello-world` | **PASS**, exit 0 | Image pulled; "Hello from Docker!". Docker Desktop 4.91.0, Engine 29.8.0, linux/amd64, context `desktop-linux`. |
+| `docker run --rm debian:bookworm-slim true` | **PASS**, exit 0 | Image pulled (digest `sha256:734a72b3…`), container ran and exited cleanly. |
+
+**Extra probes (not in the action, cheap):**
+* `wsl -l -v`: `Ubuntu` (Stopped, v2) and `docker-desktop` (Running, v2);
+  `wsl -d Ubuntu -- uname -r` → `6.6.87.2-microsoft-standard-WSL2`. The Ubuntu distro boots.
+* In `debian:bookworm-slim`, `apt-get update` succeeded and `apt-cache policy` shows candidates
+  `php-cli 2:8.2+93` (php8.2-cli 8.2.35), `php-sqlite3 2:8.2+93`, `python3`/`python3-venv`
+  3.11.2. So the D4 base packages are installable. Note: the frame targets Python 3.9 in CI, but
+  3.11 is in the CI matrix too.
+
+**Corrections forced:** the earlier fact "WSL2 cannot start (`HCS_E_HYPERV_NOT_INSTALLED`)" is
+**superseded as of 2026-11-17** (root cause: BIOS virtualization off after a CPU swap; now on).
+**Still unverified:** Playwright Chromium on bookworm; the D4 container itself (not built);
+`fcntl`-dependent tests under Linux (not run yet). Nothing product-related was executed.

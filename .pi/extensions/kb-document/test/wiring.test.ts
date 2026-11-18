@@ -19,8 +19,8 @@ function makeRepo(): string {
 	const dir = fs.mkdtempSync(path.join(os.tmpdir(), "kbdoc-wiring-"));
 	// A .git marker stops the root search here (never climbs into the real home folder).
 	fs.mkdirSync(path.join(dir, ".git"));
-	fs.mkdirSync(path.join(dir, ".pi", "tools"), { recursive: true });
-	fs.writeFileSync(path.join(dir, ".pi", "tools", "check_kb.py"), "# stub\n");
+	fs.mkdirSync(path.join(dir, ".pi", "scripts"), { recursive: true });
+	fs.writeFileSync(path.join(dir, ".pi", "scripts", "check_kb.py"), "# stub\n");
 	fs.mkdirSync(path.join(dir, ".pi", "skills", "kb-document"), { recursive: true });
 	fs.writeFileSync(path.join(dir, ".pi", "skills", "kb-document", "SKILL.md"),
 		"---\nname: kb-document\ndescription: d\n---\n\nSKILL-BODY-MARKER\n");
@@ -49,9 +49,9 @@ const FAIL = { stdout: "ERROR   .pi/knowledge/a.md:1: broken link -> x.md\n\n1 d
 beforeEach(() => { repo = makeRepo(); notes = []; });
 afterEach(() => { fs.rmSync(repo, { recursive: true, force: true }); });
 
-test("registers the three documented hooks", () => {
+test("registers the documented hooks (D19 + D25)", () => {
 	const { handlers, commands } = load(() => PASS);
-	assert.deepEqual(Object.keys(handlers).sort(), ["agent_before_settle", "before_agent_start"]);
+	assert.deepEqual(Object.keys(handlers).sort(), ["agent_before_settle", "agent_end", "before_agent_start", "session_start"]);
 	assert.deepEqual(Object.keys(commands), ["kb-check"]);
 });
 
@@ -127,4 +127,65 @@ test("outside the repo the extension is inert", async () => {
 	} finally {
 		fs.rmSync(outside, { recursive: true, force: true });
 	}
+});
+
+// --- D25 ---------------------------------------------------------------------------------
+
+const reply = (text: string) => ({ messages: [{ role: "assistant", content: [{ type: "text", text }] }] });
+const PROMISE = "When you're back, tell me and I'll run the checks.";
+
+test("D25: unrecorded promise with an unchanged KB requests exactly one continuation", async () => {
+	const { handlers, calls, ctx } = load(() => PASS);
+	await handlers.before_agent_start({ messageType: "user", prompt: "what next?" }, ctx);
+	await handlers.agent_end(reply(PROMISE), ctx);
+	const r: any = await handlers.agent_before_settle({ entries: [{ type: "custom", tag: "prior" }], outcome: "completed" }, ctx);
+	assert.equal(r.continue, true);
+	assert.equal(r.entries[0].tag, "prior", "preserves earlier proposed entries");
+	assert.equal(r.entries.at(-1).customType, "kb-document-commitment");
+	assert.match(r.entries.at(-1).content, /tell me/);
+	assert.equal(calls.length, 0, "the checker is not involved");
+	// The continuation's own run ends: still no KB change -> no second nudge.
+	await handlers.agent_end(reply("No record needed: it was a hypothetical."), ctx);
+	assert.equal(await handlers.agent_before_settle({ entries: [], outcome: "completed" }, ctx), undefined);
+});
+
+test("D25: if the continuation records it, the normal checker runs instead", async () => {
+	const { handlers, calls, ctx } = load(() => PASS);
+	await handlers.before_agent_start({ messageType: "user", prompt: "I want Docker" }, ctx);
+	await handlers.agent_end(reply("ok"), ctx);
+	assert.equal((await handlers.agent_before_settle({ entries: [] }, ctx) as any).continue, true, "operator preference nudges");
+	fs.writeFileSync(path.join(repo, ".pi", "knowledge", "a.md"), "# A\nrecorded\n");
+	assert.equal(await handlers.agent_before_settle({ entries: [] }, ctx), undefined);
+	assert.equal(calls.length, 1);
+});
+
+test("D25: a run that already edited the KB is not nudged; aborted runs are not nudged", async () => {
+	const { handlers, ctx } = load(() => PASS);
+	await handlers.before_agent_start({ messageType: "user", prompt: "I want Docker" }, ctx);
+	fs.writeFileSync(path.join(repo, "AGENTS.md"), "# agents\nrecorded\n");
+	await handlers.agent_end(reply(PROMISE), ctx);
+	assert.equal(await handlers.agent_before_settle({ entries: [] }, ctx), undefined);
+	await handlers.before_agent_start({ messageType: "user", prompt: "I want Docker" }, ctx);
+	await handlers.agent_end(reply(PROMISE), ctx);
+	assert.equal(await handlers.agent_before_settle({ entries: [], outcome: "aborted" }, ctx), undefined);
+});
+
+test("D25: pending next-actions are injected on the first prompt of each session only", async () => {
+	fs.writeFileSync(path.join(repo, ".pi", "knowledge", "next-actions.md"),
+		"# Next actions\n\n## Pending\n\n1. **Trigger:** NEXT-MARKER. **Action:** do it.\n");
+	const { handlers, ctx } = load(() => PASS);
+	const first: any = await handlers.before_agent_start({ messageType: "user", prompt: "hello" }, ctx);
+	assert.match(first.message.content, /NEXT-MARKER/);
+	assert.equal(await handlers.before_agent_start({ messageType: "user", prompt: "hello again" }, ctx), undefined);
+	await handlers.session_start({ reason: "resume" }, ctx);
+	const both: any = await handlers.before_agent_start({ messageType: "user", prompt: "please document this" }, ctx);
+	assert.match(both.message.content, /NEXT-MARKER[\s\S]*SKILL-BODY-MARKER/, "priming and skill share one message");
+});
+
+test("D25: no next-actions file, or an empty Pending section, injects nothing", async () => {
+	const { handlers, ctx } = load(() => PASS);
+	assert.equal(await handlers.before_agent_start({ messageType: "user", prompt: "hello" }, ctx), undefined);
+	fs.writeFileSync(path.join(repo, ".pi", "knowledge", "next-actions.md"), "# N\n\n## Pending\n\n_(none)_\n");
+	await handlers.session_start({ reason: "new" }, ctx);
+	assert.equal(await handlers.before_agent_start({ messageType: "user", prompt: "hello" }, ctx), undefined);
 });
