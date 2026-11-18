@@ -1362,3 +1362,13 @@ hardware `curl`), a flight-only species with a frame bundle (no bundle in K2; un
 DST-free per the T1 re-review), and the frame and station clocks disagreeing (the frame clock was not
 shifted). Whether the collage's JS uses the page's local `Date` remains unchecked, but no scenario
 depended on it.
+
+## Push to origin after K2
+
+**Who:** parent agent, 2026-11-17, on the operator's instruction *"push changes"* (answers the pending
+push question, [next-actions.md](next-actions.md) item 1). **Command:** `git push origin
+feature/birdframe-midnight-reset`: `5f90208c..a66fe045`, 25 commits (W2 `dece12cf`, W3 `ec5cdc7d`, W2R
+`0046db23`, T1 `db9ff938` + `cde2bc47`, K2 `6eb0658b`, and the `.pi/` record commits).
+**Verified:** `git ls-remote origin refs/heads/feature/birdframe-midnight-reset` = `a66fe045…` = local
+HEAD; `upstream` push stays `DISABLED_NO_PUSH_TO_UPSTREAM`. No PR opened; a feature-branch push
+triggers no CI (`.github/workflows/python-app.yml` runs only on `main`/`test_me`/`avian-visitors`).

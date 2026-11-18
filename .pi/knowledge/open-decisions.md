@@ -44,7 +44,7 @@ feature branch alone triggers no CI. No PR into the fork's `avian-visitors` bran
 | `ANSWERED` (principle, outranks parent-decisions) | D20 — minimal footprint, align with the parent repo |
 | `OPEN`, needed only at execution stage V | D21 — CI access via a PR inside the fork (deferred 2026-11-17 at G0: re-ask at V) |
 | `ANSWERED 2026-11-17` (operator) | D22 — commit a parent test for W1's request param: **yes** ("leave smoke alarm behind"); done as T1 `db9ff938` |
-| `OPEN` (opened 2026-11-17) | D30 — which stage next after K2: O (Oracle audit, recommended), V (CI; needs push + D21) or H (hardware) |
+| `OPEN` (opened 2026-11-17) | D30 — which stage next after K2: O (Oracle audit, recommended), V (CI; needs D21, push done) or H (hardware) |
 | `ANSWERED 2026-11-17` (operator), standing | D29 — operator standing permissions and working preferences (subagents allowed; plain explanations with "what you need from me") |
 | `ANSWERED 2026-11-17` (operator) | D23 — commit the pending `.pi/` changes before W2: (a) one local docs commit, no push |
 | `ANSWERED` (operator), harness | D25 — harden kb-document: build commitment gate + session priming + rule (2026-11-17) |
@@ -1155,7 +1155,8 @@ drift/ruling audit) and H (hardware pass on `birdpic`). W1–W3, review R + W2R,
 * **O first (recommended):** a read-only Oracle audit of the finished diff against every ruling, plan
   §4 and the safety rails. Needs nothing from the operator and leaves no trace. Plan §7 lists O after
   V; running it first catches drift before anything leaves this machine.
-* **V:** needs a push plus D21 (a PR inside the fork into its `avian-visitors` branch, Actions enabled).
+* **V:** needs ~~a push plus~~ D21 (a PR inside the fork into its `avian-visitors` branch, Actions
+  enabled). *The branch was pushed 2026-11-17 (`a66fe045`).*
 * **H:** needs the operator at `birdpic` and the branch deployed there (§8 deployment is not yet
   authorised); checklist in plan §6 (midnight with silence, first bird, flight-only bird, power cycle,
   flag off, the `Cache-Control` `curl`, record the station's PHP version).

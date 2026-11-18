@@ -344,7 +344,7 @@ current, and runs `python .pi/scripts/check_kb.py --index` (exit 0) at the end o
   * ~~**D27** (blocks K2 only): how K2 makes "just after midnight" happen. Recommended: a per-run
     POSIX `TZ` offset (verified for SQLite, PHP's SQLite and Python; **Chromium ignores it**).~~
     *Answered 2026-11-17 (TZ shift); K2 built, `6eb0658b`, 7 passed.*
-  * **D30** (open): which stage next after K2: O (Oracle audit), V (CI, needs D21 + push) or H
+  * **D30** (open): which stage next after K2: O (Oracle audit), V (CI, needs D21; pushed `a66fe045`) or H
     (hardware). Recommended: O first.
   * **D21** (stage V only): CI via a PR inside the fork into its `avian-visitors`.
   * **D28** (outside the feature): file the parent-bug issue; draft ready in

@@ -18,16 +18,11 @@ Rules:
 
 ## Pending
 
-1. **Trigger:** the operator says to push (opened 2026-11-17; D22 and D27 parts done: T1 `db9ff938`,
-   K2 `6eb0658b`).
-   **Action:** `git push origin feature/birdframe-midnight-reset` (`origin` is at `5f90208c`; never
-   `upstream`), then verify with `git ls-remote origin`. Pushing the feature branch triggers no CI.
-   **Log to:** [verification-log.md](verification-log.md) (push record) and the open threads.
-2. **Trigger:** the operator answers
+1. **Trigger:** the operator answers
    [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) (opened 2026-11-17).
    **Action:** O → dispatch `oracle` for a drift/ruling audit of `git diff 5950f807 HEAD -- avian frame
    tests` against Plan v0.5 §4/§7, D1–D3, D12–D17, D20 and the safety rails; re-verify its counter-claims;
-   log it. V → needs a push and D21 first. H → write the hardware checklist from plan §6 for the
+   log it. V → needs D21 first (the branch is pushed). H → write the hardware checklist from plan §6 for the
    operator; §8 deployment needs its own yes.
    **Log to:** the D30 entry, [verification-log.md](verification-log.md), `.pi/handoff/ledger.md`.
 
@@ -35,3 +30,5 @@ Rules:
 
 1. 2026-11-17: post-reboot virtualization checks: all three passed; D24 and D23 put to the
    operator. Log: [post-reboot check](verification-log.md#post-reboot-virtualization-check-2026-11-17).
+2. 2026-11-17: push after K2: `5f90208c..a66fe045` to `origin`. Log:
+   [push record](verification-log.md#push-to-origin-after-k2).

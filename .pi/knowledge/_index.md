@@ -48,7 +48,8 @@ every session; delete items when they close (their history lives in the register
    (`0046db23`, [log](verification-log.md#w2r-review-r-fixes), Plan v0.5 §4.7). K1 green on
    `0046db23`. T1 smoke alarm for W1 (`db9ff938`, D22 answered, [log](verification-log.md#t1-smoke-alarm-for-w1-d22)).
    K2 end-to-end midnight scenarios (`6eb0658b`, D27 = TZ shift, 7 passed, [log](verification-log.md#k2-end-to-end-midnight-scenarios)).
-   `origin` is at `5f90208c`. **Waiting on the operator:** a push and
+   **Pushed:** `origin` is at `a66fe045` (2026-11-17, [push record](verification-log.md#push-to-origin-after-k2));
+   later record-only commits may follow it. **Waiting on the operator:**
    [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) (next stage: O recommended), then
    D21 for stage V. Handoffs are built with `.pi/scripts/build_handoff.py`.
 1. **Open decisions** ([register](open-decisions.md)):
