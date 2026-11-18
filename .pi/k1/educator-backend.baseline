@@ -1,0 +1,18 @@
+FAIL: scoped tar reports process startup failure before any archive headers or bytes
+FAIL: corrupt SQLite text produces a checked Educators 503 JSON response
+FAIL: corrupt scope labels never become an empty 200 bird-data response
+FAIL: the saved-count endpoint refuses a running period
+FAIL: a folder probe reports open while it contains the current running capture
+FAIL: replacement active capture has a new generic key and no private scope metadata
+FAIL: omitted bird-data scope automatically follows the current capture without private metadata
+FAIL: public active recording streams exactly the frozen verified bytes: {"status":404,"err":"","out":"educator scope was not found"}
+FAIL: public active spectrogram streams an exact validated PNG: {"status":404,"err":"","bytes":28}
+FAIL: a saved capture capability serves only its exact row-bound recording
+FAIL: protected menu grant and Tools CSV bind an omitted edu body to the exact active capture
+FAIL: protected menu active grant downloads the exact private capture tar server-side
+FAIL: forwarded protected active grant stays bound to the exact current capture
+FAIL: forwarded protected implicit Tools grant keeps the automatic active scope
+FAIL: Stop changes the folder probe state and closes it without inventing a detection change
+FAIL: Stop between grant creation and download fails the active URL closed
+FAIL: a Stop-raced download grant remains strictly one-use
+PHP Fatal error:  Uncaught EducatorScopeError: educator scope is unavailable in /src/avian/api/educator-scope.php:229

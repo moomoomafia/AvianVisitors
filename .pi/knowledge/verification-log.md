@@ -954,3 +954,155 @@ not inferred.
 **superseded as of 2026-11-17** (root cause: BIOS virtualization off after a CPU swap; now on).
 **Still unverified:** Playwright Chromium on bookworm; the D4 container itself (not built);
 `fcntl`-dependent tests under Linux (not run yet). Nothing product-related was executed.
+
+**Rulings that followed (2026-11-17):** D24 = Docker container in `.pi/`; D23 = one local docs
+commit, no push, made as `94663e4b` (19 files: `.pi/` + root AGENTS.md; `.pi/ask-log/` stays
+git-ignored and was not included; no `avian/`, `frame/` or `tests/` paths). Not pushed.
+
+## Pre-container research (2026-11-17)
+
+**Who:** parent agent, asked by the operator whether research or a plan update is needed before the
+container. **Method:** read Plan v0.4 sections 6-9, [test-environment.md](test-environment.md), `frame/Dockerfile.install-security`,
+`frame/check_install_security.sh`; ran `git config core.autocrlf` and `file` on four tracked files.
+
+* **Plan gap (verified):** Plan v0.4 sections 6 and 7 have no container row or build step. The plan needs an amendment.
+* **Parent precedent (verified):** `frame/Dockerfile.install-security:1` pins `debian:bookworm-slim@sha256:abd67ffc...`,
+  installs with `--no-install-recommends`; `frame/check_install_security.sh:7-12` does `docker build` then `docker run --rm`.
+* **CRLF trap (verified):** autocrlf=true; `frame/install.sh`, `frame/display.py`, `tests/test_midnight_reset.php`,
+  `scripts/createdb.sh` are CRLF on disk. Falsified by: those files reading LF after a fresh checkout.
+* **Assumed, not verified:** `git diff HEAD` output is LF under autocrlf (to verify in C1); SQLite `localtime` and
+  Python honour POSIX `TZ` offsets in the container (D27, to verify in C2); Playwright 1.62.0 on bookworm.
+  *All three since tested by the [Oracle review](#pre-container-oracle-review): diff is LF but the
+  clone+diff method is refuted; TZ works except in Chromium; Playwright 1.62.0 works.*
+* Questions registered: D26, D27.
+
+## Pre-container Oracle review
+
+**Who:** `oracle` subagent (forked context, read-only), 2026-11-17, mission
+`39cb4ae4-e5a4-4f9c-8571-57070ca5854b`, requested by the operator ("have oracle review and confirm
+findings"). **Method:** re-ran the post-reboot checks; read the plan at `94663e4b` and now; ran
+throwaway bookworm containers (apt policy, `git archive` CR counts, TZ clock, Playwright install).
+
+| # | Claim | Verdict | Evidence |
+|---|---|---|---|
+| 1 | Post-reboot checks pass; bookworm has php 8.2, php-sqlite3, Python 3.11 | CONFIRMED | Re-run, all exit 0; sqlite3 3.40.1 also available. |
+| 2 | `94663e4b` = `.pi/` + AGENTS.md only, not pushed | CONFIRMED | `git ls-remote origin`: branch at `a5a1c4db`; local is 11 ahead. |
+| 3a | Plan had no container step before today | CONFIRMED | Only §5 characterization "C1"/"C2" matched. |
+| 3b | New plan rows consistent with the rulings | PARTIAL | Six stale/conflicting spots: name clash with §5 C1–C8; W2 done-when still Windows-only; P2 still asked D23; stale header; stale D4 drift note; wrong snapshot method. All fixed (below). |
+| 4 | CRLF trap | CONFIRMED, wider | autocrlf is from the **system** gitconfig; `git ls-files --eol` = `i/lf w/crlf`; also breaks byte/hash reads and the chmod tests (`tests/test_frame_capture.py:447-480`) under a bind mount. |
+| 5 | Clone at HEAD + `git diff HEAD` gives an LF tree | PARTIAL: method refuted | Diff is LF, but the worktree's `.git` is `gitdir: C:/apps/birdNet/AvianVisitors/.git/worktrees/...`, unusable in a container. Working method: `git -c core.autocrlf=false archive ${ref:-$(git stash create)}` → 0 CRs; a plain `git archive` → 23 CRs in `scripts/createdb.sh`. |
+| 6 | Reuse the parent's pinned bookworm digest | CONFIRMED | `frame/Dockerfile.install-security:1`; still pulls. |
+| 7 | POSIX TZ offset sets the local clock (D27) | PARTIAL | Shell, sqlite3, PHP SQLite3 and Python honour it to the second; **Chromium ignores it**. Window line is `avian/api/birdnet-api.php:281`, not `:280`. |
+| 8 | K1 suite scope; Playwright 1.62.0 on bookworm | CONFIRMED with corrections | `playwright install --with-deps chromium` exit 0, Chromium 151 runs as non-root, **656 MB** (not ~150 MB). The 3.9/3.13 matrix is flake8 only. No CI runs `tests/test_educator_backend.php` or `tests/test_site_name_api.php`. Root-only tests skip unless root. Linux PHP has posix, so `educator_caddy_identity()` (`avian/api/educator-store.php:55-58`) takes a path Windows never did: A/B base vs HEAD is essential. |
+
+**Parent re-verification of the counter-claims (same day):** `sed -n 280,282p avian/api/birdnet-api.php`
+(line 281 holds `DATE('now','localtime')`); `git config --show-origin core.autocrlf` (system gitconfig);
+`cat .git` (Windows `gitdir:`); `.github/workflows/python-ci.yml:15,28-33` (flake8 only); CR counts re-run: 0 with
+`-c core.autocrlf=false archive $(git stash create)`, 23 with plain `git archive HEAD`; stash list stayed
+empty. All confirmed.
+
+**Corrections applied:** plan steps renamed **K1/K2**; §6 snapshot method, §7 W2 done-when (K1 re-run),
+P2 (1) marked done, header item 7; D4 drift note resolved; D26 snapshot method amended (old text
+struck); D27 verified + Chromium caveat + line 281; hard-won facts 21 and 23; test-environment.md
+size; AGENTS.md and code-conventions.md matrix wording.
+
+**Parent decisions on the Oracle's two open choices:** rename to K1/K2 (yes); untracked files are
+not snapshotted, so W2's new files must be committed or staged before a K1 run.
+
+**Traces the Oracle left:** dangling unreferenced commit from `git stash create` (gc removes it);
+pinned bookworm image cached (116 MB); all containers `--rm`. Pre-existing `git count-objects`
+"garbage found" warning on this worktree's refs: leave it.
+
+**Still unverified:** whether the collage path uses the page's local `Date` (matters for K2 only).
+
+## K1 build and baseline
+
+**Who:** parent agent, 2026-11-17 (Plan v0.4 step K1, authorised by [D26](open-decisions.md#d26--container-scope-phasing-and-build-authorisation)); root-cause
+diagnosis by `oracle`, mission `7546dc80-9835-4a77-bf8a-16da324b2b06` (a `pi-worker` attempt first
+returned a malformed tool call and produced nothing). **Environment:** Docker Desktop 4.91.0 on
+this Windows host; image `avian-k1:local` (`.pi/k1/Dockerfile`, pinned bookworm digest, PHP 8.2.35,
+Python 3.11.2, Playwright 1.62.0 + Chromium, non-root `tester`); 1.92 GB on disk, ~4 min build, ~4 min
+per run. **Method:** `bash .pi/k1/run.sh [ref]` pipes `git -c core.autocrlf=false archive` into the
+container and runs `.pi/k1/suite.sh`.
+
+**Results (base `5950f807` vs worktree HEAD `428f3104`+`.pi/`):**
+
+| Suite | Base | HEAD |
+|---|---|---|
+| `php -l avian/api/birdnet-api.php` | pass | pass |
+| `php tests/test_midnight_reset.php` | 20 checks pass | 20 checks pass |
+| `php tests/test_site_name_api.php` | 6 pass | 6 pass |
+| `php tests/test_educator_backend.php` | 17 FAIL + fatal (exit 255) | **identical** 17 FAIL + fatal |
+| `tests/test_midnight_reset.py` | 1 passed (not skipped) | 1 passed |
+| `tests/test_frame_capture.py` | **77 passed** (Windows: 7 POSIX failures) | 77 passed |
+| `tests/test_frame_birdweather.py` | 18 passed | 18 passed |
+| `tests/test_frame_capture_browser.py` | 38 passed (real Chromium) | 38 passed |
+| `tests/test_educator_security.py` | 7 passed | 7 passed |
+| `frame/test_bundle_runtime.py` | 42 passed | 42 passed |
+| `.pi/` W1 probe, R3 clamp, characterization | n/a (not in base) | all pass (probe; 30/30; 13/13) |
+| flake8 fatal set on `frame/ tests/` | 0 | 0 |
+
+W1 introduces no regression on Linux. `suite.sh` now gates `tests/test_educator_backend.php` as an A/B
+against `.pi/k1/educator-backend.baseline` (the 18 base lines); the final HEAD run: **all PASS, exit 0**.
+
+**Finding: `tests/test_educator_backend.php` fails on Linux on the parent's own base** (Oracle,
+parent re-checked the cited lines). Two causes, neither ours:
+
+1. **Lost SQLite locks (16 FAIL + the fatal).** `educator_store_open()` (`avian/api/educator-store.php:253`)
+   opens a probe handle `fopen($path,'r+')` (`:263`) and closes it after the SQLite connection is open
+   (`:321`). On Linux, closing any fd drops all the process's POSIX `fcntl` locks on that file,
+   including SQLite's WAL shared lock; another process can then checkpoint and delete `-wal`/`-shm`
+   under the live connection. Oracle evidence: `/proc` showed `educators.db-wal (deleted)` after the
+   write at test ~1529; the swallowed error at `avian/api/educator-scope.php:229` is
+   `disk I/O error` from `educator-store.php:331`. Keeping the probe open in a container copy: PHP 8.2
+   → 1/199 fail, PHP 8.5 → 199/199 pass. A standalone two-process script lost a write with the code as
+   shipped. ~~**Implication:** a possible lost-write hazard on real stations (Linux, PHP-FPM, overlapping
+   requests) in Educators mode.~~ *Amended 2026-11-17 (parent, [D28 write-up](#d28-write-up-and-independent-reproduction)):*
+   every caller opens the store under the app's own `educators.lock` (writes exclusive), so the
+   field impact is probably limited to overlapping readers (possible 503s); unmeasured. The
+   SQLite-level lost write is reproduced. Falsified by: the same script not losing the write on a real station.
+   Frequency unmeasured; whether `birds.db` paths share the pattern unchecked.
+2. **PHP 8.2 `proc_open` (1 FAIL).** With a missing tar binary, 8.2 still returns a process, so
+   `avian/api/export.php` takes the 409 branch (`:627`) instead of the 503 the test expects
+   (`:610-616`; test at `tests/test_educator_backend.php:1336-1344`). Safe (no bytes sent); a test
+   version gap. Mechanism not confirmed, behaviour seen on official `php:8.2-cli` vs `php:8.5-cli`.
+
+Windows never shows cause 1 because Windows locks are per-handle. Parent CI does not run this suite.
+Not fixed: parent code, outside the feature (D20). Reporting it is
+[D28](open-decisions.md#d28--report-the-educator-store-lost-lock-bug-upstream).
+
+**Corrections forced:** hard-won fact 21 ("14 Windows-only failures") now notes the Linux set.
+**Traces:** `avian-k1:local` image (kept, it is the gate); the Oracle's `php:8.2-cli`/`php:8.5-cli`
+images removed by the parent; dangling `git stash create` commits (gc removes them).
+**Not executed:** K2 (fake station/panel), anything on hardware; PHP 8.5 in K1 (the station's PHP is
+assumed 8.2 on bookworm, not verified on `birdpic`).
+
+## D28 write-up and independent reproduction
+
+**Who:** parent agent, 2026-11-17, on the operator's instruction: "commit and push to feature/branch.
+In our own documentation, write out D28 for myself and for future bug issue report to the parent
+repo." **Output:** [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md).
+
+**Method and verdicts:**
+
+* **Code path re-read** (`avian/api/educator-store.php:253-322`): probe `fopen` at `:263`, `new SQLite3`
+  at `:275`, PRAGMAs (WAL) at `:295-297`, success-path `fclose($probe)` at `:321` with `$db` still open.
+  Confirms the Oracle's description (it cited "~:262"; the line is `:263`).
+* **Independent reproduction:** wrote `.pi/research/d28/wal_lock_repro.php` (pure SQLite3, no repo
+  code, mirrors the open sequence). Ran 3× in K1 (PHP 8.2.35, SQLite 3.40.1): with the probe closed,
+  another process's close **deleted the live `-wal`** and a fresh process saw **1** row while the
+  writer saw 2; with the probe kept, both saw 2. 3/3 identical. *(First attempt had a quoting bug in
+  the child `php -r` command and printed nothing useful; fixed and re-run.)* CONFIRMED.
+* **Correction to the Oracle's severity:** it called this "a real lost-write hazard on stations". All
+  four `educator_store_open()` callers take the app lock first (`avian/api/educator-scope.php:153→162`
+  shared, `avian/api/educators.php:206→209` shared GET, `:274→277` exclusive,
+  `avian/api/educator-store.php:1782→1784` exclusive; lock impl `:99-153`), and
+  `scripts/educators_control.sh:335-337` flocks the same lock. Writers are therefore serialised against
+  everything; the plausible field symptom is overlapping readers hitting `disk I/O error` (503).
+  Unmeasured. The test suite trips it because it holds a connection across child requests. The K1 log
+  wording was amended (old text struck).
+* **Not done:** auditing every `sqlite3` CLI call in `scripts/educators_control.sh` for the lock;
+  searching `birds.db` code for the same probe pattern; checking `birdpic`'s PHP version.
+
+**Operator authorisation recorded:** commit **and push** to `origin`
+`feature/birdframe-midnight-reset` (2026-11-17). Pushing to `upstream` stays disabled; no PR.

@@ -189,7 +189,7 @@ authorisation; do not discard unrelated local changes.
   single-line JSON blob; `scripts/gotty*` are binaries; `avian/frontend/apt.js` is
   ~15k lines. Scope greps or you will drown your own context.
 * `frame/display.py` is POSIX-only (`fcntl`); the frame targets Python **3.9** (CI
-  matrix 3.9/3.11/3.13), flake8 160 cols / complexity 15 in `.flake8` — but the complexity limit
+  matrix 3.9/3.11/3.13 is **flake8 only**, `.github/workflows/python-ci.yml`; tests run on 3.11, `.github/workflows/python-app.yml`), flake8 160 cols / complexity 15 in `.flake8` — but the complexity limit
   is not enforced for the parent's branch, and upstream `run()` is already 18 (pre-plan probe, 2026-11-16). Match upstream; don't refactor it to meet an unenforced limit (D20).
 * `extras/archive/tests/` are archived — do not "fix" them.
 * `tests/smoke_collage_readiness.mjs` reads `frame/shoot.py` as text and executes the

@@ -11,7 +11,8 @@ The knowledge base is the source of truth for evidence and rulings:
 Read [AGENTS.md](../AGENTS.md) first.
 
 > **Status (2026-11-17): G0 lifted by the operator for W1–W3 only.** W1 is built and reviewed.
-> **W2 is gated on D23** (operator). V, H, §8 and any push/PR still need separate permission.
+> ~~**W2 is gated on D23** (operator).~~ *2026-11-17: D23 done (`94663e4b`); W2 now waits on
+> container step K1 and handoff regeneration (P2).* V, H, §8 and any push/PR still need separate permission.
 > Record: [open-decisions.md](knowledge/open-decisions.md).
 >
 > **What v0.4 changes, and why.** This is an **execution-state revision**: the design in
@@ -31,6 +32,11 @@ Read [AGENTS.md](../AGENTS.md) first.
 >    `:87` is a line inside it.
 > 6. §3 and §9 state the D15 exit code explicitly (1, via D14) and add the root `.pi-tasks/` to
 >    the strip-before-PR list (D11 amendment).
+> 7. **Amended in place 2026-11-17 (container):** virtualization works, so [D24](knowledge/open-decisions.md#d24--re-confirm-d4-container-as-the-local-gate-once-virtualization-works)
+>    re-confirms the D4 container as the local gate and [D26](knowledge/open-decisions.md#d26--container-scope-phasing-and-build-authorisation)
+>    phases it: **K1** (Linux test runner) before W2, **K2** (fake station + fake panel) after W2.
+>    Named K1/K2 so they cannot be confused with the §5 characterization cases C1–C8. §6, §7 and
+>    §9 changed; design unchanged. Oracle-reviewed: [pre-container review](knowledge/verification-log.md#pre-container-oracle-review).
 
 ---
 
@@ -229,6 +235,8 @@ intended flips with the flag on and no change with it off; the R3 scripts and
 
 | Where | What | Expected / notes |
 |---|---|---|
+| **Local container K1** (added 2026-11-17, D24/D26) | `.pi/k1/run.sh [ref]`: `.pi/` Docker image on the parent's pinned `debian:bookworm-slim`, non-root user; tree = `git -c core.autocrlf=false archive` of `${ref:-$(git stash create)}` (falls back to HEAD) piped into `docker run -i`. **Tracked files only:** new files must be committed or staged first. Never the bind-mounted CRLF worktree | the local gate: real `fcntl`; a named suite that skips fails the run; baseline recorded on base `5950f807` and HEAD before W2, re-run after W2. Windows rows below become quick pre-checks |
+| **Local container K2** (after W2; D27 open) | fake station (`php -S`, copied tree, provisioned Educators lock, synthetic `birds.db`) + headless fake `inky` + midnight scenarios | push/no-push asserted on the fake panel; still not the real glass |
 | Local (Windows) | `PYTHONPATH=.pi/research/pre-v03/stubs python -m pytest tests/test_frame_capture.py tests/test_frame_birdweather.py` | all new tests pass; the 7 known POSIX-permission failures unchanged (baseline 94 passed + 7) |
 | Local | `php tests/test_midnight_reset.php`, `php tests/test_site_name_api.php`, R3 scripts, `php .pi/research/w1/recent_param_probe.php <repo>` | 20 / 6 / 30+20 / 11 pass |
 | Local | `php tests/test_educator_backend.php` | **14 of 199 fail on base too, identical set** (Windows tar/permission paths). Pass = same 14, nothing new; A/B with `git archive 5950f807 avian tests scripts \| tar -x -C <tmp>` |
@@ -249,8 +257,10 @@ nothing is pushed without the operator's say-so. **`defaultReads` is rejected by
 |---|---|---|---|
 | G0 | operator | authorise building | **done 2026-11-17** (W1–W3) |
 | W1 | worker | §4.1 station change | **done 2026-11-17**, `428f3104`; verified by the parent (post-W1 review) |
-| P2 | operator + parent | W2 pre-dispatch: (1) rule D23 — recommended: parent commits the pending `.pi/` changes locally as one docs commit; (2) regenerate `.pi/handoff/plan.md` **from this v0.4** with a header rule "where verbatim ruling text conflicts with §4, §4 wins"; (3) tell the worker to stage explicit `frame/` and `tests/` paths only (no `-a`, `-A`, `-u`) | working tree has no stray tracked changes; handoff regenerated |
-| W2 | worker | §4.2–4.4 frame change + §5 frame tests | §5 frame tests pass locally (stub loop); characterization flips as expected; `tests/test_educator_backend.php` still exactly the 14 baseline failures |
+| P2 | operator + parent | W2 pre-dispatch: (1) ~~rule D23 — recommended: parent commits the pending `.pi/` changes locally as one docs commit;~~ **done 2026-11-17, `94663e4b`**; (2) regenerate `.pi/handoff/plan.md` **from this v0.4** with a header rule "where verbatim ruling text conflicts with §4, §4 wins"; (3) tell the worker to stage explicit `frame/` and `tests/` paths only (no `-a`, `-A`, `-u`) | working tree has no stray tracked changes; handoff regenerated |
+| K1 | parent | `.pi/` Linux test container (D26, authorised 2026-11-17) **— done 2026-11-17**, green on HEAD; `test_educator_backend.php` gated as A/B (parent bug, D28) | image builds; parent suites run on an LF snapshot; base vs HEAD baseline recorded in the verification log |
+| W2 | worker | §4.2–4.4 frame change + §5 frame tests | K1 re-run (parent): new tests pass, no new failures against the K1 HEAD baseline; Windows stub loop as a pre-check; characterization flips as expected; `tests/test_educator_backend.php` still exactly the 14 baseline failures |
+| K2 | parent | fake station + fake panel + scenarios (after W2; needs D27) | the midnight scenarios assert push/no-push |
 | W3 | worker | §4.5 docs | README paragraph at `frame/README.md:89`/`:91` + config line, end-user voice |
 | T1 | worker | only if D22 = (a): one PHP case per §5 | case passes on HEAD, fails on base `5950f807` |
 | R | reviewer | review the full diff vs this plan, D20 and every ruling | no unresolved High findings |
@@ -276,7 +286,9 @@ current, and runs `python .pi/scripts/check_kb.py --index` (exit 0) at the end o
 ## 9. Gates and open items
 
 * **G0 lifted 2026-11-17** (W1–W3; V and H separately gated).
-* **D23 (open, needed before W2):** commit the pending `.pi/` changes first (step P2).
+* ~~**D23 (open, needed before W2):** commit the pending `.pi/` changes first (step P2).~~
+  *Answered 2026-11-17: committed locally as `94663e4b`.* **D24** answered: Docker container is the
+  local gate. **D26** answered: K1 now, K2 after W2. **D27 (open, blocks K2 only):** midnight clock.
 * **D22 (open, not blocking W2):** commit a parent test for W1 (§5 PHP row, step T1).
 * **D21 (open, needed only at stage V):** CI via a PR inside the fork into its `avian-visitors`.
 * **Upstream PR:** strip `.pi/`, `AGENTS.md` **and the root `.pi-tasks/`** first (D11c + its

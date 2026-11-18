@@ -53,7 +53,16 @@ every session; delete items when they close.
    **Environment drift (2026-11-17):** D4 (container = local gate) was never amended, but plan
    §6 uses Windows + stubs. ~~The operator is rebooting to enable virtualization in BIOS.~~ *Done 2026-11-17: all
    three checks passed. D24 ruled **Docker container in `.pi/`** (D4 kept; container not built
-   yet, which is the next env task). D23 ruled **commit `.pi/` locally, no push** (done).* **After
+   yet, which is the next env task). D23 ruled **commit `.pi/` locally, no push** (done). D26 ruled **K1 (Linux test runner) now,
+   then W2, then K2** ([D26](open-decisions.md#d26--container-scope-phasing-and-build-authorisation));
+   Plan v0.4 §6/§7/§9 amended after an [Oracle review](verification-log.md#pre-container-oracle-review).
+   [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) (midnight clock)
+   stays open until K2. **K1 built and green on HEAD** ([K1 log](verification-log.md#k1-build-and-baseline));
+   `.pi/k1/` committed and pushed to `origin` with the KB (operator authorised commit + push,
+   2026-11-17). It found a parent bug (educator store loses SQLite locks on Linux), written up in
+   [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md);
+   [D28](open-decisions.md#d28--report-the-educator-store-lost-lock-bug-upstream): filing the issue
+   is the operator's call. **Next: P2** (regenerate `.pi/handoff/plan.md` from v0.4 incl. K1/K2), then W2.* **After
    the reboot (original text):** run `wsl --status` and `docker run --rm hello-world`, then put
    [D24](open-decisions.md#d24--re-confirm-d4-container-as-the-local-gate-once-virtualization-works)
    to the operator (recommended: keep D4 and build the `.pi/` container — **Docker** over a
@@ -154,6 +163,7 @@ every session; delete items when they close.
 | [orchestration.md](orchestration.md) | Running the multi-agent plan: verified subagent inventory (`scout`/`oracle`/`worker`/`reviewer`; **no `tester`**), one-child-at-a-time mechanics, `context.md`/`plan.md` handoff contract, ledger template, env constraints children must be told. |
 | [feature-midnight-reset.md](feature-midnight-reset.md) | The in-flight feature: verified code facts, draw paths that bypass the gate, window options ranked, edit surface, requirement→code map. |
 | [plan-review-midnight-reset.md](plan-review-midnight-reset.md) | Review of the draft plan: gaps, risks, improvements for v0.3, and the question backlog that fed the decision register. |
+| [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md) | A **parent-repo bug** found by K1 (Educators store drops SQLite locks on Linux): plain-language summary, code path, evidence, reproduction, and a ready-to-file draft issue ([D28](open-decisions.md#d28--report-the-educator-store-lost-lock-bug-upstream)). |
 | [next-actions.md](next-actions.md) | **Pending commitments** (trigger → action → log). Injected automatically into the first prompt of every session by the `kb-document` extension ([D25](open-decisions.md#d25--harden-kb-document-so-commitments-and-operator-statements-are-recorded-automatically)). Add an item instead of promising anything in chat. |
 | [open-decisions.md](open-decisions.md) | **Decision register.** [D1](open-decisions.md#d1--may-a-forced-render-draw-an-empty-today-window-collage)–[D4](open-decisions.md#d4--what-environment-is-the-acceptance-gate) ruled by the operator (some amended); [D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)–[D16](open-decisions.md#d16--no-validated-list-fetch-failed-or---no-signature-with-the-flag-on) answered 2026-11-16 (no blocking items open); [D6](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr)–[D10](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr), [D17](open-decisions.md#d17--the-local-mode-served-list-variant) parent-decided; [D5](open-decisions.md#non-blocking--decided-by-the-parent-from-house-style-to-be-proposed-in-the-pr) superseded by [D14](open-decisions.md#d14--how-is-an-un-updated-station-detected-and-with-what-exit-code-supersedes-d5); [D11](open-decisions.md#d11--commit-ignore-or-leave-untracked-pi-and-root-agentsmd) housekeeping. Record rulings inline here. |
 | [_references.md](_references.md) | **Generated** reverse index: every doc, source file and decision → the docs that cite it. Look here before amending anything. Regenerate with `python .pi/scripts/check_kb.py --index`; never hand-edit. |
@@ -279,12 +289,28 @@ Three frame data sources, one renderer:
 21. **`tests/test_educator_backend.php` fails 14/199 on this Windows host on base *and* HEAD**
     (identical set; tar/permission paths). It is the only parent suite that runs
     `avian/api/birdnet-api.php` end to end — don't attribute those 14 to our change; A/B with
-    `git archive 5950f807 avian tests scripts | tar -x -C <tmp>`. Driving the real endpoint in
+    `git archive 5950f807 avian tests scripts | tar -x -C <tmp>` (on Windows; for a Linux extract
+    add `-c core.autocrlf=false`, else the files carry CRs: fact 23). Driving the real endpoint in
     CLI needs `educator_store_open(true)` first, else 503 "educator data store is missing or
     unsafe" ([post-W1 review](verification-log.md#post-w1-review-implementation-and-test-coverage)).
+    **On Linux (K1, 2026-11-17) it is a different set:** 17 FAIL + a fatal abort, identical on base
+    and HEAD, caused by the parent's store code dropping SQLite's POSIX locks
+    (`avian/api/educator-store.php:263,321`) and PHP 8.2 `proc_open`. K1 gates it as an A/B against
+    `.pi/k1/educator-backend.baseline` ([K1 log](verification-log.md#k1-build-and-baseline)).
 22. **You will not remember anything across sessions; promises in chat are lies by default**
     ([D25](open-decisions.md#d25--harden-kb-document-so-commitments-and-operator-statements-are-recorded-automatically)).
     A promise ("when you say X I'll do Y") goes in [next-actions.md](next-actions.md) first. The
     extension injects that file into every new session and sends you back once if a run
     promises, recommends, asks, or hears an operator preference without touching the KB.
     Changes to the extension apply only after `/reload` or a new session.
+23. **Never run Linux tests from a bind-mounted worktree.** `core.autocrlf=true`; the working tree
+    is CRLF (`frame/install.sh`, `frame/display.py`, `scripts/createdb.sh`, checked with `file`,
+    2026-11-17), so `bash\r` breaks scripts in a container. autocrlf comes from the **system**
+    gitconfig, and a plain `git archive` applies it too (23 CRs in `scripts/createdb.sh`). Use
+    `git -c core.autocrlf=false archive ${ref:-$(git stash create)} | docker run -i … tar -x`
+    (0 CRs; tracked files only). The worktree's `.git` is a Windows `gitdir:` path a container
+    cannot resolve ([D26](open-decisions.md#d26--container-scope-phasing-and-build-authorisation)).
+24. **K1 is the local gate: `bash .pi/k1/run.sh [ref]`** (2026-11-17). No ref = tracked + staged
+    worktree state; `5950f807` = base. ~4 min per run (most of it the 38 Chromium tests); exit 0 =
+    every named suite passed, none skipped. New files are invisible until `git add`-ed. Rebuild is
+    automatic (`docker build` each run; cached).

@@ -198,7 +198,7 @@ when the environment skipped them (see
 
 ## Cost and caveats
 
-* Container build is a one-off (Playwright Chromium is the bulk, ~150 MB) and needs
+* Container build is a one-off (Playwright Chromium is the bulk: ~~~150 MB~~ **656 MB** for Chromium 151 with `--with-deps`, measured by the Oracle 2026-11-17) and needs
   Docker Desktop started, or use WSL2 Ubuntu directly (already installed, `wsl -l -v`
   shows it Stopped — it starts on demand).
 * Windows-side `php` via `choco`/`scoop`/`winget` is possible and would make the PHP

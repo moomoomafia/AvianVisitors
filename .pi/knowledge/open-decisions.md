@@ -47,6 +47,9 @@ feature branch alone triggers no CI. No PR into the fork's `avian-visitors` bran
 | `ANSWERED 2026-11-17` (operator) | D23 — commit the pending `.pi/` changes before W2: (a) one local docs commit, no push |
 | `ANSWERED` (operator), harness | D25 — harden kb-document: build commitment gate + session priming + rule (2026-11-17) |
 | `ANSWERED 2026-11-17` (operator) | D24 — D4 re-confirmed: Docker container in `.pi/` is the local gate (virtualization verified) |
+| `ANSWERED 2026-11-17` (operator) | D26 — container phased: K1 now (authorised), then W2, then K2 (operator's "C1/C2", renamed) |
+| `OPEN` (opened 2026-11-17), not blocking | D28 — report the parent's educator-store lost-lock bug (found by K1) |
+| `OPEN` (opened 2026-11-17), blocks container phase K2 only | D27 — how the container makes "just after midnight" happen |
 | Re-asked under D20, now ruled | D4 CI clause — "No new workflow" (2026-11-16) |
 | `SUPERSEDED` | D17 — operator chose the parent repo's flow (2026-11-16); D5 → D14 |
 | `ANSWERED`, housekeeping | D18 — 2026-11-16 |
@@ -253,8 +256,11 @@ vs frame-only), and the Phase 4 review has nothing to check against.
 > not start (`HCS_E_HYPERV_NOT_INSTALLED`). The operator is enabling virtualization in BIOS
 > (needed for Docker anyway). Until this ruling is re-confirmed or amended, treat Windows runs as
 > **pre-checks only**. Re-confirmation is tracked as
-> [D24](#d24--re-confirm-d4-container-as-the-local-gate-once-virtualization-works). Plan v0.4 §6
-> is not yet changed.
+> [D24](#d24--re-confirm-d4-container-as-the-local-gate-once-virtualization-works). ~~Plan v0.4 §6
+> is not yet changed.~~
+> *Resolved 2026-11-17:* virtualization works; D24 re-confirmed this ruling (Docker container in
+> `.pi/`), [D26](#d26--container-scope-phasing-and-build-authorisation) phased it (K1, then W2,
+> then K2), and Plan v0.4 §6/§7 are amended in place.
 
 > **Clause ruled (operator, 2026-11-16, after research R2): "No new workflow."** Feature tests go
 > only into the parent's existing test files (`tests/test_midnight_reset.php`,
@@ -1018,6 +1024,90 @@ no push (recommended); (b) leave them and tell the W2 worker to commit only expl
 
 **Consequence if unanswered:** W2's commit may mix KB/tooling changes into a product commit,
 which complicates the D11c strip before any parent PR.
+
+### D26 — Container scope, phasing and build authorisation
+
+**Status:** `ANSWERED 2026-11-17`: operator chose **"Phased: C1 now, then W2, then C2
+(Recommended)"** (option a). This authorises building C1 and the plan amendment now; C2 is built
+after W2 lands (D27 is asked then). ~~`OPEN` (opened 2026-11-17)~~
+*Renamed 2026-11-17 (parent, after the [Oracle review](verification-log.md#pre-container-oracle-review)):*
+the operator's "C1"/"C2" are now **K1**/**K2** everywhere outside this quote, to avoid a clash with
+Plan §5's characterization cases C1–C8. Same phases, same authorisation.
+
+**Why it blocks:** D24 chose the container, but Plan v0.4 has no container step (§6 is Windows +
+stubs + CI + hardware, §7 has no build step), and G0 authorised only W1–W3. Building is an operator
+permission ([AGENTS.md](../../AGENTS.md)).
+
+**Options:** (a) two phases. **C1** (now K1), before W2: a `.pi/` Dockerfile on the parent's pinned
+`debian:bookworm-slim` that runs the parent's suites unmodified on Linux (real `fcntl`, php-sqlite3,
+Pillow + `frame/requirements-shoot.txt` + pytest). Baseline on base `5950f807` and HEAD.
+**C2** (now K2), after W2: fake station (`php -S` on a copied tree, provisioned Educators lock, synthetic
+`birds.db` from the `scripts/createdb.sh` DDL) plus a headless fake `inky`, and the midnight
+scenarios. (b) C1 only, leaving end-to-end to hardware. (c) Build C1+C2 before W2.
+**Recommendation:** (a). C1 is cheap and immediately turns 7 POSIX + 14 educator Windows-only
+failures into real signal for W2. C2 tests W2's behaviour, so building it needs W2 to exist.
+
+**Parent-decided (house style / evidence, 2026-11-17):** the Dockerfile follows the parent's
+`frame/Dockerfile.install-security` + `frame/check_install_security.sh` idiom (pinned bookworm
+digest, apt `--no-install-recommends`, `docker build` then `docker run --rm`), but lives in `.pi/`.
+**Never execute from a bind-mounted worktree:** `core.autocrlf=true` and the working tree is CRLF
+(`file` on `frame/install.sh`, `frame/display.py`, `scripts/createdb.sh`), so shell scripts would
+break under Linux. ~~Snapshot an LF tree in the container instead (clone at HEAD plus `git diff HEAD`
+applied; assumed LF because autocrlf normalises diffs: verify in C1).~~ *Refuted 2026-11-17 by the
+[Oracle review](verification-log.md#pre-container-oracle-review):* the diff is LF, but a container
+cannot resolve this worktree's Windows `gitdir:` path. **Snapshot method:**
+`git -c core.autocrlf=false archive ${ref:-$(git stash create)}` piped into `docker run -i … tar -x`
+(0 CRs; a plain `git archive` gives 23 in `scripts/createdb.sh`). It covers **tracked files only**:
+new files must be committed or staged before a K1 run (parent-decided). Run as a non-root user.
+
+**Consequence if unanswered:** no container. W2 proceeds on the Windows stub loop only, and
+"verified" claims wait for CI (D21) or hardware.
+
+### D27 — How the container makes "just after midnight" happen
+
+**Status:** `OPEN` (opened 2026-11-17; blocks K2 only)
+
+**Why:** `recent` has no clock seam. Today is SQLite `'now','localtime'`
+(`avian/api/birdnet-api.php:281,294-296`; ~~`:280`~~ is the function header), and the frame's quiet hours and heal use Python's
+local clock ([test-environment.md](test-environment.md#layer-2--the-station-simulator-the-real-prize)).
+
+**Options:** (a) **per-run `TZ` offset**: a POSIX TZ string allows arbitrary offsets
+(e.g. `TZ=XXX-3:25`), so local time can be placed at 00:05 or 23:59 with zero installs. Rows are
+seeded relative to real now. (b) `libfaketime` (an extra package; known to be fragile with
+Chromium). (c) Seed relative to real now only (no rollover case).
+**Recommendation:** (a). ~~Assumption to verify in C2: SQLite `localtime` and Python both honour
+`TZ` in the container.~~ *Verified 2026-11-17 by the [Oracle review](verification-log.md#pre-container-oracle-review):*
+with `TZ=XXX2:25:24` the shell, sqlite3 CLI, PHP's SQLite3 and Python all read 00:05:00 (seconds
+precision). PHP `date()` stays UTC (`as_of`, `avian/api/birdnet-api.php:336`), matching a stock Pi.
+**Caveat: Chromium ignores `TZ`** (`getTimezoneOffset()` = 0). If the page's JS clock matters in a
+scenario, use Playwright `timezone_id` (IANA, whole hours via `Etc/GMT±N`). Not yet proven whether the
+collage path uses local `Date` (`avian/frontend/apt.js:3675,4184,4226` do in other views).
+
+**Consequence if unanswered (D27):** K2 cannot test the rollover case, which is the feature's core.
+
+### D28 — Report the educator-store lost-lock bug upstream?
+
+**Status:** `OPEN` for filing (opened 2026-11-17; not blocking W2, K2 or the feature).
+*Operator, 2026-11-17:* "In our own documentation, write out D28 for myself and for future bug issue
+report to the parent repo." **Done:** full write-up, plain-language summary and a ready draft issue
+in [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md). Filing itself is still
+the operator's call.
+
+**Why:** K1 found that `educator_store_open()` closes a probe handle (`avian/api/educator-store.php:263`,
+`:321`) after SQLite opens, which on Linux drops SQLite's POSIX locks; another process can then
+delete the live WAL. The Oracle reproduced a lost write with two processes, and the parent
+reproduced it independently (`.pi/research/d28/wal_lock_repro.php`). Field impact is probably
+narrowed by the app's `educators.lock` (amended 2026-11-17; see the write-up). It is the parent's code,
+identical on base, outside this feature, so D20 forbids fixing it here. Evidence:
+[K1 log](verification-log.md#k1-build-and-baseline).
+
+**Options:** (a) open an issue on the parent repo with the reproduction (no code); (b) note it for the
+fork only; (c) do nothing. Any issue or PR is outward-facing and needs the operator.
+**Recommendation:** (a), after one confirmation on a real station's PHP version (assumed 8.2). The
+likely fix (keep the probe open for the connection's lifetime, or validate with `stat` instead of
+`fopen`) is the parent's call.
+
+**Consequence if unanswered:** none for the feature; the hazard stays unreported.
 
 ---
 
