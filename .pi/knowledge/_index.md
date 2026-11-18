@@ -67,7 +67,6 @@ every session; delete items when they close (their history lives in the register
    (`python .pi/scripts/check_kb.py --index`) must exit 0 at the end of every session; the
    `kb-document` extension is active (project trust granted).
 
-
 ## Docs
 
 | Doc | Read it when the task touches… |
