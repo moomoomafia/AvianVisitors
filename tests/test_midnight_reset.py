@@ -35,7 +35,8 @@ class MidnightResetTests(unittest.TestCase):
             db.close()
             environment = {**os.environ, "AV_EDUCATOR_LOCK_FILE": str(temp / "educators.lock"),
                            "AV_EDUCATOR_STATE_FILE": str(temp / "educators.state"),
-                           "AV_EDUCATOR_BIRDS_DB": str(temp / "birds.db"), "AV_REQUIRE_AUTH": "0",
+                           "AV_EDUCATOR_BIRDS_DB": str(temp / "birds.db"),
+                           "AV_EDUCATOR_MAINTENANCE_FILE": str(temp / "educators.maintenance"),
                            "AV_EDUCATOR_STATE_TEST_METADATA": "1", "AV_EDUCATOR_STORE_TEST_METADATA": "1"}
             windows = {}
             for flag in ("", "&reset_at_midnight=1"):
@@ -44,6 +45,7 @@ class MidnightResetTests(unittest.TestCase):
                         f"require {json.dumps(str(root / 'avian' / 'api' / 'birdnet-api.php'))};")
                 result = subprocess.run(["php", "-r", code], cwd=root, env=environment, text=True,
                                         capture_output=True, timeout=10, check=False)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 windows[flag] = json.loads(result.stdout)
         # A per-request ask clamps today's window to the station's midnight; without it, rolling 24 h.
         self.assertIs(windows[""]["midnight_clamped"], False)
