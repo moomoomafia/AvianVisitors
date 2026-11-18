@@ -259,12 +259,19 @@ blocking W2):
 
 | Option | What | Trace |
 |---|---|---|
-| (a) ~~recommended~~ *amended 2026-11-17: `edu_endpoint` lives only in a suite CI never runs; split into a1/a2, see D22* | one clock-independent case in an existing parent PHP test: two `edu_endpoint` calls (`tests/test_educator_backend.php:64-104`) on `recent`, `hours=24`, with and without `reset_at_midnight=1`, asserting only `midnight_clamped` and `window_start` ending `00:00:00` (true at any time of day for today, `avian/api/birdnet-api.php:109-113`). Store provisioned (`educator_store_open(true)`, `:178`), no capture running. | test lines only |
+| (a) ~~recommended~~ *amended 2026-11-17: `edu_endpoint` lives only in a suite CI never runs; split into a1/a2, see D22* | one clock-independent case in an existing parent PHP test: two `edu_endpoint` calls (`tests/test_educator_backend.php:64-104`) on `recent`, `hours=24`, with and without `reset_at_midnight=1`, asserting only `midnight_clamped` and `window_start` ending `00:00:00` (true at any time of day for today, `avian/api/birdnet-api.php:110-114`; ~~`:109-113`~~ corrected 2026-11-17). Store provisioned (`educator_store_open(true)`, `:178`), no capture running. | test lines only |
 | (b) | record the gap; rely on the `.pi/` probe + R1's argument | none |
 | (c) | the full probe as a parent test (time-relative rows need a midnight guard → flake risk) | more test lines |
 
 If (a) is chosen it is a separate small step (**T1**, §7), not part of W2, and must not touch
 `avian/api/birdnet-api.php`.
+
+> **Done 2026-11-17 (D22 answered):** the CI-run variant, not `edu_endpoint`. One method in
+> `tests/test_midnight_reset.py` (`test_recent_request_can_ask_for_the_station_midnight`, +35/−1
+> with review fixes, `db9ff938` + `cde2bc47`) makes two real `php -r` requests to `recent` with
+> Educators disabled (lock + state + empty `birds.db` in a temp dir; no educator store). Fails on
+> base `5950f807`, passes on HEAD. Not covered: `Cache-Control` (needs K2 or hardware).
+> [T1 log](knowledge/verification-log.md#t1-smoke-alarm-for-w1-d22).
 
 Our own scaffolding stays in `.pi/`: the characterization suite
 (`.pi/research/pre-v03/test_characterize_today.py`, 13/13 today) is re-run after W2 to show the

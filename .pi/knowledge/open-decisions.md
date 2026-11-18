@@ -44,6 +44,7 @@ feature branch alone triggers no CI. No PR into the fork's `avian-visitors` bran
 | `ANSWERED` (principle, outranks parent-decisions) | D20 — minimal footprint, align with the parent repo |
 | `OPEN`, needed only at execution stage V | D21 — CI access via a PR inside the fork (deferred 2026-11-17 at G0: re-ask at V) |
 | `ANSWERED 2026-11-17` (operator) | D22 — commit a parent test for W1's request param: **yes** ("leave smoke alarm behind"); done as T1 `db9ff938` |
+| `ANSWERED 2026-11-17` (operator), standing | D29 — operator standing permissions and working preferences (subagents allowed; plain explanations with "what you need from me") |
 | `ANSWERED 2026-11-17` (operator) | D23 — commit the pending `.pi/` changes before W2: (a) one local docs commit, no push |
 | `ANSWERED` (operator), harness | D25 — harden kb-document: build commitment gate + session priming + rule (2026-11-17) |
 | `ANSWERED 2026-11-17` (operator) | D24 — D4 re-confirmed: Docker container in `.pi/` is the local gate (virtualization verified) |
@@ -1003,7 +1004,7 @@ library guard (`avian/api/birdnet-api.php:127`). End-to-end coverage now exists 
 **Options:** (a) add one clock-independent case to an existing parent PHP test: two
 `edu_endpoint` calls on `recent`, `hours=24`, with and without `reset_at_midnight=1`, asserting
 only `midnight_clamped` and `window_start` ending `00:00:00`. That holds at any time of day
-(`avian/api/birdnet-api.php:109-113`), needs no time-relative rows, and needs the store
+(`avian/api/birdnet-api.php:110-114`; ~~`:109-113`~~ corrected 2026-11-17), needs no time-relative rows, and needs the store
 provisioned (`educator_store_open(true)`) with no capture running (~~recommended: small, upstream
 idiom, guards the request path in Linux CI~~); (b) record the gap and rely on the `.pi/` probe + R1
 argument (smallest trace); (c) the full probe as a parent test (more coverage, but time-relative
@@ -1102,6 +1103,26 @@ scenario, use Playwright `timezone_id` (IANA, whole hours via `Etc/GMT±N`). Not
 collage path uses local `Date` (`avian/frontend/apt.js:3675,4184,4226` do in other views).
 
 **Consequence if unanswered (D27):** K2 cannot test the rollover case, which is the feature's core.
+
+### D29 — Operator standing permissions and working preferences
+
+**Status:** `ANSWERED 2026-11-17` (operator statements, recorded under D25 so a new session knows them).
+
+* **Subagents:** *"You can spawn subagents as needed"* (2026-11-17, said while the post-reboot
+  checks ran). This is the operator's standing authorisation to delegate (scout, oracle, worker,
+  reviewer), still one child at a time ([orchestration.md](orchestration.md)). It does **not** widen
+  build permission (G0 covers W1–W3 + review fixes + T1) or permit pushes.
+* **Pushes are per request:** the operator authorised exactly one push (*"commit and push to
+  feature/branch"*, 2026-11-17, landed `5f90208c`). Every later push needs a new yes; `upstream` stays
+  disabled; no PR without permission.
+* **Explanations:** the operator twice asked for a plain-language explanation of a decision
+  (*"what D22 is, what you need from me"*; *"Explain D22 to me and what you need from me"*). When a
+  decision needs the operator, explain it in short plain words and end with an explicit numbered
+  "what I need from you" with a recommendation.
+* **Documentation before moving on:** *"Finish documentation before we proceed"* and repeated
+  "was everything recorded?" checks (2026-11-17). Run the kb-document audit before reporting; never
+  claim "all recorded" from memory.
+* **Walk lightly (D20)** remains the governing principle.
 
 ### D28 — Report the educator-store lost-lock bug upstream?
 

@@ -66,6 +66,29 @@ numbers in A/B R4.
 
 For scale: upstream's own station midnight reset was +112 shipped lines plus +108 test lines.
 
+### Measured shipped diff (2026-11-17)
+
+`git diff --numstat 5950f807 HEAD -- avian frame tests` after W1, W2, W3, W2R and T1 (local commits
+up to `cde2bc47`):
+
+| File | Measured | Estimate above |
+|---|---|---|
+| `avian/api/birdnet-api.php` | +3/−2 | 3 |
+| `frame/display.py` | +54/−5 | ~25–35 |
+| `frame/shoot.py` | +7/−4 | ~4–6 |
+| `frame/config.example.toml` | +2 | ~3 |
+| `frame/README.md` | +2 (one long paragraph line) | ~6–10 |
+| **product total** | **5 files, +68/−11** | ~41–57 |
+| `tests/test_frame_capture.py` | +246 | — |
+| `tests/test_midnight_reset.py` | +35/−1 | (PHP row; D22 placed it here) |
+| **tests total** | **+281/−1** | ~60–90 |
+
+`frame/display.py` came out above the estimate: two helpers (`reset_at_midnight_active`,
+`has_drawable_bird`), the `fetch_recent_payload` split, and review R's post-capture decline (F1),
+which the estimate did not foresee. Tests came out about 3× the estimate because §5 asked for one
+case per draw path and rule. Still below upstream's own midnight feature (+112 shipped, +108 tests)
+for shipped code.
+
 ## Research and A/B plan
 
 ### R2 result (2026-11-16)

@@ -74,6 +74,11 @@ unless you pass `cwd`/`worktree`. Two consequences:
   Worker handoffs are generated with `.pi/scripts/build_handoff.py <plan> <task-header>`.
 * **Never put prose in `bash -lc '...'` heredocs** (one apostrophe executes backtick text); tell
   children the same.
+* **Delegation is authorised** by the operator's standing permission (*"You can spawn subagents as
+  needed"*, [D29](open-decisions.md#d29--operator-standing-permissions-and-working-preferences)).
+* **`ask_user` is auto-cancelled after 30 minutes** with no answer (2026-11-17: a D22/D27/push batch was
+  lost that way). Before asking, write the questions into the register and
+  [next-actions.md](next-actions.md) so they survive; after a timeout, restate them in the reply.
 * **`fcntl`, `os.geteuid`, `os.O_NOFOLLOW` are absent** → `frame/display.py`-dependent
   tests error locally; use the stub recipe in
   [testing-and-ci.md](testing-and-ci.md#running-displaypy-tests-on-windows) and label

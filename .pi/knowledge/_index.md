@@ -32,7 +32,10 @@ Written for a reader with zero memory of the conversation. Update this list at t
 every session; delete items when they close (their history lives in the register and the log).
 
 > **Pending commitments live in [next-actions.md](next-actions.md)** (D25). Read it if the
-> extension did not inject it.
+> extension did not inject it. **Operator standing permissions and preferences:**
+> [D29](open-decisions.md#d29--operator-standing-permissions-and-working-preferences) (subagents
+> allowed; pushes one at a time; plain explanations ending with "what I need from you";
+> document before moving on).
 
 0. **Where the build stands.** **[Plan v0.5](../reset-after-midnight%20Plan%20v0.5.md) is current**
    (execution-state revision; design unchanged since v0.3). Built: **W1** (`428f3104`, station +3/−2,

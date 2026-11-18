@@ -39,6 +39,28 @@ Results per step: [K1 baseline](verification-log.md#k1-build-and-baseline),
 (`tests/test_frame_capture.py` 77 on base → 92 at `0046db23`). Everything below about Windows is a
 pre-check only.
 
+**K1 upkeep (2026-11-17):**
+
+* **Deliberately not in the suite** (Oracle, [pre-container review](verification-log.md#pre-container-oracle-review)):
+  bare `pytest` and `requirements.txt` (station ML stack); `frame/requirements-frame.txt` (real
+  `inky`/`spidev`); root-only tests (`frame/test_install_security.py`, the root case of
+  `frame/test_ebird_credentials.py`); `frame/test_bundle_render_integration.py` (12 of its tests skip
+  without a disposable root container, and K1 counts a skip as a failure; run it by hand: 14 passed
+  at `ec5cdc7d`).
+* **Educator A/B baseline:** `.pi/k1/educator-backend.baseline` is the `FAIL:` + fatal lines of
+  `tests/test_educator_backend.php` on base `5950f807`. If the parent base moves (rebase), regenerate
+  it: `bash .pi/k1/run.sh <new-base> > log`, then take the `^FAIL:|^PHP Fatal error` lines from that
+  suite's block (recipe used: [K1 log](verification-log.md#k1-build-and-baseline)).
+* **Raw run logs** (not evidence by themselves; results are in the verification log) are kept
+  outside the repo in `C:\tmp\k1\` (`base.log`, `head*.log`, `w2.log`, `w2r.log`, `t1.log`); the W2R
+  worker's is `%TEMP%\k1_w2r.log`. Safe to delete.
+* **Disk:** image `avian-k1:local` ~1.9 GB plus the pinned `debian:bookworm-slim` (shows as
+  `debian:<none>`, 116 MB). Remove with `docker rmi avian-k1:local` (rebuilt on the next run).
+* **flake8 is not installed** in this host's Python; use `uvx flake8 <files>` (7.5.0) on Windows, or
+  the fatal set inside K1.
+* **Writing tests that create SQLite files:** `with sqlite3.connect(p) as db:` commits but does **not**
+  close; on Windows the temp dir then cannot be deleted (`WinError 32`). Call `db.close()`.
+
 ## Verified state on this Windows workstation (2026-11-16)
 
 Environment: Python 3.14.0, pytest 9.1.1, Pillow present, playwright importable,

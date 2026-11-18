@@ -820,7 +820,7 @@ is done; W2, W3 and everything after are not started (matches `.pi/handoff/ledge
 
 * **No committed test covers W1.** Q1 is still open. The probe shows a clock-independent
   parent-test case is cheap: with `hours=24` on today, `midnight_clamped` is true whenever the
-  param is honoured (`avian/api/birdnet-api.php:109-113`), whatever the time. Asserting only
+  param is honoured (`avian/api/birdnet-api.php:110-114`; ~~`:109-113`~~ corrected 2026-11-17, [T1 re-review](#t1-re-review)), whatever the time. Asserting only
   the echo fields (`midnight_clamped`, `window_start` ends `00:00:00`) needs no time-relative
   rows and no midnight guard. Caveat: an active Educators capture auto-scopes unscoped calls,
   so the case must sit where no capture is running.

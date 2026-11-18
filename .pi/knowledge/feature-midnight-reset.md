@@ -1,7 +1,13 @@
 # Feature: BirdFrame reset-after-midnight — code ground truth
 
-Feature branch `feature/birdframe-midnight-reset` (this worktree), no source changes
-committed yet (`git status` clean apart from untracked `.pi/`).
+> **Status 2026-11-17:** this is the pre-plan scouting doc (code ground truth as of base
+> `5950f807`). The current design and execution state are in
+> [Plan v0.5](../reset-after-midnight%20Plan%20v0.5.md) (§4, including the §4.7 review amendments),
+> which wins where they differ. Built as local commits: W1 `428f3104`, W2 `dece12cf`, W3 `ec5cdc7d`,
+> W2R `0046db23`, T1 `db9ff938`/`cde2bc47` ([open threads](_index.md#open-threads-last-updated-2026-11-17-plan-v05-written)).
+
+Feature branch `feature/birdframe-midnight-reset` (this worktree). ~~No source changes
+committed yet (`git status` clean apart from untracked `.pi/`).~~ *(true when written, 2026-11-16)*
 
 * Draft brief: [`.pi/reset-after-midnight Plan v0.2.md`](../reset-after-midnight%20Plan%20v0.2.md)
   (v0.1 kept alongside for delta).
