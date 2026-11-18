@@ -29,12 +29,12 @@
 | [D19](open-decisions.md#d19--make-the-documentation-duty-fire-automatically-skill-vs-extension) | [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [D20](open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) | [_index.md](_index.md), [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md), [code-conventions.md](code-conventions.md), [feature-midnight-reset.md](feature-midnight-reset.md), [minimal-footprint.md](minimal-footprint.md), [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [test-environment.md](test-environment.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [D21](open-decisions.md#d21--may-the-parent-open-a-pr-inside-the-fork-so-the-parents-ci-runs) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
-| [D22](open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
+| [D22](open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param) | [_index.md](_index.md), [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | [D23](open-decisions.md#d23--commit-the-pending-pi-changes-before-the-w2-worker-runs) | [_index.md](_index.md), [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | [D24](open-decisions.md#d24--re-confirm-d4-container-as-the-local-gate-once-virtualization-works) | [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | [D25](open-decisions.md#d25--harden-kb-document-so-commitments-and-operator-statements-are-recorded-automatically) | [_index.md](_index.md), [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | [D26](open-decisions.md#d26--container-scope-phasing-and-build-authorisation) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
-| [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
+| [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) | [_index.md](_index.md), [next-actions.md](next-actions.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | [D28](open-decisions.md#d28--report-the-educator-store-lost-lock-bug-upstream) | [_index.md](_index.md), [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 
 ## Knowledge docs (backlinks)
@@ -87,7 +87,7 @@
 | `.pi-tasks/TASK_0001.md` | [open-decisions.md](open-decisions.md) |
 | `.pi-tasks/env-notes.md` | [open-decisions.md](open-decisions.md) |
 | `.pi/handoff/context.md` | [orchestration.md](orchestration.md), [verification-log.md](verification-log.md) |
-| `.pi/handoff/ledger.md` | [orchestration.md](orchestration.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
+| `.pi/handoff/ledger.md` | [next-actions.md](next-actions.md), [orchestration.md](orchestration.md), [verification-log.md](verification-log.md), [AGENTS.md](../../AGENTS.md) |
 | `.pi/handoff/plan.md` | [open-decisions.md](open-decisions.md), [orchestration.md](orchestration.md), [verification-log.md](verification-log.md) |
 | `.pi/k1/suite.sh` | [verification-log.md](verification-log.md) |
 | `.pi/research/d28/wal_lock_repro.php` | [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
@@ -98,7 +98,7 @@
 | `.pi/research/r3/www/echo.php` | [verification-log.md](verification-log.md) |
 | `.pi/research/r5/manifest_scan.py` | [verification-log.md](verification-log.md) |
 | `.pi/research/w1/recent_param_probe.php` | [open-decisions.md](open-decisions.md), [testing-and-ci.md](testing-and-ci.md), [verification-log.md](verification-log.md) |
-| `.pi/scripts/build_handoff.py` | [_index.md](_index.md), [verification-log.md](verification-log.md) |
+| `.pi/scripts/build_handoff.py` | [_index.md](_index.md), [next-actions.md](next-actions.md), [verification-log.md](verification-log.md) |
 | `.pi/scripts/check_kb.py` | [_index.md](_index.md), [open-decisions.md](open-decisions.md), [verification-log.md](verification-log.md) |
 | `.pi/skills/kb-document/SKILL.md` | [open-decisions.md](open-decisions.md) |
 | `AGENTS.md` | [AGENTS.md](../../AGENTS.md) |

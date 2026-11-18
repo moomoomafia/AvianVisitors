@@ -18,7 +18,15 @@ Rules:
 
 ## Pending
 
-None.
+1. **Trigger:** the operator answers any of D22, D27, or "push" (opened 2026-11-17; the `ask_user`
+   batch timed out unanswered after W2R).
+   **Action:** D22 = (a) → write the T1 handoff with `.pi/scripts/build_handoff.py`, dispatch one
+   worker, K1 A/B (fails on `5950f807`, passes on HEAD). D27 ruled → build K2 in `.pi/` (fake
+   station + fake `inky` + midnight scenarios incl. the F1 straddle). Push authorised →
+   `git push origin feature/birdframe-midnight-reset` (local was 8 commits ahead of `5f90208c`).
+   Recommendations: D22 (a), D27 per-run `TZ` offset.
+   **Log to:** the register entries (quote the ruling), [verification-log.md](verification-log.md),
+   `.pi/handoff/ledger.md`.
 
 ## Done
 
