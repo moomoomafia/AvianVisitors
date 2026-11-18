@@ -1180,3 +1180,34 @@ root container), and `frame/config.example.toml` parses with `tomllib` (key comm
 The README behaviour claims were checked by the worker against `frame/display.py`; the parent's own W2
 diff read agrees (empty day exits 0 without capture; outdated mic exits 1 before quiet hours).
 **Not executed:** rendered markdown; hardware.
+
+## Review R: full product diff
+
+**Who:** `reviewer`, 2026-11-17, mission `f7045983-7d4b-4658-977c-e8204a610f82`. **Scope:**
+`git diff 5950f807 HEAD -- avian frame tests` (W1 `428f3104`, W2 `dece12cf`, W3 `ec5cdc7d`) against Plan
+v0.5 §1–§5, rulings D1–D3, D12–D17, D20, and the safety rails. **Method:** read-only; the reviewer had no
+shell (could not run K1, flake8 or git), read HEAD files and used the sibling checkout
+`C:/apps/birdNet/AvianVisitors` (at `5950f807` per its packed-refs) as the base. **Verdict: ready with edits.**
+
+**Confirmed correct by the reviewer:** flag-off equivalence (`frame/display.py:106-107`, `:480-495` = base
+body, `:416,423`; `frame/shoot.py:260-261`; test `tests/test_frame_capture.py:337`); every draw path declines
+an empty day before the gate (`frame/display.py:470-473`, tests `:315-335`, bundle use/rollback exit 0 so no
+revert, `frame/bundle_runtime.py:2098-2112`); D14/D15/D16 exit codes (`frame/display.py:463-468`; Educators
+scoping reports `midnight_clamped` false, `avian/api/birdnet-api.php:90`); one fetch per run,
+`fetch_species` not called; base-pose test matches `_pose_suffix` (`frame/bundle_runtime.py:1241-1245`);
+Python 3.9 clean; `frame/config_contract.py:51-121` does not reject unknown keys.
+
+| # | Sev | Finding | Parent re-check | Action |
+|---|---|---|---|---|
+| F1 | **High** | A refreshing run that straddles the station's midnight can push the empty-nest card: the decision uses the frame's fetch, the page re-requests `recent` (now clamped) seconds later, `FRAME_READY` accepts a zero-tile collage, and `run()` re-signs from `capture["species"] = []` and pushes. Breaks §1 / req 9. Not caught: the test stub echoes the decided list. | **CONFIRMED**: `frame/shoot.py:66-75` (empty collage is ready when `.nest-img` loaded), `frame/display.py:506-520` (re-sign then push, no drawable check), `frame/systemd/birdframe.timer:11` (phase-free 15 min) | fix: post-capture decline when active and the captured list has no drawable bird (return True, no push/save); test with a stub capturing `[]` |
+| F2 | Low | `--preview` with a failed fetch returns True and writes nothing (flag off would exit 1) | CONFIRMED by the W2 diff read (step b returns `not force and use_signature`) | fix: `return not (force or preview) and use_signature` + test subcase |
+| F3 | Low | species without `sci` raise outside any `try` with the flag on | CONFIRMED (W2 log item 3); station always sends `sci` (`avian/api/birdnet-api.php:370`) | resolved by F4 (signature back under upstream `try`) |
+| F4 | Low (D20) | duplicated bundle salt (`frame/display.py:474-479`) and `elif` restructure; smaller shape: keep upstream `if use_signature:` and change one line to `species = species if active else fetch_species(`; −6 lines, 2 fewer branches | shape read and judged equivalent for flag off (`active` False ⇒ upstream path unchanged) | apply |
+| F5 | Low (docs) | README lacks D14's required sentence that an outdated mic (or active Educators capture) undoes `avian-bundle` switches | **CONFIRMED**: D14 body ("Known consequence, to state in the README: under `avian-bundle use` an outdated station…") | add one clause |
+| F6 | Low (docs) | `frame/config.example.toml:27-28` say "station", which that file uses for BirdWeather; the BirdNET-Pi is "mic" there | not re-read line by line; accepted (W3 log notes the README uses "mic") | replace with "mic" |
+| F7 | Low | the "ignored" line tests truthiness while activation needs `is True`; `"true"` in local mode logs a misleading line | CONFIRMED by the W2 diff | use `is True` |
+
+**Correction this forces in the KB:** Plan §4.3's note that upstream's re-sign "keeps state truthful if the
+window changes between the fetch and the capture" is true for *state* but missed the *panel*: the capture
+can be empty. The design gains step (f) (post-capture decline). Recorded in Plan v0.5 §4.2 as an amendment.
+**Unverified:** reviewer did not re-measure complexity (worker: 28); flake8 and K1 to be re-run after fixes.

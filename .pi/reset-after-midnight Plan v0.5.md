@@ -116,6 +116,9 @@ the H checklist (§6).
 
 ### 4.2 Frame — `frame/display.py` (W2; unchanged from v0.3)
 
+> **Amended 2026-11-17 by review R** (see §4.7): step (b) for preview, step (e)'s shape, the
+> "ignored" line, and a new step (f) after the capture. The original text below is kept.
+
 1. `DEFAULTS["reset_at_midnight"] = False` (`:42-70`).
 2. **One shared fetch.** Extract the body of `fetch_recent` (`:91-101`) into
    `fetch_recent_payload(base, hours, timeout, auth=None, reset_at_midnight=False)` returning the
@@ -158,7 +161,9 @@ the H checklist (§6).
 **single** injection point for every page `recent` request (verified, pre-v0.3 item 5); every other
 query parameter is preserved verbatim (characterization C8). Upstream's re-sign from the captured
 response (`frame/display.py:457-463`) keeps state truthful if the window changes between the fetch
-and the capture.
+and the capture. *Amended 2026-11-17 (review R, F1): truthful state is not enough. If the station
+passes midnight between the fetch and the page's request, the capture is an empty nest and would be
+pushed; §4.7 step (f) declines it.*
 
 ### 4.4 "Drawable" (D12 + R5 amendment; W2; unchanged from v0.3)
 
@@ -186,6 +191,31 @@ and the capture.
   behaviour (no state reset needed). End-user voice, no internals. Also say: with an outdated
   station the frame keeps its collage and reports a failure every 15 minutes (including during
   quiet hours) until the station is updated (D14).
+
+### 4.7 Review-R amendments (2026-11-17, step W2R)
+
+From [review R](knowledge/verification-log.md#review-r-full-product-diff); each finding was
+re-checked against source by the parent. They implement existing rulings (D1, D14, D20); no new
+design choice.
+
+1. **Step (f), post-capture decline (F1, High).** After `obtain_image` succeeds and before
+   `mat_and_center`/preview/push: if `active and not preview and "species" in capture and not
+   has_drawable_bird(capture["species"], bundle)`, print the step (d) line and **return True** (no
+   push, no `save_state`). Evidence: `frame/shoot.py:66-75` accepts an empty collage;
+   `frame/display.py:506-520` re-signs and pushes; `frame/systemd/birdframe.timer:11` is phase-free.
+   Test: the flag-on stub captures a list that differs from the decided one (`[]`) ⇒ `run()` True,
+   no push, no save.
+2. **Step (b) and preview (F2).** `return not (force or preview) and use_signature`: a preview whose
+   fetch failed reports failure (as the flag-off path does) instead of exiting 0 with no file.
+3. **Step (e) shape (F4, D20; also fixes F3).** Remove the duplicated signature/salt lines from the
+   `if active:` block and restore the upstream `if use_signature:` (not `elif`); change only its
+   first statement to `species = species if active else fetch_species(...)`. Flag off: identical
+   (`active` is False). Flag on: still one fetch, `fetch_species` not called, and a malformed entry
+   is caught by the upstream `try` as "signature fetch failed".
+4. **"Ignored" line (F7).** Print it only when `cfg.get("reset_at_midnight") is True and not active`.
+5. **Docs (F5, F6).** README: add that with an outdated mic (or an active Educators capture) bundle
+   switches are undone until the mic is updated (D14's required sentence).
+   `frame/config.example.toml`: say "mic", not "station" (that file's "station" is BirdWeather).
 
 ### 4.6 Not changed
 
@@ -265,6 +295,7 @@ untracked files).
 | W2 | worker | §4.2–4.4 frame change + §5 frame tests, one local commit | parent re-runs K1: new tests pass, nothing else changes against the K1 HEAD baseline; characterization flips as expected with the flag on and nothing changes with it off |
 | K2 | parent | fake station + fake panel + scenarios | needs D27; the midnight scenarios assert push/no-push |
 | W3 | worker | §4.5 docs | README paragraph at `frame/README.md:89`/`:91` + config line, end-user voice |
+| W2R | worker | §4.7 review-R fixes (F1, F2, F4, F7 code + tests; F5, F6 docs), one local commit (added 2026-11-17) | parent re-runs K1; the F1 test fails on `ec5cdc7d` and passes after; flag-off behaviour unchanged |
 | T1 | worker | only if D22 = (a): one PHP case per §5 | case passes on HEAD, fails on base `5950f807` (K1 A/B) |
 | R | reviewer | review the full diff vs this plan, D20 and every ruling | no unresolved High findings |
 | V | parent | §6 runs; CI only if the operator authorises it on the fork (D21) | results recorded in the verification log |
