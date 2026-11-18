@@ -1405,3 +1405,11 @@ per-request TZ, fake Inky matches `push_panel`'s imports and `saturation` signat
 push is visible, outdated station = base tree; `build_handoff.py` reproducible.
 
 **Plan impact:** O1-1 changes the user-facing wording of plan §4.2 step (c) (recorded as an amendment there).
+
+**Round 1 fixes:** `worker`, mission `3b22f0b8-4b98-4e67-aec8-7637512b572d`, local commit `e18f304d` (5 files,
++6/−4): O1-1 message and `DEFAULTS` comment say "mic", test asserts "did not apply the midnight window";
+O1-2 repro exits `$lost && $ok ? 0 : 1`; O1-4 and O1-5 one comment line each. Worker: Windows pre-check 7
+known failures / 91 passed; flake8 only the known C901 (`run()` 27) and upstream E128. **Parent re-check on
+committed `e18f304d`:** diff read (matches); K1 exit 0, 14/14 PASS; K2 7 passed; repro `EXIT=0` with the
+lost write and a consistent control. Worker noted two code comments still saying "station's midnight"
+(`frame/display.py:514`, `tests/test_frame_capture.py:275`), outside the task: left for round 2 to judge.
