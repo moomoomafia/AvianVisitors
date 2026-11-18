@@ -166,8 +166,8 @@ Any report must name the environment and list what was **not** executed.
 ## Feature freeze (current branch)
 
 Branch `feature/birdframe-midnight-reset`. The current plan is
-[`.pi/reset-after-midnight Plan v0.4.md`](.pi/reset-after-midnight%20Plan%20v0.4.md) (2026-11-17: execution-state revision, design
-unchanged; ~~v0.3~~ and v0.1/v0.2 kept for history). ~~**Building the feature is
+[`.pi/reset-after-midnight Plan v0.5.md`](.pi/reset-after-midnight%20Plan%20v0.5.md) (2026-11-17: execution-state revision, design
+unchanged since v0.3; ~~v0.4~~, v0.3 and v0.1/v0.2 kept for history). ~~**Building the feature is
 NOT authorised**~~ *Superseded 2026-11-17: gate G0 lifted by the operator for Plan v0.3 steps
 W1–W3 only; stages V and H, §8 deployment, pushes and PRs still need separate permission
 (see the gate amendment in [`.pi/knowledge/open-decisions.md`](.pi/knowledge/open-decisions.md)).*

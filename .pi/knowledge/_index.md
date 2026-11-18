@@ -14,7 +14,7 @@ the rules for keeping the map true.
 web frontend (`avian/`) plus an optional e-ink wall frame (`frame/`).
 **This checkout:** git **worktree** `AvianVisitors-birdframe-midnight-reset`,
 branch `feature/birdframe-midnight-reset`, main worktree
-`C:/apps/birdNet/AvianVisitors`. Current plan: [`.pi/reset-after-midnight Plan v0.4.md`](../reset-after-midnight%20Plan%20v0.4.md) (2026-11-17; ~~v0.3~~ superseded, design unchanged; [v0.3](../reset-after-midnight%20Plan%20v0.3.md), v0.1 and v0.2 kept for history). Plan critique + open questions:
+`C:/apps/birdNet/AvianVisitors`. Current plan: [`.pi/reset-after-midnight Plan v0.5.md`](../reset-after-midnight%20Plan%20v0.5.md) (2026-11-17; design unchanged since v0.3; [v0.4](../reset-after-midnight%20Plan%20v0.4.md), [v0.3](../reset-after-midnight%20Plan%20v0.3.md), v0.1 and v0.2 kept for history). Plan critique + open questions:
 [plan-review-midnight-reset.md](plan-review-midnight-reset.md).
 
 ---
@@ -26,124 +26,43 @@ is written and W1 is built and reviewed; next is W2 after
 [D23](open-decisions.md#d23--commit-the-pending-pi-changes-before-the-w2-worker-runs) — see open thread 0.)* Current shape:
 [feature-midnight-reset.md](feature-midnight-reset.md#decided-design-d1d4-ruled-2026-11-16-amended-by-audit-2).
 
-## Open threads (last updated 2026-11-17, after the post-W1 review)
+## Open threads (last updated 2026-11-17, Plan v0.5 written)
 
 Written for a reader with zero memory of the conversation. Update this list at the end of
-every session; delete items when they close.
+every session; delete items when they close (their history lives in the register and the log).
 
-> **Pending commitments live in [next-actions.md](next-actions.md)** (moved there 2026-11-17,
-> D25). Read it now if the extension did not already inject it. The current item is the
-> post-reboot virtualization checks.
+> **Pending commitments live in [next-actions.md](next-actions.md)** (D25). Read it if the
+> extension did not inject it.
 
-0. **Where the build stands (2026-11-17).** **Plan v0.4 is current**
-   ([plan](../reset-after-midnight%20Plan%20v0.4.md)): an execution-state revision of v0.3. Design
-   unchanged; it adds W1 done, step P2 (W2 pre-dispatch), optional T1 (D22), the Windows
-   educator-test baseline, a Cache-Control `curl` on hardware, and a README anchor fix. Of the §7
-   steps, only **W1** is built: `avian/api/birdnet-api.php` +3/−2, local commit `428f3104`, not
-   pushed. It matches §4.1 verbatim and is verified end to end by the parent
-   ([post-W1 review](verification-log.md#post-w1-review-implementation-and-test-coverage)).
-   `frame/` and `tests/` are untouched. **Before dispatching W2:** (a) operator rules
-   [D23](open-decisions.md#d23--commit-the-pending-pi-changes-before-the-w2-worker-runs)
-   (recommended: commit the pending `.pi/` changes locally first); (b) regenerate
-   `.pi/handoff/plan.md` from v0.4 (it is still derived from v0.3) with the rule "§4 wins over
-   verbatim ruling text" (D15 holds with exit 1, not 0) — v0.4 step P2. Not blocking W2:
-   [D22](open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param) (a committed
-   parent test for W1; recommended: a clock-independent `edu_endpoint` case). Unverified:
-   `Cache-Control: no-store` with the param (CLI shows no headers).
-   **Environment drift (2026-11-17):** D4 (container = local gate) was never amended, but plan
-   §6 uses Windows + stubs. ~~The operator is rebooting to enable virtualization in BIOS.~~ *Done 2026-11-17: all
-   three checks passed. D24 ruled **Docker container in `.pi/`** (D4 kept; container not built
-   yet, which is the next env task). D23 ruled **commit `.pi/` locally, no push** (done). D26 ruled **K1 (Linux test runner) now,
-   then W2, then K2** ([D26](open-decisions.md#d26--container-scope-phasing-and-build-authorisation));
-   Plan v0.4 §6/§7/§9 amended after an [Oracle review](verification-log.md#pre-container-oracle-review).
-   [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) (midnight clock)
-   stays open until K2. **K1 built and green on HEAD** ([K1 log](verification-log.md#k1-build-and-baseline));
-   `.pi/k1/` committed and pushed to `origin` with the KB (operator authorised commit + push,
-   2026-11-17). It found a parent bug (educator store loses SQLite locks on Linux), written up in
-   [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md);
-   [D28](open-decisions.md#d28--report-the-educator-store-lost-lock-bug-upstream): filing the issue
-   is the operator's call. **Next: P2** (regenerate `.pi/handoff/plan.md` from v0.4 incl. K1/K2), then W2.* **After
-   the reboot (original text):** run `wsl --status` and `docker run --rm hello-world`, then put
-   [D24](open-decisions.md#d24--re-confirm-d4-container-as-the-local-gate-once-virtualization-works)
-   to the operator (recommended: keep D4 and build the `.pi/` container — **Docker** over a
-   hand-built WSL Ubuntu; operator input and the local-vs-hardware split are quoted there).
-   Treat Windows runs as pre-checks until then.
-   **Where the change lives (operator check, 2026-11-17):** the setting is frame-only
-   (`reset_at_midnight` in `~/.birdframe/config.toml`, D3); the frame fetches, decides
-   (signature, quiet hours, heal, `frame/display.py:418-445`), captures the station page through
-   `frame/shoot.py:243-258`, and pushes. The station only *accepts* the per-request param (W1).
-   birdnet.local never sends it, so the website is unchanged (verified, post-W1 review).
-
-1. **[D12](open-decisions.md#d12--what-does-nothing-to-draw-mean-for-the-d1-decline)–[D16](open-decisions.md#d16--no-validated-list-fetch-failed-or---no-signature-with-the-flag-on) ruled (2026-11-16)** via small guiding questions: decline only when
-   today has **no drawable** bird (frame uses its own bundle); reset ignores `hours`
-   (everything since midnight); outdated station ⇒ hold + **exit 1**; station unreachable
-   on a manual run ⇒ report failure (bundle switch reverts); Educators not used (D15
-   parent-decided: ~~hold, exit 0~~ hold via the D14 path, **exit 1** — amended by D20 in the
-   register; stale wording fixed 2026-11-17, [post-W1 review](verification-log.md#post-w1-review-implementation-and-test-coverage)). **Next: write Plan v0.3** from the register + "Decided
-   design".
-2. **[D18](open-decisions.md#d18--knowledge-base-reference-conventions-linking) done (2026-11-16):** hybrid linking applied; `python .pi/scripts/check_kb.py --index` (moved from ~~`.pi/tools/`~~ 2026-11-17)
-   now validates the whole base and regenerates [_references.md](_references.md). It must
-   exit 0 at the end of every session (see [AGENTS.md](../../AGENTS.md)).
-3. **[D11](open-decisions.md#d11--commit-ignore-or-leave-untracked-pi-and-root-agentsmd) settled (D11c, 2026-11-16):** `.pi/` and [AGENTS.md](../../AGENTS.md) are committed on this
-   branch and pushed to the operator's fork (`origin`). **Strip them before any PR to the
-   parent repo** — and also the root `.pi-tasks/` directory (committed locally by the pi-task
-   tool during G0, commits `69730fc1`/`0e15473a`; not covered by D11c's wording, found 2026-11-17) — whether this goes upstream at all (D11a) is still undecided. Never commit
+0. **Where the build stands.** **[Plan v0.5](../reset-after-midnight%20Plan%20v0.5.md) is current**
+   (execution-state revision; design unchanged since v0.3). Built: **W1** (`428f3104`, station +3/−2,
+   [post-W1 review](verification-log.md#post-w1-review-implementation-and-test-coverage)) and the
+   **K1** Linux test container (`bash .pi/k1/run.sh [ref]`, green on HEAD,
+   [K1 log](verification-log.md#k1-build-and-baseline)). The branch is pushed to `origin`
+   (`5f90208c`). **Next per plan §7:** P2 (regenerate `.pi/handoff/` from v0.5) → **W2** (frame change
+   + tests, worker, one local commit) → K1 re-run → K2 (needs D27) → W3 (docs). V and H need
+   separate operator permission; every push needs the operator's say-so.
+1. **Open decisions** ([register](open-decisions.md)):
+   [D22](open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param) (a committed parent test
+   for W1; recommended: one clock-independent `edu_endpoint` case),
+   [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) (K2's midnight
+   clock; recommended: per-run `TZ` offset; Chromium ignores it),
+   [D21](open-decisions.md#d21--may-the-parent-open-a-pr-inside-the-fork-so-the-parents-ci-runs) (CI
+   via a PR inside the fork; stage V),
+   [D28](open-decisions.md#d28--report-the-educator-store-lost-lock-bug-upstream) (file the parent
+   bug; draft in [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-lost-lock.md)).
+2. **Before any PR to the parent** (D11c + amendment): strip `.pi/`, [AGENTS.md](../../AGENTS.md)
+   and the root `.pi-tasks/`. Whether to go upstream at all (D11a) is undecided. Never commit
    `.pi/ask-log/`.
-4. *(2026-11-17: trust **is** granted — `C:\apps\birdNet` is `true` in `~/.pi/agent/trust.json`;
-   extended by D25, see hard-won fact 22.)* **[D19](open-decisions.md#d19--make-the-documentation-duty-fire-automatically-skill-vs-extension) built, ~~awaiting trust~~:** the `kb-document` skill + extension exist and pass
-   20/20 tests plus a headless real-Pi load, but they load in normal sessions **only after
-   you approve the project-trust prompt** on next start. Then do one live check: plant a
-   broken link in a scratch KB doc, say "document this", and confirm the injected procedure
-   and the end-of-run fix-up continuation. Until trusted, `/kb-check` is absent.
-5. ~~**Building the feature is not authorised.**~~ *Superseded 2026-11-17:* **G0 lifted** for
-   W1–W3 ([gate amendment](open-decisions.md), [log](verification-log.md#g0-lift-and-w1-dispatch)).
-   Handoff committed in `.pi/handoff/` (plan, context, ledger). **W1 done** (station 3 lines,
-   local commit); next W2 then W3, one worker at a time. V and H need separate operator
-   permission. **Operator to rule Q1** (registered 2026-11-17 as [D22](open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param)): add one `edu_endpoint` `recent` case to
-   `tests/test_midnight_reset.php`? (works; needs lock + real clock). *2026-11-17 post-W1
-   review:* **no committed or `.pi/` check executed W1's three lines** (R3 tests a copy / stops
-   at the library guard); the parent's new `.pi/research/w1/recent_param_probe.php` now does,
-   discriminating base vs HEAD. A clock-independent parent case is possible (assert only
-   `midnight_clamped`/`window_start`); recommendation: add it — see
-   [post-W1 review](verification-log.md#post-w1-review-implementation-and-test-coverage). PHP in a stale tool shell:
-   export `PHP_INI_SCAN_DIR` inside `bash -lc` — `-d extension=sqlite3` alone fails.
-6. **R5 answered (2026-11-16): yes, reachable today** — a live community bundle has 22
-   flight-only species; D12's "drawable" now means "unsuffixed slug is a masks key" ([R5 brief](../outputs/r5-drawable-base-pose.md)).
-   No open research questions remain.
-   **Still unverified, but no longer blocking:** how often a day's first detection lacks art
-   (urgency of D12 only); Playwright 1.62.0 on Debian 12 (only matters for the blocked D4
-   container). **Moot under [D20](open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo)** (the design no longer depends on them): `getenv()`
-   visibility of `AVIAN_STATION_TIMEZONE` under FPM, and index use through the unscoped
-   `TEMP VIEW` (the `Date =` optimisation was dropped). *(Closed
-   since: GitHub runners have PHP + SQLite3 — R2; the clamp and param-shape claims — R3.)*
-7. **PHP now runs locally** (scoop, PHP 8.5; [R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php)): the parent's PHP suites and the R3
-   checks execute for real. Still not executed: anything needing Linux (`frame/display.py`
-   tests, the fake station + fake panel) or hardware. The [D4](open-decisions.md#d4--what-environment-is-the-acceptance-gate) container
-   does not exist; Docker Desktop's daemon is off on this machine, and **WSL2 cannot start**
-   (Wsl/Service/CreateInstance/CreateVm/HCS/HCS_E_HYPERV_NOT_INSTALLED — Virtual Machine Platform / virtualization not enabled;
-   found 2026-11-16 when attempting R3), so Docker almost certainly can't run either. The
-   D4 container needs virtualization enabled first (admin + reboot).
-   *Superseded 2026-11-17: virtualization is on; WSL2 and Docker both pass
-   ([post-reboot check](verification-log.md#post-reboot-virtualization-check-2026-11-17)). The D4
-   container is still not built; that waits on the D24 ruling.*
-8. **[D20](open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) principle adopted (2026-11-16):** align with the parent repo, change the least
-   code. [minimal-footprint.md](minimal-footprint.md) shrank the design. Re-asked rulings:
-   D17 → **use the parent repo's flow** (superseded); D4's CI clause → **no new workflow**
-   (after R2: parent CI already runs PHP + SQLite3 on `ubuntu-latest`). **R1 done**
-   (variant B′, [brief](../outputs/r1-station-param-variant.md)); R3 remains (execute the
-   `hours=24` clamp proof and the param-shape claims in the `.pi/` container with `php`).
-9. **Plan v0.3 written and Oracle-reviewed (2026-11-16)** — [`Plan v0.3`](../reset-after-midnight%20Plan%20v0.3.md)
-   revision 2; verdict "ready with edits", all applied ([Plan v0.3 Oracle review](verification-log.md#plan-v03-oracle-review)).
-   ~~Next: operator gate **G0** (authorise building).~~ G0 lifted 2026-11-17 (W1–W3). **D21** (CI via a PR inside the fork) is open
-   but only needed at execution stage V. *Earlier text:* write Plan v0.3 from the register +
-   [minimal-footprint.md](minimal-footprint.md) (which overrides the older
-   "Decided design" where they differ); then, when authorised, the harness in `.pi/` before
-   any feature code.
-10. **Checker moved to `.pi/scripts/check_kb.py` (2026-11-17), staged but not committed.**
-    A project `.pi/tools/` made Pi 1.5.2 block startup with a deprecation warning (hard-won
-    fact 20, [log](verification-log.md#checker-relocation-pitools-to-piscripts)). Commit it
-    together with the rest of `.pi/` when the operator says so (now registered as
-    [D23](open-decisions.md#d23--commit-the-pending-pi-changes-before-the-w2-worker-runs), 2026-11-17).
+3. **Still unverified:** `Cache-Control: no-store` with the param (hardware `curl`, plan §6 H); the
+   station's PHP version (assumed 8.2); whether the collage's JS uses the page's local `Date` (K2
+   only); field frequency of the D28 bug.
+4. **Environment:** Docker Desktop + WSL2 work (BIOS virtualization enabled after a CPU swap,
+   [post-reboot check](verification-log.md#post-reboot-virtualization-check-2026-11-17)). Windows
+   runs (stub `fcntl`, scoop PHP) are pre-checks only. The KB checker
+   (`python .pi/scripts/check_kb.py --index`) must exit 0 at the end of every session; the
+   `kb-document` extension is active (project trust granted).
+
 
 ## Docs
 

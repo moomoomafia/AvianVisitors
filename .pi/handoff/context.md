@@ -1,36 +1,58 @@
-# Worker context — BirdFrame midnight reset
+# Worker context — BirdFrame midnight reset, step W2
 
-Prepared by the parent on 2026-11-17 from the knowledge base (no fresh scout: the base already
-holds the scout phase). Authoritative design: `.pi/handoff/plan.md` (verbatim Plan v0.3 +
-register). Ledger: `.pi/handoff/ledger.md`.
+Prepared by the parent on 2026-11-17 (Plan v0.5 step P2) from the knowledge base; no fresh scout
+(the base holds the scout phase). Authoritative design: `.pi/handoff/plan.md` (verbatim Plan v0.5
+§3–§9 + rulings). Ledger: `.pi/handoff/ledger.md`. Background, if needed:
+`.pi/knowledge/frame-refresh-decision.md`, `.pi/knowledge/frame-render-capture.md`,
+`.pi/knowledge/testing-and-ci.md`.
 
-## Files retrieved (read by the parent this session)
+## Files retrieved (anchors re-checked 2026-11-17: `frame/` and `tests/` are byte-identical to base `5950f807`)
 
-* `avian/api/birdnet-api.php:135` — `$action = $_GET['action'] ?? 'stats';` (the new
-  `$resetAtMidnight` line goes right after it, per plan §4.1).
-* `avian/api/birdnet-api.php:169-171` — `header('Cache-Control: ' . (($educatorCacheDisabled || $RESET_AT_MIDNIGHT) ? 'no-store' : 'public, max-age=30'));`
-* `avian/api/birdnet-api.php:358-364` — `recentWindow($db, $hours, $ctx, $RESET_AT_MIDNIGHT, $educatorScope !== null)`.
-* `avian/api/birdnet-api.php:104-116` — `recentWindow` clamp (`hours=24` always clamps to midnight).
-* `tests/test_educator_backend.php:64-76` — `edu_endpoint(...)` harness (for open question Q1).
-* `tests/test_midnight_reset.php` — pins the clamp; run with `php tests/test_midnight_reset.php`.
-* `.pi/research/r3/clamp_check.php`, `.pi/research/r3/param_check.php` — R3 probes, run with
-  `php -d extension=sqlite3 <file>`.
+* `frame/display.py:42-70` — `DEFAULTS` (add `"reset_at_midnight": False`).
+* `frame/display.py:91-101` — `fetch_recent` (extract into `fetch_recent_payload`, keep the wrapper).
+* `frame/display.py:366`, `:395-400` — `obtain_image` → `shoot(...)` call.
+* `frame/display.py:418-445` — `run()` signature/refresh block; `:429-443` the `if use_signature:` block,
+  `:438-441` the bundle salt, `:445` `--no-signature` ⇒ `changed = True`.
+* `frame/display.py:457-463` — upstream re-sign from what the browser was served (keep).
+* `frame/display.py:520-528` — `main()` takes the render lock before `run()`.
+* `frame/shoot.py:243-259` — `_make_api_handler`, `hours=\d+` substitution at `:258-259`.
+* `frame/shoot.py:412`, `:448` — `shoot(...)` signature and the route.
+* `frame/bundle_runtime.py:1883-1889` — install invariant (base pose ⇔ masks key).
+* `avian/frontend/apt.js:3164-3186` — collage drop test (read-only reference; do not edit).
+* `tests/test_frame_capture.py` — where every §5 frame row goes, in its existing style (it stubs
+  Playwright; see `:149-152`).
+* `.pi/research/pre-v03/test_characterize_today.py` — characterization C1–C8 of today's behaviour
+  (13/13 on HEAD). Read-only for you; the parent re-runs it.
 
-## Environment (this Windows host)
+## How to test (Windows host, your shell)
 
-* PHP 8.5 via scoop; a shell older than the install fails with `Class "SQLite3" not found`
-  (environment, not product) — pass `-d extension=sqlite3` or a fresh `PHP_INI_SCAN_DIR`.
-* WSL2/Docker cannot start (`HCS_E_HYPERV_NOT_INSTALLED`); no e-ink panel; `fcntl` absent.
-* The bash tool may run under cmd.exe: wrap multi-step shell in `bash -lc '...'`.
-* `core.autocrlf=true`: keep files LF.
+* Fast pre-check:
+  `bash -lc 'cd C:/apps/birdNet/AvianVisitors-birdframe-midnight-reset && PYTHONPATH=.pi/research/pre-v03/stubs python -m pytest tests/test_frame_capture.py tests/test_frame_birdweather.py -q'`
+  Baseline on Windows: the 7 POSIX-permission failures in `tests/test_frame_capture.py`
+  (chmod/`os.geteuid` tests) exist **before** your change; they must stay exactly 7 and nothing new
+  may fail. `fcntl` is stubbed by `.pi/research/pre-v03/stubs/fcntl.py`.
+* `python -m flake8 --select=E9,F63,F7,F82 frame tests` must be clean; respect `.flake8` (160 cols).
+* **The real gate is the Linux container K1** (`bash .pi/k1/run.sh`), which the parent runs after
+  you return. You may run it yourself (~4 min) but it only sees **committed or staged** files.
+* The bash tool may run under cmd.exe: wrap multi-step shell in `bash -lc '...'`. Python printing
+  non-ASCII crashes the console unless `PYTHONIOENCODING=utf-8`.
+* `core.autocrlf=true`: write files with LF; git normalises.
 
 ## Rules for every child
 
 * You have **no subagent tool**; do not spawn agents or shell out to `pi`.
-* Do not touch, commit, or clean untracked files (`.pi-tasks/`, `.pi/ask-log/`); never
-  `git add -A`, never `git clean -x`/`-X`. No push, no PR.
-* §4.6 "Not changed" (in `plan.md`) is a hard boundary.
+* Do not touch, commit, or clean untracked or unrelated files (`.pi/`, `.pi-tasks/`,
+  `.pi/ask-log/`, `AGENTS.md`); never `git add -A`/`-u`, `git commit -a`, `git clean`, `git stash`.
+  No push, no PR.
+* §4.6 "Not changed" is a hard boundary. Python 3.9-compatible code. Match upstream style
+  (comment voice, fail-closed validation); don't refactor `run()` to meet complexity.
+* Frame target is Python 3.9; CI tests on 3.11.
+
+## Report back
+
+Diff stat, the commit hash, the test commands you ran with their exact pass/fail counts, any
+deviation from §4/§5 (with the reason), and anything you could not verify.
 
 ## Start here
 
-W1: plan §4.1, then the "Done when" row for W1 in §7.
+`plan.md` "Precedence rule", then §4.2 → §4.3 → §4.4, then §5 frame rows, then the W2 row in §7.

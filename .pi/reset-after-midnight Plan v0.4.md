@@ -1,5 +1,8 @@
 # BirdFrame midnight reset — Plan v0.4
 
+> **Superseded 2026-11-17 by [Plan v0.5](reset-after-midnight%20Plan%20v0.5.md)** (execution-state
+> revision; design unchanged). Kept for history, including its in-place 2026-11-17 amendments.
+
 Repository: `AvianVisitors` (fork `moomoomafia/AvianVisitors`; parent `Twarner491/AvianVisitors`,
 push to parent disabled). Branch: `feature/birdframe-midnight-reset`. Product base: `5950f807`
 (= the parent's tip, verified 2026-11-16). Shipped so far: W1, local commit `428f3104`, not pushed.

@@ -1106,3 +1106,15 @@ repo." **Output:** [bug-d28-educator-store-lost-lock.md](bug-d28-educator-store-
 
 **Operator authorisation recorded:** commit **and push** to `origin`
 `feature/birdframe-midnight-reset` (2026-11-17). Pushing to `upstream` stays disabled; no PR.
+
+## Plan v0.5: execution-state revision
+
+**Who:** parent agent, 2026-11-17, on the operator's instruction "update or rewrite the plan to latest version. Then
+proceed as you planned/expected". **What:** [Plan v0.5](../reset-after-midnight%20Plan%20v0.5.md) = v0.4 sections 1-5 copied
+verbatim (design unchanged) + rewritten header, section 6 (K1 is the local gate, K2 after W2), section 7 (K1 done, P2 from v0.5,
+W2 done-when = K1 re-run, workers must commit), section 9 (open: D21, D22, D27, D28). v0.4 marked superseded.
+**Checks run:** `git diff --stat 5950f807 HEAD -- frame tests` is empty, so every section-4 `frame/` and `tests/` anchor still
+holds; `git diff --stat 5950f807 HEAD -- avian` = only `avian/api/birdnet-api.php` +3/-2 (W1); `git fetch upstream`: the parent's
+`avian-visitors` is still `5950f807` (no drift). Open threads in [_index.md](_index.md) rewritten (closed threads deleted;
+their history stays in the register and this log). **Not reviewed** by a subagent: the design text is byte-identical to the
+Oracle-reviewed v0.4 sections.

@@ -1,48 +1,39 @@
-# Worker handoff plan — BirdFrame midnight reset (Plan v0.3)
+# Worker handoff plan — BirdFrame midnight reset (Plan v0.5)
 
-Transcribed **verbatim** from `.pi/reset-after-midnight Plan v0.3.md` and
-`.pi/knowledge/open-decisions.md` on 2026-11-17 (gate G0 lifted). Never use the edit-surface
-table in `.pi/knowledge/feature-midnight-reset.md` (superseded where it conflicts; Plan v0.3 +
-`open-decisions.md` + `.pi/knowledge/minimal-footprint.md` win). If a ruling below proves
-unimplementable, stop and report — do not deviate.
+Regenerated 2026-11-17 by the parent (Plan v0.5 step P2) from
+`.pi/reset-after-midnight Plan v0.5.md` (§3–§9, verbatim) and `.pi/knowledge/open-decisions.md`
+(rulings, verbatim). It replaces the v0.3-derived handoff. Never use the edit-surface table in
+`.pi/knowledge/feature-midnight-reset.md` (superseded).
 
-## Authorisation (G0, 2026-11-17)
+## Precedence rule (read first)
 
-Operator: *"Execute Gate G0 … then (5) dispatch W1 only (§4.1, the three-line station-API
-change) as a single fresh `worker` child in this session."* Scope: W1–W3. **Stages V and H, §8
-deployment, any push or PR remain unauthorised.** D21 stays `OPEN` (deferred to stage V).
-This session dispatches **W1 only**.
+**Where a verbatim ruling body below conflicts with Plan §4, §4 wins.** The register keeps
+original wording plus dated amendments; §4 is the reconciled design. Example: D15 holds via the
+D14 path with **exit 1**, not the original "exit 0". If §4 itself proves unimplementable, stop and
+report — do not deviate or redesign.
 
-## Open numbered questions (unanswered by the operator — do not decide them)
+## Authorisation and your task
 
-*(2026-11-17: **this handoff is derived from Plan v0.3, now superseded by Plan v0.4**
-(`.pi/reset-after-midnight Plan v0.4.md`). Regenerate it from v0.4 before dispatching W2 (v0.4
-step P2); until then v0.4 wins where they differ. Q1 below is registered as D22 in `.pi/knowledge/open-decisions.md`, still open. A
-new D23 (commit the pending `.pi/` changes before W2) must be settled before W2 is dispatched.
-Where a verbatim ruling body below conflicts with Plan §4, **§4 wins** — e.g. D15 holds via the
-D14 path with exit 1, not exit 0.)*
+G0 (operator, 2026-11-17) authorises W1–W3. **W1 is done** (`428f3104`). **Your task is W2 only:
+§4.2–§4.4 (frame change) + the §5 frame-test rows.** Not W3 (docs), not T1, not K2.
+Stages V and H, §8 deployment, any push or PR are **not** authorised.
 
-1. **§5 conditional row, `tests/test_midnight_reset.php` (owned by W1).** Attempt upstream's
-   `edu_endpoint` pattern (`tests/test_educator_backend.php:64-76`) to run the full `recent`
-   endpoint with `reset_at_midnight=1` cheaply. If it works cheaply, the plan allows one case
-   there; **otherwise record the gap** (brief scenario 11 — other API clients unchanged — then
-   rests on R1's argument and the `.pi/` R3 scripts). W1's station diff must stay exactly 3
-   lines regardless; this question must not inflate it. Report which way it went to the parent;
-   the operator rules on adding the test.
+## Commit rules (W2)
 
-## Hard boundary (§4.6 "Not changed", verbatim) — applies to every child
+* Stage **explicit paths only**: `git add frame/display.py frame/shoot.py tests/test_frame_capture.py`
+  (plus any other `frame/` or `tests/` file §4/§5 genuinely requires — say which and why). Never
+  `git add -A`, `-a`, `-u`, `git commit -a`, `git clean`, `git stash`.
+* Make **one local commit** (style: `feat(frame): …`, like W1's
+  `feat(api): accept reset_at_midnight=1 per request (Plan v0.3 W1)`). No push.
+* Do not touch `.pi/`, `AGENTS.md`, `.pi-tasks/`, `avian/`, or anything in §4.6.
 
-### 4.6 Not changed
+## Open questions you must NOT decide
 
-`install.sh`, `config_contract.py`, `birdframe-names`, systemd units, `apt.js`, the station's global
-setting, any workflow file, `ActiveBundle.drawable_slugs`, signature hashing (D6 dropped),
-`state.json` format (D9).
+D21, D22, D27, D28 (see §9). None blocks W2. If you hit a new design question, stop and report it.
 
-Frame code never writes station config (D3/D10). No §4.2–§4.5 or §5 frame work in W1.
+## Plan v0.5 §3–§7 (verbatim)
 
-## Plan v0.3 §3–§5 (verbatim)
-
-## 3. Requirements → rulings (all decided; no open blockers)
+## 3. Requirements → rulings (all decided; no open design blockers)
 
 | # | Requirement (v0.2 brief) | How it is met | Ruling |
 |---|---|---|---|
@@ -60,32 +51,43 @@ Frame code never writes station config (D3/D10). No §4.2–§4.5 or §5 frame w
 | Iso | Station display, global `RESET_AT_MIDNIGHT`, history untouched | request-scoped param; frame never writes station config; read-only DB | D3, D10 |
 
 Supporting rulings: **D2** local mode only (`species_source != "birdweather" and shoot is True`);
-**D3** additive request param + config toggle `reset_at_midnight`, default `false`; **D4** CI = the
-parent's existing jobs, no new workflow, hardware pass mandatory; **D11c** `.pi/` + `AGENTS.md`
-are on this branch and must be stripped before any PR to the parent (so must the root `.pi-tasks/`,
-D11 amendment 2026-11-17); **D14** outdated station ⇒
-hold + exit 1; **D15** Educators scope ⇒ hold (falls into the D14 path); **D16** station
-unreachable ⇒ timer skips (exit 0), forced run exits 1; **D20** minimal footprint.
+**D3** additive request param + config toggle `reset_at_midnight`, default `false`; **D4** local gate =
+the `.pi/` container (re-confirmed by D24), CI = the parent's existing jobs, no new workflow, hardware
+pass mandatory; **D11c** `.pi/` + `AGENTS.md`
+are on this branch and must be stripped before any PR to the parent, **and so must the root
+`.pi-tasks/`** (D11 amendment, 2026-11-17); **D14** outdated station ⇒ hold + exit 1; **D15**
+Educators scope ⇒ hold via the D14 path, **exit 1** (the register's original "exit 0" text is
+superseded by its D20 amendment; no dedicated code); **D16** station unreachable ⇒ timer skips
+(exit 0), forced run exits 1; **D20** minimal footprint.
+Open, non-design: **D21** (CI via a PR inside the fork, stage V), **D22** (commit a parent test for
+W1), **D27** (K2's midnight clock), **D28** (report a parent bug; outside the feature). See §9.
 
-## 4. Design
+### §4. Design
 
-### 4.1 Station — `avian/api/birdnet-api.php` (R1 variant B′, +1 / 2 modified)
+#### 4.1 Station — `avian/api/birdnet-api.php` (R1 variant B′) — DONE
+
+**Built 2026-11-17 by W1, local commit `428f3104`** (+3/−2, matches v0.3 verbatim):
 
 ```php
-// new line in the request-derived block, after $action (:135)
+// avian/api/birdnet-api.php:136, right after $action (:135)
 $resetAtMidnight = $RESET_AT_MIDNIGHT || (($_GET['reset_at_midnight'] ?? null) === '1');
-// :169   (($educatorCacheDisabled || $resetAtMidnight) ? 'no-store' : 'public, max-age=30')
-// :362   recentWindow($db, $hours, $ctx, $resetAtMidnight, $educatorScope !== null)
+// :170   (($educatorCacheDisabled || $resetAtMidnight) ? 'no-store' : 'public, max-age=30')
+// :363   recentWindow($db, $hours, $ctx, $resetAtMidnight, $educatorScope !== null)
 ```
 
 Facts this relies on (executed, R3): only exact `1` enables it; arrays, `0`, case variants are
-ignored; PHP key mangling (`reset.at.midnight`) and last-wins duplicates behave as for every
-upstream param; a request can never switch a station-wide ON off; educator scopes still win
-(`:90`). Requests without the param are byte-identical to today. With the param, `no-store` applies
-to whatever action carries it (parity with the global flag); the response field
-`reset_at_midnight` then means "station flag OR param, not scoped" (no in-repo reader).
+ignored; PHP key mangling and last-wins duplicates behave as for every upstream param; a request
+can never switch a station-wide ON off; educator scopes still win (`:90`). Requests without the
+param are byte-identical to today. The response field `reset_at_midnight` now means "station flag
+OR param, not scoped"; the lowercase key was not found in `avian/frontend/apt.js` or `frame/`.
 
-### 4.2 Frame — `frame/display.py`
+**Evidence (post-W1 review):** `.pi/research/w1/recent_param_probe.php` drives the real `recent`
+and `stats` endpoints. It passes 11/11 on HEAD, while exactly the 3 param-dependent checks fail on
+base. `tests/test_midnight_reset.php` passes 20 and `tests/test_site_name_api.php` passes 6.
+**Not verified:** `Cache-Control: no-store` with the param (CLI exposes no headers). It moves to
+the H checklist (§6).
+
+#### 4.2 Frame — `frame/display.py` (W2; unchanged from v0.3)
 
 1. `DEFAULTS["reset_at_midnight"] = False` (`:42-70`).
 2. **One shared fetch.** Extract the body of `fetch_recent` (`:91-101`) into
@@ -115,12 +117,13 @@ to whatever action carries it (parity with the global flag); the response field
    The steps sit in one `if active:` block; no restructuring of `run()` (it is already complexity 18
    upstream and the limit is not enforced on the parent's branch). The render lock is already held:
    `main()` takes it before calling `run()` (`frame/display.py:520-528`). Step (c) runs before (d) so
-   an outdated station can never hide behind an exit-0 decline.
+   an outdated station can never hide behind an exit-0 decline. Step (c) is also the **only**
+   Educators handling (D15): no `educator_scope` branch.
 5. `obtain_image` (`:366`) passes `window_hours=24 if active else cfg["hours"]` and
    `reset_at_midnight=active` to `shoot()` (`:395-400`). The birdweather and image branches are
    untouched.
 
-### 4.3 Frame — `frame/shoot.py`
+#### 4.3 Frame — `frame/shoot.py` (W2; unchanged from v0.3)
 
 `_make_api_handler(..., reset_at_midnight=False)` (`:243`): in the station branch after the existing
 `hours` substitution (`:258`), append `reset_at_midnight=1` when asked and not already present.
@@ -130,7 +133,7 @@ query parameter is preserved verbatim (characterization C8). Upstream's re-sign 
 response (`frame/display.py:457-463`) keeps state truthful if the window changes between the fetch
 and the capture.
 
-### 4.4 "Drawable" (D12 + R5 amendment)
+#### 4.4 "Drawable" (D12 + R5 amendment; W2; unchanged from v0.3)
 
 * **Frame bundle active** (the operator's setup, D12b): a species is drawable iff the bundle has a
   base pose for it — `"perched"` or `"variant-1"` in `bundle.index["assets"].get(slugify(sci), {})`.
@@ -138,30 +141,35 @@ and the capture.
   `frame/bundle_runtime.py:1883-1889`), i.e. exactly the collage's drop test
   (`avian/frontend/apt.js:3164-3186`). **Do not change `ActiveBundle.drawable_slugs`** (species-level;
   upstream BirdWeather filtering depends on it).
-* **No frame bundle:** per the **D12 amendment of 2026-11-16** (parent-decided after the Oracle
-  review; basis D20 and D12b) the frame does **not** fetch the station's mask table —
-  `avian/frontend/masks.json` is ~800 KB, too heavy every 15 min on a Zero 2 W, and the operator's
-  frame has its own bundle — so only an **empty** today-window declines. The residual risk (a
-  station-default flight-only species) is fail-static: panel kept, capture times out, exit 1.
+* **No frame bundle:** per the **D12 amendment of 2026-11-16** the frame does **not** fetch the
+  station's mask table (`avian/frontend/masks.json` is ~800 KB, too heavy every 15 min on a
+  Zero 2 W), so only an **empty** today-window declines. The residual risk (a station-default
+  flight-only species) is fail-static: panel kept, capture times out, exit 1.
 
-### 4.5 Config and docs
+#### 4.5 Config and docs (W3)
 
 * `frame/config.example.toml`: add after `hours = 24` (`:26`):
   `# reset_at_midnight = false  # local mode only: show birds since the station's midnight; keeps the`
   `#                             # last collage until today's first drawable bird; needs an updated station`
-* `frame/README.md`: one short paragraph after the bird-names section (`:87`): what it does, local
-  mode only, `hours` is ignored while on, update the station first, `--force` will not repaint an
-  empty day, set back to `false` to restore today's behaviour (no state reset needed). End-user
-  voice, no internals. Also say: with an outdated station the frame keeps its collage and reports a
-  failure every 15 minutes (including during quiet hours) until the station is updated (D14).
+* `frame/README.md`: one short paragraph **after the bird-names section** — i.e. after the
+  `--image-url` labels paragraph (`frame/README.md:89`) and before "When updating a paired mic and
+  frame" (`:91`). *(v0.4 correction: v0.3 said `:87`, which is the `shoot_title` line inside that
+  section.)* Content: what it does, local mode only, `hours` is ignored while on, update the
+  station first, `--force` will not repaint an empty day, set back to `false` to restore today's
+  behaviour (no state reset needed). End-user voice, no internals. Also say: with an outdated
+  station the frame keeps its collage and reports a failure every 15 minutes (including during
+  quiet hours) until the station is updated (D14).
 
-### 4.6 Not changed
+#### 4.6 Not changed
 
 `install.sh`, `config_contract.py`, `birdframe-names`, systemd units, `apt.js`, the station's global
 setting, any workflow file, `ActiveBundle.drawable_slugs`, signature hashing (D6 dropped),
-`state.json` format (D9).
+`state.json` format (D9). **Plus (v0.4):** `avian/api/birdnet-api.php` beyond W1's three lines,
+unless the operator picks D22 (a), which touches a *test* file only.
 
-## 5. Tests (in the parent's existing files, in their style)
+### §5. Tests (in the parent's existing files, in their style)
+
+Frame rows (W2) are **unchanged from v0.3**:
 
 | File | Add | Proves |
 |---|---|---|
@@ -181,40 +189,93 @@ setting, any workflow file, `ActiveBundle.drawable_slugs`, signature hashing (D6
 | ″ | the flag-on URL and decision do not depend on the frame's clock (patch `time.time`/`datetime` far from the station's day) | brief scenario 9 |
 
 Worker note: flag-on tests must patch `fetch_recent_payload`, not `fetch_species`.
-| `tests/test_midnight_reset.php` | none required: the param read is after the library-only guard and the clamp it relies on is already pinned (`:33-36`). If the worker shows upstream's `edu_endpoint` pattern (`tests/test_educator_backend.php:64-76`) runs the full `recent` endpoint with the param cheaply, add one case there; **otherwise W1 must record the gap** (brief scenario 11 — other API clients unchanged — then rests on R1's argument and the `.pi/` R3 scripts). | req 1, 8, brief 11 |
+
+PHP row (**replaced in v0.4**; governed by
+[D22](../knowledge/open-decisions.md#d22--commit-a-parent-test-for-w1s-request-param), open, not
+blocking W2):
+
+| Option | What | Trace |
+|---|---|---|
+| (a) recommended | one clock-independent case in an existing parent PHP test: two `edu_endpoint` calls (`tests/test_educator_backend.php:64-104`) on `recent`, `hours=24`, with and without `reset_at_midnight=1`, asserting only `midnight_clamped` and `window_start` ending `00:00:00` (true at any time of day for today, `avian/api/birdnet-api.php:109-113`). Store provisioned (`educator_store_open(true)`, `:178`), no capture running. | test lines only |
+| (b) | record the gap; rely on the `.pi/` probe + R1's argument | none |
+| (c) | the full probe as a parent test (time-relative rows need a midnight guard → flake risk) | more test lines |
+
+If (a) is chosen it is a separate small step (**T1**, §7), not part of W2, and must not touch
+`avian/api/birdnet-api.php`.
 
 Our own scaffolding stays in `.pi/`: the characterization suite
-(`.pi/research/pre-v03/test_characterize_today.py`, 13/13 today) is re-run after the change to show
-the intended flips with the flag on and no change with it off; the R3 scripts re-verify the PHP.
+(`.pi/research/pre-v03/test_characterize_today.py`, 13/13 today) is re-run after W2 to show the
+intended flips with the flag on and no change with it off; the R3 scripts and
+`.pi/research/w1/recent_param_probe.php` re-verify the PHP.
 
-## Plan v0.3 §7 Execution (verbatim)
+### §6. Verification
 
-## 7. Execution (one child at a time; no recursive delegation)
+| Where | What | Expected / notes |
+|---|---|---|
+| **K1: local gate** (Linux container, D24/D26) | `bash .pi/k1/run.sh` (worktree: tracked + staged files) or `bash .pi/k1/run.sh <ref>`. Image: `.pi/k1/Dockerfile` on the parent's pinned `debian:bookworm-slim` (PHP 8.2, Python 3.11, Playwright 1.62.0 + Chromium), non-root user. Tree: `git -c core.autocrlf=false archive` piped into the container, never the bind-mounted CRLF worktree. ~4 min | exit 0 = every named suite passed and none skipped. Suites: PHP syntax, `tests/test_midnight_reset.php` (20), `tests/test_site_name_api.php` (6), `tests/test_educator_backend.php` (A/B: exactly the 18 base lines in `.pi/k1/educator-backend.baseline`), pytest `tests/test_midnight_reset.py`, `tests/test_frame_capture.py` (77 on HEAD before W2), `tests/test_frame_birdweather.py` (18), `tests/test_frame_capture_browser.py` (38), `tests/test_educator_security.py` (7), `frame/test_bundle_runtime.py` (42), the `.pi/` W1 probe, R3 clamp and characterization suites, flake8 fatal set |
+| **K2** (after W2; needs D27) | fake station (`php -S`, copied tree, provisioned Educators lock, synthetic `birds.db`) + headless fake `inky` + midnight scenarios | push/no-push asserted on the fake panel; still not the real glass |
+| Windows pre-check | `PYTHONPATH=.pi/research/pre-v03/stubs python -m pytest tests/test_frame_capture.py tests/test_frame_birdweather.py`; scoop PHP for the PHP suites (stale shell: export `PHP_INI_SCAN_DIR`, recipe in [testing-and-ci.md](../knowledge/testing-and-ci.md)) | fast feedback only; 7 POSIX-permission failures and 14/199 educator failures are Windows-only artefacts; **not evidence** |
+| Local | flake8 with the repo `.flake8` on changed files | complexity is advisory upstream (`run()` is 18 on base) |
+| CI (parent's existing `python-app.yml` on the fork) | `pytest` + `frame-capture` browser job | runs only on `main`/`test_me`/`avian-visitors` pushes or PRs; **the feature-branch push triggers nothing**. Real CI needs an operator-authorised PR *inside the fork* (D21) |
+| Hardware (`birdpic`) | mandatory before any upstream PR: flag on over a midnight with silence; a first drawable bird; a flight-only bird alone (if the bundle has one); power-cycle before the first bird; flag off regression; `curl -sI '<station>/avian/api/birdnet-api.php?action=recent&hours=24&reset_at_midnight=1'` shows `Cache-Control: no-store` (without the param: `public, max-age=30`, unless Educators is enabled); record the station's PHP version (D28) | burn-in, real timing, real SAPI headers and panel behaviour are hardware-only |
 
-Available agents: `scout`, `oracle`, `worker`, `reviewer` (no `tester`). Each `worker` starts
-blank: hand it this plan, the relevant knowledge docs and an exact task. Commits are **local**;
-nothing is pushed without the operator's say-so.
+Every report names the environment and lists what was not executed.
 
-| Step | Agent | Task | Done when |
+### §7. Execution (one child at a time; no recursive delegation)
+
+Available agents: `scout`, `oracle`, `worker`, `reviewer` (no `tester`). Commits are **local**;
+pushing needs the operator's say-so each time. **`defaultReads` is rejected by this install's
+`subagent` tool**; pin the full `.pi/handoff/...` paths in the task text. Workers stage explicit
+`frame/` and `tests/` paths only (never `-a`, `-A`, `-u`) and **commit** their work (K1 cannot see
+untracked files).
+
+| Step | Agent | Task | Status / done when |
 |---|---|---|---|
-| G0 | operator | authorise building | explicit go-ahead |
-| W1 | worker | §4.1 station change | diff = 3 lines in `avian/api/birdnet-api.php`; parent PHP tests + R3 scripts pass |
-| W2 | worker | §4.2–4.4 frame change + §5 frame tests | §5 tests pass locally (stub loop); characterization flips as expected |
-| W3 | worker | §4.5 docs | README paragraph + config line, end-user voice |
+| G0 | operator | authorise building | **done 2026-11-17** (W1–W3) |
+| W1 | worker | §4.1 station change | **done**, `428f3104`; verified by the parent (post-W1 review) and K1 |
+| K1 | parent | `.pi/` Linux test container | **done**; base and HEAD baselines recorded ([K1 log](../knowledge/verification-log.md#k1-build-and-baseline)) |
+| P2 | parent | regenerate `.pi/handoff/plan.md` + `context.md` from **this v0.5**, header rule "where verbatim ruling text conflicts with §4, §4 wins"; update the ledger | handoff names v0.5; working tree has no stray tracked changes |
+| W2 | worker | §4.2–4.4 frame change + §5 frame tests, one local commit | parent re-runs K1: new tests pass, nothing else changes against the K1 HEAD baseline; characterization flips as expected with the flag on and nothing changes with it off |
+| K2 | parent | fake station + fake panel + scenarios | needs D27; the midnight scenarios assert push/no-push |
+| W3 | worker | §4.5 docs | README paragraph at `frame/README.md:89`/`:91` + config line, end-user voice |
+| T1 | worker | only if D22 = (a): one PHP case per §5 | case passes on HEAD, fails on base `5950f807` (K1 A/B) |
 | R | reviewer | review the full diff vs this plan, D20 and every ruling | no unresolved High findings |
-| V | parent | §6 local runs; push only if the operator authorises CI on the fork | results recorded in the verification log |
+| V | parent | §6 runs; CI only if the operator authorises it on the fork (D21) | results recorded in the verification log |
 | O | oracle | drift/ruling audit of the result | verdict recorded |
-| H | operator + parent | hardware pass on `birdpic` | checklist recorded |
+| H | operator + parent | hardware pass on `birdpic` (§6) | checklist recorded |
 
-The parent records each step in `.pi/knowledge/verification-log.md`, keeps the register current, and
-runs `python .pi/scripts/check_kb.py --index` (exit 0) at the end of each session.
+G0 covers W1–W3 only. Whether T1 falls under it is part of the D22 ruling. The parent records
+each step in `.pi/knowledge/verification-log.md`, keeps the register and `.pi/handoff/ledger.md`
+current, and runs `python .pi/scripts/check_kb.py --index` (exit 0) at the end of each session.
 
-## Recorded deviations (Plan v0.3 §9, verbatim)
+## Plan v0.5 §9 (verbatim)
 
+### §9. Gates and open items
+
+* **G0 lifted 2026-11-17** (W1–W3; V and H separately gated).
+* **Answered 2026-11-17:** D23 (`.pi/` committed before W2, `94663e4b`), D24 (Docker container is the
+  local gate), D26 (K1 now, K2 after W2).
+* **Open:**
+  * **D22** (not blocking W2): commit a parent test for W1 (§5 PHP row, step T1).
+  * **D27** (blocks K2 only): how K2 makes "just after midnight" happen. Recommended: a per-run
+    POSIX `TZ` offset (verified for SQLite, PHP's SQLite and Python; **Chromium ignores it**).
+  * **D21** (stage V only): CI via a PR inside the fork into its `avian-visitors`.
+  * **D28** (outside the feature): file the parent-bug issue; draft ready in
+    [bug-d28-educator-store-lost-lock.md](../knowledge/bug-d28-educator-store-lost-lock.md).
+* **Upstream PR:** strip `.pi/`, `AGENTS.md` **and the root `.pi-tasks/`** first (D11c + its
+  2026-11-17 amendment); whether to go upstream at all is undecided (D11a). The PR would carry
+  only §4 and §5.
+* **Not researched (operator deselected):** parent CI health; station-default masks scan; a
+  throwaway spike.
 * **Recorded deviations:** D12 amended for the no-bundle path (§4.4); §4.2 item 2 departs from the
-  superseded D17 "flag-only helper" bullet.
+  superseded D17 "flag-only helper" bullet; §4.5 README anchor corrected (v0.4).
+* **Line endings:** `core.autocrlf=true` comes from the system gitconfig; keep files LF and let git
+  normalise. Linux runs use K1's archive, never the worktree.
+* **Known residuals:** station-default flight-only species with no frame bundle (§4.4); a tile with a
+  mask left unplaced by the packer (pre-existing, Audit 2) — both fail-static, never blank;
+  Cache-Control with the param unverified until H.
 
-## Rulings (verbatim from `.pi/knowledge/open-decisions.md`)
+## Rulings (verbatim from `.pi/knowledge/open-decisions.md`, 2026-11-17)
 
 ### D1 — May a forced render draw an empty today-window collage?
 
@@ -378,7 +439,7 @@ Mechanics (unchanged from the recommendation):
 Original options retained below for the record.
 
 The brief calls an API change optional; the constraints make one effectively necessary
-([verification-log.md](verification-log.md) claims 5 and 7). If accepted:
+([verification-log.md](../knowledge/verification-log.md) claims 5 and 7). If accepted:
 
 * **Name:** `reset_at_midnight=1` (matches the existing config vocabulary and the
   `reset_at_midnight` response field) vs a more neutral `window=today`. Upstream PR
@@ -402,132 +463,6 @@ as the mechanism that keeps signature and image structurally in sync.
 
 Consequence if unanswered: two Workers can implement two different contracts (API param
 vs frame-only), and the Phase 4 review has nothing to check against.
-
-### D4 — What environment is the acceptance gate?
-
-**Status:** `ANSWERED 2026-11-16`
-
-> **Clause ruled (operator, 2026-11-16, after research R2): "No new workflow."** Feature tests go
-> only into the parent's existing test files (`tests/test_midnight_reset.php`,
-> `tests/test_frame_capture.py`) and run in the parent's existing CI, which already has PHP +
-> SQLite3 on `ubuntu-latest` (R2, [verification-log.md](verification-log.md#r2-does-the-parents-ci-already-run-the-php-contract)).
-> The Debian container, fake station and fake e-ink panel live in `.pi/` and run locally.
-> The rest of the D4 ruling (container as the local gate; mandatory hardware pass) stands.
->
-> **Clause re-opened by [D20](#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16):** "mirror it as a GitHub Actions job" adds a workflow to
-> the parent's tree. Upstream CI already runs `pytest` on Linux (`.github/workflows/python-app.yml`);
-> the container + fakes can live in `.pi/` instead. Needs operator re-confirmation. See [minimal-footprint.md](minimal-footprint.md).
-
-> **Ruling:** **Option A — Debian dev container + CI job.** "Build a docker image
-> (php-cli, php-sqlite3, sqlite3, Python 3.11 venv, Playwright Chromium) with a
-> fake-station fixture and the headless fake panel; mirror it as a GitHub Actions job so
-> 'tests pass' is reproducible."
-
-What this commits us to, per [test-environment.md](test-environment.md):
-
-1. A `debian:bookworm-slim` image following the `frame/Dockerfile.install-security`
-   precedent, with `php-cli`, `php-sqlite3`, `sqlite3`, a Python **3.11** venv
-   (`requirements.txt` + `frame/requirements-frame.txt` + `frame/requirements-shoot.txt`),
-   Playwright Chromium, and `xvfb` if the browser needs it.
-2. A **fake station** fixture: real `avian/api/` served by `php -S` against a synthetic
-   `birds.db` created from `scripts/createdb.sh` (indexes included), seeded relative to a
-   chosen anchor so midnight rollover, silent multi-day stretches, first-detection-of-day,
-   DST days, and an old station that ignores the new param are all reproducible.
-
-> **Amended 2026-11-16 (Audit 2, F-H6) — the ruling (container + CI) stands; items 1–2
-> above are not viable as written.** Parent re-verified each point against source.
->
-> * **Packages:** do **not** install `requirements.txt` (the station's ML stack:
->   tensorflow, streamlit…) or `frame/requirements-frame.txt` (pulls real `inky` →
->   `spidev`, which needs a C toolchain bookworm-slim lacks, and defeats the fake panel).
->   Install Pillow + `frame/requirements-shoot.txt` (Playwright) + pytest; put the fake
->   `inky` on `PYTHONPATH`.
-> * **`php -S` runs as SAPI `cli-server`, not `cli`.** Every test override in the API is
->   gated on `PHP_SAPI === 'cli'` (`avian/api/educator-store.php:39,46,52,101,421,492`;
->   `avian/api/educator-state.php:23,30`) and is therefore **ignored** — including
->   `AV_EDUCATOR_BIRDS_DB` and `AV_EDUCATOR_NOW`.
-> * **Every request takes a root-owned lock first.** `educator_resolve_scope` calls
->   `educator_store_lock(false)` *before* checking whether Educators is enabled
->   (`avian/api/educator-scope.php:148-157`); the lock lives at `/var/lib/avian-visitors/educators.lock`
->   (root:caddy 0660, real `caddy` group, posix functions). Without it **every** API call
->   returns 503. Provision it in the image, or drive endpoints through the existing
->   `php -r` harness (`tests/test_educator_security.py:216-236`) where the `cli` overrides
->   work.
-> * **Paths:** `birds.db` must be at `<served tree>/../../scripts/birds.db` and
->   `birdnet.conf` at `dirname(__DIR__,2)` (`avian/api/birdnet-api.php:35-36`) — serve a **copied**
->   tree, or fixtures land in the checkout's `scripts/`.
-> * **No clock seam for `recent`.** Today and the anchor come from SQLite
->   `'now','localtime'` (`birdnet-api.php:280,294-296`); `AV_EDUCATOR_NOW` does not apply.
->   "Seed relative to a chosen anchor" is achievable only by seeding rows relative to
->   *real* now, by a `TZ` offset trick, or with `libfaketime`. Pick one explicitly.
-> * **Fixture DDL:** `scripts/createdb.sh` sources `/etc/birdnet/birdnet.conf`, writes
->   `$HOME/BirdNET-Pi/...`, drops the table and `chown`s — copy the DDL out, don't run it.
-> * **DST cases drop out** if D13 picks the `Date =` form (no time arithmetic left).
-> * **CI may already cover part of D4:** `.github/workflows/python-app.yml` `build` runs `pytest` on Linux
->   (`fcntl` works there) and `frame-capture` installs Python 3.11 + Playwright Chromium.
->   Extend that job rather than inventing a parallel one. Whether the runner image has
->   `php` + sqlite3 (i.e. whether the PHP test is *already* non-vacuous in CI) is unverified.
-> * Python 3.9 compatibility is not exercised by a 3.11-only container; only the flake8
->   matrix covers it (`.github/workflows/python-ci.yml:15`).
-3. A **headless fake `inky`** on `PYTHONPATH`, in `tests/` only — never an env-var branch
-   inside `frame/display.py`. Assertions are update counts plus captured PNG frames.
-4. A CI job mirroring it, so "tests pass" means something reproducible and the Phase 5
-   report cannot be built on vacuously-skipped tests.
-5. **Tier 3 hardware pass on `birdpic` remains mandatory before merge** — burn-in/heal,
-   the concurrent-push controller wedge, Zero 2 W capture timing, colour fidelity, SPI and
-   mat geometry are not emulatable. Record the result in
-   [verification-log.md](verification-log.md).
-
-On this machine the daemon is not running: Docker Desktop must be started before the
-first build. WSL2 Ubuntu stays a fine ad-hoc fallback but is no longer the gate.
-
-> **Environment finding (2026-11-16, while attempting R3):** WSL2 **cannot start** on this
-> machine — `Wsl/Service/CreateInstance/CreateVm/HCS/HCS_E_HYPERV_NOT_INSTALLED` (Virtual Machine Platform / virtualization not enabled). Docker
-> Desktop needs the same virtualization, so the D4 container is **blocked here** until the
-> operator enables it (admin `wsl.exe --install --no-distribution` + reboot, possibly a
-> BIOS setting). The ruling stands; only its local feasibility changed. Parent CI (R2) is
-> unaffected.
-
-Original context retained below.
-
-On this workstation nothing load-bearing is verifiable *(as of the D4 ruling; since 2026-11-16 PHP is
-installed per-user and the PHP contract runs — [R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php))*: `php` is absent (PHP contract
-tests **pass vacuously**, `tests/test_midnight_reset.py:7`), `fcntl` is absent (every
-`display.py`-dependent test errors), the full suite aborts at collection, and there is
-no e-ink panel.
-
-Options (evidence in [test-environment.md](test-environment.md)):
-
-* **(A) Container gate.** Debian-based dev container (matching
-  `frame/Dockerfile.install-security`'s `debian:bookworm-slim` precedent) with
-  `php-cli` + `php-sqlite3` + `sqlite3` + a Python 3.11 venv + Playwright Chromium, plus a
-  **fake station** (`php -S` on the real `avian/api/` against a synthetic `birds.db`) and a
-  **headless fake `inky` panel** that records update counts and PNGs. Mirror as a CI job.
-  Strongest option: it makes the brief's time scenarios deterministic. Needs Docker
-  Desktop started (it is installed; the daemon is not running).
-* **(B) WSL2 Ubuntu.** Same toolchain via `apt`, no image to maintain, faster to stand up
-  here (Ubuntu is installed, currently Stopped). Less reproducible than (A) unless the
-  package list is checked in.
-* **(C) Windows-native PHP only.** `choco`/`scoop`/`winget` can install PHP, which fixes
-  the vacuous PHP tests but **not** the frame: `display.py` still cannot import (`fcntl`).
-  Split verification story for no real gain — not recommended.
-* **(D) CI-only + one hardware pass.** No local Linux env; rely on GitHub Actions plus a
-  manual `birdpic` run. Cheapest now, weakest during development.
-
-All options still require the tier-3 hardware pass: panel emulation cannot prove refresh
-artifacts, burn-in/heal policy, the concurrent-push controller wedge
-(`display.py:516-528`), Zero 2 W capture timing, or colour fidelity.
-
-**Settled as a sub-answer of this decision:** the display *can* be emulated for
-behavioural testing, but **not with upstream `inky.mock`** — its `_RESOLUTION` set stops
-at 800×480 and the frame's panel is 1600×1200, `InkyMock` opens a Tk window unconditionally,
-and `pip install inky` fails on Windows (`spidev`). A test-side fake `inky` package on
-`PYTHONPATH` is the correct mechanism because `push_panel` lazy-imports the library.
-
-Consequence if unanswered: the Phase 5 report will claim green tests that were skipped,
-and Phase 6's PR-readiness verdict will be built on them.
-
----
 
 ### D12 — What does "nothing to draw" mean for the D1 decline?
 
@@ -553,7 +488,7 @@ Asked in small guiding steps (operator preference, 2026-11-16):
 `drawable_slugs` when a frame bundle is active, else the station's mask table; if the
 drawable set can't be determined, proceed as today.
 
-> **Amended 2026-11-16 by R5 (`PARENT-DECIDED`, refines "drawable"; [R5 brief](../outputs/r5-drawable-base-pose.md), [R5](verification-log.md#r5-drawable-vs-base-pose-deep-research-brief--reviewer--live-feed-scan)).**
+> **Amended 2026-11-16 by R5 (`PARENT-DECIDED`, refines "drawable"; [R5 brief](../outputs/r5-drawable-base-pose.md), [R5](../knowledge/verification-log.md#r5-drawable-vs-base-pose-deep-research-brief--reviewer--live-feed-scan)).**
 > "Drawable" now means what the collage actually draws on every capture: **some species in
 > today's window has its unsuffixed slug as a key in the masks table the collage will load**
 > (frame bundle: a `perched` or `variant-1` pose; station default: `slug in MASKS`, no suffix
@@ -566,7 +501,7 @@ drawable set can't be determined, proceed as today.
 > bird) more faithfully; it does not change it. Computed locally — **`ActiveBundle.drawable_slugs`
 > stays species-level** (upstream uses it for BirdWeather filtering).
 
-> **Amended 2026-11-16 after the [Plan v0.3 Oracle review](verification-log.md#plan-v03-oracle-review) (`PARENT-DECIDED`, no-bundle path only).**
+> **Amended 2026-11-16 after the [Plan v0.3 Oracle review](../knowledge/verification-log.md#plan-v03-oracle-review) (`PARENT-DECIDED`, no-bundle path only).**
 > With **no frame bundle**, the frame does **not** fetch the station's mask table: only an
 > **empty** today-window declines; every listed species counts as drawable. *Basis:* D20 (the
 > station table `avian/frontend/masks.json` is ~800 KB — too heavy to fetch every 15 minutes on
@@ -610,11 +545,11 @@ and any bundle switch in that window is silently undone.
 
 **Status:** `ANSWERED 2026-11-16`
 
-> **Amended by [D20](#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16) — implementation only; the UX ruling stands.** Instead of a new
+> **Amended by [D20](../knowledge/open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16) — implementation only; the UX ruling stands.** Instead of a new
 > SQL branch, reuse upstream `recentWindow`: the frame sends `hours=24` plus the param, and with a
 > 24-hour window on today's anchor the clamp always applies (`anchor − 24h` < `start of day`), which
 > is exactly "everything since midnight". Upstream already pins it ("24 hour window clamps after
-> midnight", `tests/test_midnight_reset.php`). No new SQL, no echo fields. See [minimal-footprint.md](minimal-footprint.md).
+> midnight", `tests/test_midnight_reset.php`). No new SQL, no echo fields. See [minimal-footprint.md](../knowledge/minimal-footprint.md).
 
 > **Ruling:** **"Everything since midnight."** Asked as: *"With midnight reset turned on,
 > which birds should the wall show during the day?"* — with reset on, the frame **ignores
@@ -652,9 +587,9 @@ the other; with option 2 and the old D5 signal, a correct new station returns
 
 **Status:** `ANSWERED 2026-11-16`
 
-> **Amended by [D20](#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16) — detection only; exit 1 ruling stands.** No new echo field:
+> **Amended by [D20](../knowledge/open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16) — detection only; exit 1 ruling stands.** No new echo field:
 > detect on the existing `midnight_clamped`. Audit 2's objections vanish once the frame always sends
-> `hours=24` (an old station with the global flag ON already returns correct, clamped rows). See [minimal-footprint.md](minimal-footprint.md).
+> `hours=24` (an old station with the global flag ON already returns correct, clamped rows). See [minimal-footprint.md](../knowledge/minimal-footprint.md).
 
 > **Ruling (exit code):** **"Loud — mark it failed."** Asked as: *"Frame updated, station
 > not; the frame keeps its last collage. How loud should it be?"* ⇒ hold the previous collage
@@ -691,9 +626,9 @@ Original analysis retained below.
 
 **Status:** `PARENT-DECIDED 2026-11-16`
 
-> **Amended by [D20](#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16):** no dedicated code. A scoped response reports
+> **Amended by [D20](../knowledge/open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16):** no dedicated code. A scoped response reports
 > `midnight_clamped: false` (`avian/api/birdnet-api.php:90`), so it takes the D14 hold path; only
-> the log text widens to name both causes (outdated station, or an Educators capture). See [minimal-footprint.md](minimal-footprint.md).
+> the log text widens to name both causes (outdated station, or an Educators capture). See [minimal-footprint.md](../knowledge/minimal-footprint.md).
 
 > **Operator context:** asked *"Do you use the station's Educators (classroom) feature?"* —
 > answer: **"No, I don't use it."** So this path is not reachable on the operator's setup and
@@ -701,7 +636,11 @@ Original analysis retained below.
 >
 > **Decision (house style, fail-static):** option (a) — if the response shows an Educators
 > scope (`educator_scope` present) while the flag is on, **hold the previous collage, log
-> "educator capture active", exit 0**. Scope semantics win; the param never overrides a scope
+> "educator capture active", ~~exit 0~~**. *(Amended 2026-11-16 by the D20 note above: no
+> dedicated branch — the hold goes through the D14 path and **exits 1**, as Plan v0.3 §3/§4.2(c)
+> say. Marker added 2026-11-17 in the
+> [post-W1 review](../knowledge/verification-log.md#post-w1-review-implementation-and-test-coverage) because a
+> verbatim copy in the W2 handoff could mislead a blank worker.)* Scope semantics win; the param never overrides a scope
 > (that invariant is pinned by `tests/test_midnight_reset.php`). Revisit if the operator ever
 > starts using Educators. Needs one test, no hardware.
 
@@ -757,11 +696,11 @@ station-unreachable behaviour).
 > Signature/pixel agreement is provided by upstream's existing re-sign from the captured
 > response (`frame/display.py:457-463`). A/B R4 is no longer needed.
 
-> **Re-opened by [D20](#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16) — needs operator re-confirmation.** Its premise (signature and
+> **Re-opened by [D20](../knowledge/open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16) — needs operator re-confirmation.** Its premise (signature and
 > pixels must come from one response) is already handled upstream: `frame/display.py:457-463`
 > re-signs from what the browser was served (`frame/shoot.py:272-275`). The upstream-aligned
 > alternative keeps the page's own station request and adds the param to the existing `hours=`
-> rewrite (`frame/shoot.py:258`). See [minimal-footprint.md](minimal-footprint.md) and A/B R4.
+> rewrite (`frame/shoot.py:258`). See [minimal-footprint.md](../knowledge/minimal-footprint.md) and A/B R4.
 
 Amends D3's mechanics; does not change the ruling.
 
@@ -796,36 +735,13 @@ Basis: house style (additive, flag-gated, minimal blast radius) and the pinned t
 
 **Precedence:** outranks every `PARENT-DECIDED` detail; operator rulings that conflict with it
 are **re-asked**, not overridden. Applied in
-[minimal-footprint.md](minimal-footprint.md) the same day: parent-decided details shrunk
+[minimal-footprint.md](../knowledge/minimal-footprint.md) the same day: parent-decided details shrunk
 (D13 implementation, D3 mechanics, D14 detection, D15, D6 dropped, `Date =` optimisation
 dropped); two operator rulings flagged for re-confirmation (D3's "frame serves its own list"
-half → [D17](#d17--the-local-mode-served-list-variant), and D4's "mirror it as a CI job").
+half → [D17](../knowledge/open-decisions.md#d17--the-local-mode-served-list-variant), and D4's "mirror it as a CI job").
 **Outcomes:** D17 — operator chose the parent repo's flow (superseded). D4 CI clause — operator:
 "Decide after research R2"; R2 done (parent CI already runs PHP + SQLite3); then **"No new
 workflow."**
-
-### D21 — May the parent open a PR inside the fork so the parent's CI runs?
-
-**Status:** `OPEN` (not blocking until execution stage V of Plan v0.3)
-
-**Why:** the parent's `.github/workflows/python-app.yml` runs only on pushes to
-`main`/`test_me`/`avian-visitors` or PRs into `main`/`avian-visitors`, and has no
-`workflow_dispatch` — pushing `feature/birdframe-midnight-reset` alone runs nothing (found by the
-[Plan v0.3 Oracle review](verification-log.md#plan-v03-oracle-review)). Real Linux CI (real `fcntl`, PHP + SQLite3) needs a PR inside
-`moomoomafia/AvianVisitors` into its `avian-visitors` branch, with Actions enabled on the fork.
-
-**Options:** (1) yes, at stage V only, never targeting the parent (recommended); (2) push the
-change to the fork's `avian-visitors` directly (also triggers CI, but changes the fork's main
-branch); (3) no CI — rely on local runs + the hardware pass.
-
-**Consequence if unanswered:** Plan v0.3's CI row cannot run; verification rests on local runs
-(stubbed `fcntl`, scoop PHP) and hardware.
-
-> **Deferred 2026-11-17 (at the G0 lift, operator):** stays `OPEN`; re-ask at stage V. Reason:
-> nothing blocks W1–W3 — §6's local runs cover verification on this host, and pushing a feature
-> branch alone triggers no CI. Do not open a PR into the fork's `avian-visitors` branch.
-
----
 
 ## Non-blocking — decided by the parent from house style, to be proposed in the PR
 
@@ -834,12 +750,10 @@ Recorded so no child re-opens them, and so Reviewer can check the implementation
 | ID | Question | Adopted answer | Basis |
 |---|---|---|---|
 | D5 | ~~Un-updated station ignores the param: fall back to rolling, or hold?~~ **SUPERSEDED by D14 (Audit 2).** | ~~Hold; detect via absent `midnight_clamped` / `window_start`~~ — those fields are **always present** on any station with the global-flag code (`avian/api/birdnet-api.php:392-397`), and an old station with the global flag ON already returns `midnight_clamped: true`, so they cannot prove the param was honoured | see D14 |
-| D6 | First detection of the day hashes identically to yesterday — refresh? | **Dropped by [D20](#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16): not implemented — near-cosmetic, adds hash material.** Force a refresh by putting the effective window identity in the existing `scope` argument of `signature()`. **Audit 2: optional / near-cosmetic** — if today's signature equals the saved one, the glass already shows that species+bucket set. The salt must come from the *same* response in both hashing sites (`frame/display.py:438-441,459-463`) | precedent `birdweather_signature_scope` (`display.py:125`); keeps the frozen unscoped hash contract (`tests/test_frame_birdweather.py:193-197`) |
-| D7 | Suppress the 24 h heal while today's window is empty? | Yes, suppress; document the burn-in consequence. A heal cannot "redraw the retained image" — a clamped window structurally cannot return yesterday's rows. **Audit 2: needs no mechanism** — a data-keyed pre-capture guard already suppresses it | req 10 explicitly outranks heal; [`frame-refresh-decision.md`](frame-refresh-decision.md) |
+| D6 | First detection of the day hashes identically to yesterday — refresh? | **Dropped by [D20](../knowledge/open-decisions.md#d20--guiding-principle-minimal-footprint-aligned-with-the-parent-repo) (2026-11-16): not implemented — near-cosmetic, adds hash material.** Force a refresh by putting the effective window identity in the existing `scope` argument of `signature()`. **Audit 2: optional / near-cosmetic** — if today's signature equals the saved one, the glass already shows that species+bucket set. The salt must come from the *same* response in both hashing sites (`frame/display.py:438-441,459-463`) | precedent `birdweather_signature_scope` (`display.py:125`); keeps the frozen unscoped hash contract (`tests/test_frame_birdweather.py:193-197`) |
+| D7 | Suppress the 24 h heal while today's window is empty? | Yes, suppress; document the burn-in consequence. A heal cannot "redraw the retained image" — a clamped window structurally cannot return yesterday's rows. **Audit 2: needs no mechanism** — a data-keyed pre-capture guard already suppresses it | req 10 explicitly outranks heal; [`frame-refresh-decision.md`](../knowledge/frame-refresh-decision.md) |
 | D8 | First detection inside quiet hours leaves yesterday up until quiet ends? | Yes — the brief says preserve quiet hours; state it in docs and cover with a test | `in_quiet_hours` (`display.py:348`) |
 | D9 | Additive `state.json` keys; must older files still work? | **Amended (Audit 2): add no keys.** A data-keyed pre-capture guard is already immune to a corrupt/missing `state.json`, so the state format stays unchanged. Hard rule: **a decline must never call `save_state`** (it would stamp `last_refresh` without a push); today `save_state` is only reached after `push_panel` (`display.py:477-481`) — keep it that way. Covers the `OnBootSec=2min` boot-after-outage run | `display.py:329-335,477-481`; `frame/systemd/birdframe.timer:10` |
 | D10 | Should any of this be pushed into `avian/frontend/apt.js` or the global flag? | No. The site must keep clearing on a genuinely empty window, and the global `RESET_AT_MIDNIGHT` is off-limits | `tests/smoke_collage_readiness.mjs:25`; brief isolation list |
 
 ---
-
-(D9 is the row above; D17 is included only so its superseded status is visible — do **not** implement its served-list or flag-only-helper bullets.)
