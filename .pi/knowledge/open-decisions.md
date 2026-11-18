@@ -44,6 +44,7 @@ feature branch alone triggers no CI. No PR into the fork's `avian-visitors` bran
 | `ANSWERED` (principle, outranks parent-decisions) | D20 — minimal footprint, align with the parent repo |
 | `OPEN`, needed only at execution stage V | D21 — CI access via a PR inside the fork (deferred 2026-11-17 at G0: re-ask at V) |
 | `ANSWERED 2026-11-17` (operator) | D22 — commit a parent test for W1's request param: **yes** ("leave smoke alarm behind"); done as T1 `db9ff938` |
+| `OPEN` (opened 2026-11-17) | D30 — which stage next after K2: O (Oracle audit, recommended), V (CI; needs push + D21) or H (hardware) |
 | `ANSWERED 2026-11-17` (operator), standing | D29 — operator standing permissions and working preferences (subagents allowed; plain explanations with "what you need from me") |
 | `ANSWERED 2026-11-17` (operator) | D23 — commit the pending `.pi/` changes before W2: (a) one local docs commit, no push |
 | `ANSWERED` (operator), harness | D25 — harden kb-document: build commitment gate + session priming + rule (2026-11-17) |
@@ -879,13 +880,20 @@ branch); (3) no CI — rely on local runs + the hardware pass.
 > **Deferred 2026-11-17 (at the G0 lift, operator):** stays `OPEN`; re-ask at stage V. Reason:
 > nothing blocks W1–W3 — §6's local runs cover verification on this host, and pushing a feature
 > branch alone triggers no CI. Do not open a PR into the fork's `avian-visitors` branch.
+>
+> **Context update 2026-11-17 (parent):** the "Consequence" above predates K1/K2. Local runs are now
+> real Linux (K1: the parent's suites; K2: end-to-end midnight scenarios), so parent CI would be an
+> independent second opinion on the same Ubuntu image family, not the only Linux evidence. What CI
+> adds beyond K1: the parent's own `ubuntu-latest` PHP 8.3 and its bare `pytest` over every suite with
+> `requirements.txt` installed. Recommendation unchanged: (1), at stage V, after a push.
 
 ### D24 — Re-confirm D4: container as the local gate once virtualization works?
 
 **Status:** `ANSWERED 2026-11-17`: operator chose **"Docker container in .pi/ (Recommended)"**
 (option a; keep D4). ~~`OPEN` (opened 2026-11-17; not blocking W2 coding, blocking any "verified" claim at V)~~
 Consequence: build a `.pi/` Dockerfile on `debian:bookworm-slim`; Windows runs are quick pre-checks
-only. The container is not built yet.
+only. ~~The container is not built yet.~~ *Built 2026-11-17: K1 (`.pi/k1/`) and K2 (`.pi/k2/`); see
+[testing-and-ci.md](testing-and-ci.md#k1-the-local-linux-gate).*
 
 **Why:** see the D4 drift note. After the reboot, Docker/WSL2 should work, so D4's ruling
 becomes executable again.
@@ -1135,6 +1143,25 @@ collage path uses local `Date` (`avian/frontend/apt.js:3675,4184,4226` do in oth
   "was everything recorded?" checks (2026-11-17). Run the kb-document audit before reporting; never
   claim "all recorded" from memory.
 * **Walk lightly (D20)** remains the governing principle.
+
+### D30 — Which stage next after K2: O, V or H?
+
+**Status:** `OPEN` (opened 2026-11-17, after K2; asked together with the push)
+
+**Why:** Plan v0.5 §7's remaining steps are V (§6 runs + parent CI on the fork), O (Oracle
+drift/ruling audit) and H (hardware pass on `birdpic`). W1–W3, review R + W2R, T1, K1 and K2 are done.
+
+**Options:**
+* **O first (recommended):** a read-only Oracle audit of the finished diff against every ruling, plan
+  §4 and the safety rails. Needs nothing from the operator and leaves no trace. Plan §7 lists O after
+  V; running it first catches drift before anything leaves this machine.
+* **V:** needs a push plus D21 (a PR inside the fork into its `avian-visitors` branch, Actions enabled).
+* **H:** needs the operator at `birdpic` and the branch deployed there (§8 deployment is not yet
+  authorised); checklist in plan §6 (midnight with silence, first bird, flight-only bird, power cycle,
+  flag off, the `Cache-Control` `curl`, record the station's PHP version).
+
+**Consequence if unanswered:** the build sits verified locally (K1 + K2) but unaudited, without parent
+CI and without the mandatory hardware pass; no upstream PR is possible (D4, D11a).
 
 ### D28 — Report the educator-store lost-lock bug upstream?
 

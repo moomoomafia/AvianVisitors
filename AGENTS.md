@@ -162,8 +162,9 @@ see [`.pi/knowledge/test-environment.md`](.pi/knowledge/test-environment.md) (re
 `cli-server`, the Educators lock must be provisioned, and there is no clock seam for
 `recent`). ~~Until that container exists, do not claim coverage from anything run on this
 Windows box.~~ *2026-11-17:* the test runner half exists (K1, see
-[`.pi/knowledge/testing-and-ci.md`](.pi/knowledge/testing-and-ci.md#k1-the-local-linux-gate)); the fake station and
-fake panel (K2) do not yet. Claim coverage only from K1, CI or hardware, never from a Windows run. Note the existing Linux CI (`.github/workflows/python-app.yml`) already runs
+[`.pi/knowledge/testing-and-ci.md`](.pi/knowledge/testing-and-ci.md#k1-the-local-linux-gate)); ~~the fake station and
+fake panel (K2) do not yet~~ the fake station and fake panel exist too (K2, `bash .pi/k2/run.sh`, same
+doc). Claim coverage only from K1, CI or hardware, never from a Windows run. Note the existing Linux CI (`.github/workflows/python-app.yml`) already runs
 `pytest` where `fcntl` works — a CI result is real evidence; a local skip is not.
 
 Any report must name the environment and list what was **not** executed.

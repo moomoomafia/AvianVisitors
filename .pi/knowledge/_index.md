@@ -48,11 +48,11 @@ every session; delete items when they close (their history lives in the register
    (`0046db23`, [log](verification-log.md#w2r-review-r-fixes), Plan v0.5 §4.7). K1 green on
    `0046db23`. T1 smoke alarm for W1 (`db9ff938`, D22 answered, [log](verification-log.md#t1-smoke-alarm-for-w1-d22)).
    K2 end-to-end midnight scenarios (`6eb0658b`, D27 = TZ shift, 7 passed, [log](verification-log.md#k2-end-to-end-midnight-scenarios)).
-   `origin` is at `5f90208c`. **Waiting on the operator:** ~~D27 (K2)~~ (done), a push,
-   then D21 for stage V. Handoffs are built with `.pi/scripts/build_handoff.py`.
+   `origin` is at `5f90208c`. **Waiting on the operator:** a push and
+   [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) (next stage: O recommended), then
+   D21 for stage V. Handoffs are built with `.pi/scripts/build_handoff.py`.
 1. **Open decisions** ([register](open-decisions.md)):
-   [D27](open-decisions.md#d27--how-the-container-makes-just-after-midnight-happen) (K2's midnight
-   clock; recommended: per-run `TZ` offset; Chromium ignores it),
+   [D30](open-decisions.md#d30--which-stage-next-after-k2-o-v-or-h) (next stage after K2),
    [D21](open-decisions.md#d21--may-the-parent-open-a-pr-inside-the-fork-so-the-parents-ci-runs) (CI
    via a PR inside the fork; stage V),
    [D28](open-decisions.md#d28--report-the-educator-store-lost-lock-bug-upstream) (file the parent
@@ -61,8 +61,9 @@ every session; delete items when they close (their history lives in the register
    and the root `.pi-tasks/`. Whether to go upstream at all (D11a) is undecided. Never commit
    `.pi/ask-log/`.
 3. **Still unverified:** `Cache-Control: no-store` with the param (hardware `curl`, plan §6 H); the
-   station's PHP version (assumed 8.2); whether the collage's JS uses the page's local `Date` (K2
-   only); field frequency of the D28 bug.
+   station's PHP version (assumed 8.2); whether the collage's JS uses the page's local `Date` (no K2
+   scenario depended on it); field frequency of the D28 bug; DST days and frame/station clock
+   disagreement end to end (K2 shifts only the station clock; see the [K2 log](verification-log.md#k2-end-to-end-midnight-scenarios)).
 4. **Environment:** Docker Desktop + WSL2 work (BIOS virtualization enabled after a CPU swap,
    [post-reboot check](verification-log.md#post-reboot-virtualization-check-2026-11-17)). Windows
    runs (stub `fcntl`, scoop PHP) are pre-checks only. The KB checker

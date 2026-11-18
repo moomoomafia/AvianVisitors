@@ -92,7 +92,8 @@ are on this branch and must be stripped before any PR to the parent, **and so mu
 Educators scope ⇒ hold via the D14 path, **exit 1** (the register's original "exit 0" text is
 superseded by its D20 amendment; no dedicated code); **D16** station unreachable ⇒ timer skips
 (exit 0), forced run exits 1; **D20** minimal footprint.
-Open, non-design: **D21** (CI via a PR inside the fork, stage V), **D22** (commit a parent test for
+*Status 2026-11-17: D22 and D27 since answered and done (T1, K2); still open: D21, D28, and D30 (next
+stage).* Original line: Open, non-design: **D21** (CI via a PR inside the fork, stage V), **D22** (commit a parent test for
 W1), **D27** (K2's midnight clock), **D28** (report a parent bug; outside the feature). See §9.
 
 ## 4. Design
@@ -340,8 +341,11 @@ current, and runs `python .pi/scripts/check_kb.py --index` (exit 0) at the end o
   * ~~**D22**~~ *answered 2026-11-17 ("leave smoke alarm behind"); T1 done, `db9ff938`.* Original: commit a parent test for W1 (§5 PHP row, step T1). *Amended 2026-11-17:* the
     `edu_endpoint` case would sit in a suite CI never runs; recommendation is now to measure a
     CI-run case in `tests/test_midnight_reset.php` first, else record the gap.
-  * **D27** (blocks K2 only): how K2 makes "just after midnight" happen. Recommended: a per-run
-    POSIX `TZ` offset (verified for SQLite, PHP's SQLite and Python; **Chromium ignores it**).
+  * ~~**D27** (blocks K2 only): how K2 makes "just after midnight" happen. Recommended: a per-run
+    POSIX `TZ` offset (verified for SQLite, PHP's SQLite and Python; **Chromium ignores it**).~~
+    *Answered 2026-11-17 (TZ shift); K2 built, `6eb0658b`, 7 passed.*
+  * **D30** (open): which stage next after K2: O (Oracle audit), V (CI, needs D21 + push) or H
+    (hardware). Recommended: O first.
   * **D21** (stage V only): CI via a PR inside the fork into its `avian-visitors`.
   * **D28** (outside the feature): file the parent-bug issue; draft ready in
     [bug-d28-educator-store-lost-lock.md](knowledge/bug-d28-educator-store-lost-lock.md).
