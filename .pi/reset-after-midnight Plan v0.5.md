@@ -3,7 +3,8 @@
 Repository: `AvianVisitors` (fork `moomoomafia/AvianVisitors`; parent `Twarner491/AvianVisitors`,
 push to parent disabled). Branch: `feature/birdframe-midnight-reset`, pushed to `origin` at
 `5f90208c` (operator-authorised, 2026-11-17). Product base: `5950f807` (= the parent's tip).
-Shipped so far: W1 (`428f3104`, +3/−2 in `avian/api/birdnet-api.php`).
+Shipped so far (local commits; `origin` still at `5f90208c`): W1 `428f3104`, W2 `dece12cf`, W3
+`ec5cdc7d`, W2R `0046db23`. Against base: 5 product files +68/−11, plus `tests/test_frame_capture.py` +246.
 
 Supersedes [Plan v0.4](reset-after-midnight%20Plan%20v0.4.md) (kept for history, like v0.1–v0.3).
 The knowledge base is the source of truth for evidence and rulings:
@@ -12,7 +13,9 @@ The knowledge base is the source of truth for evidence and rulings:
 Read [AGENTS.md](../AGENTS.md) first.
 
 > **Status (2026-11-17): G0 lifted for W1–W3.** W1 built and reviewed; the K1 Linux test container
-> is built and green on HEAD. **Next: P2 (regenerate the handoff from this plan), then W2.**
+> is built and green on HEAD. ~~**Next: P2 (regenerate the handoff from this plan), then W2.**~~
+> *Updated 2026-11-17: P2, W2, W3, review R and its fixes (W2R) are done; K1 is green on `0046db23`.
+> Next needs the operator: D22 (T1), D27 (K2), a push, then D21 for stage V.*
 > V, H, §8 and any further push/PR need separate permission.
 >
 > **What v0.5 changes, and why.** An **execution-state revision**: §1–§5 (objective, principle,
@@ -58,7 +61,9 @@ Align with and default to what the parent repo does; change the smallest amount 
 upstream mechanisms before adding any; research/A-B when options are close; keep our tooling in
 `.pi/`. Target: **5 parent files, ~45–60 changed lines plus tests in the parent's existing test
 files** (upstream's own station midnight reset was +112 shipped / +108 test lines).
-**Spent so far:** 1 file, +3/−2 (W1).
+**Spent so far:** ~~1 file, +3/−2 (W1).~~ 5 files, +68/−11 (W1 3 lines in `avian/api/birdnet-api.php`;
+`frame/display.py` +59; `frame/shoot.py` +11; README and example config +2 each), plus 246 test lines in
+the parent's existing `tests/test_frame_capture.py` (2026-11-17, `git diff --stat 5950f807 0046db23`).
 
 ## 3. Requirements → rulings (all decided; no open design blockers)
 
@@ -292,13 +297,13 @@ untracked files).
 | G0 | operator | authorise building | **done 2026-11-17** (W1–W3) |
 | W1 | worker | §4.1 station change | **done**, `428f3104`; verified by the parent (post-W1 review) and K1 |
 | K1 | parent | `.pi/` Linux test container | **done**; base and HEAD baselines recorded ([K1 log](knowledge/verification-log.md#k1-build-and-baseline)) |
-| P2 | parent | regenerate `.pi/handoff/plan.md` + `context.md` from **this v0.5**, header rule "where verbatim ruling text conflicts with §4, §4 wins"; update the ledger | handoff names v0.5; working tree has no stray tracked changes |
-| W2 | worker | §4.2–4.4 frame change + §5 frame tests, one local commit | parent re-runs K1: new tests pass, nothing else changes against the K1 HEAD baseline; characterization flips as expected with the flag on and nothing changes with it off |
+| P2 | parent | regenerate `.pi/handoff/plan.md` + `context.md` from **this v0.5**, header rule "where verbatim ruling text conflicts with §4, §4 wins"; update the ledger | **done 2026-11-17** (`031a33f3`) |
+| W2 | worker | §4.2–4.4 frame change + §5 frame tests, one local commit | parent re-runs K1: new tests pass, nothing else changes against the K1 HEAD baseline; characterization flips as expected with the flag on and nothing changes with it off — **done**, `dece12cf`; K1 91 passed |
 | K2 | parent | fake station + fake panel + scenarios | needs D27; the midnight scenarios assert push/no-push |
-| W3 | worker | §4.5 docs | README paragraph at `frame/README.md:89`/`:91` + config line, end-user voice |
-| W2R | worker | §4.7 review-R fixes (F1, F2, F4, F7 code + tests; F5, F6 docs), one local commit (added 2026-11-17) | parent re-runs K1; the F1 test fails on `ec5cdc7d` and passes after; flag-off behaviour unchanged |
-| T1 | worker | only if D22 = (a): one PHP case per §5 | case passes on HEAD, fails on base `5950f807` (K1 A/B) |
-| R | reviewer | review the full diff vs this plan, D20 and every ruling | no unresolved High findings |
+| W3 | worker | §4.5 docs | README paragraph at `frame/README.md:89`/`:91` + config line, end-user voice — **done**, `ec5cdc7d` |
+| R | reviewer | review the full diff vs this plan, D20 and every ruling | no unresolved High findings — **done**: ready with edits, F1 High + F2–F7 Low ([log](knowledge/verification-log.md#review-r-full-product-diff)) |
+| W2R | worker | §4.7 review-R fixes (F1, F2, F4, F7 code + tests; F5, F6 docs), one local commit (added 2026-11-17) | parent re-runs K1; the F1 test fails on `ec5cdc7d` and passes after; flag-off behaviour unchanged — **done**, `0046db23`; K1 92 passed; F3 residual accepted |
+| T1 | worker | only if D22 rules for a test (amended 2026-11-17: measure a CI-run case first) | case passes on HEAD, fails on base `5950f807` (K1 A/B); a short re-review if it lands |
 | V | parent | §6 runs; CI only if the operator authorises it on the fork (D21) | results recorded in the verification log |
 | O | oracle | drift/ruling audit of the result | verdict recorded |
 | H | operator + parent | hardware pass on `birdpic` (§6) | checklist recorded |
@@ -324,7 +329,9 @@ current, and runs `python .pi/scripts/check_kb.py --index` (exit 0) at the end o
 * **Answered 2026-11-17:** D23 (`.pi/` committed before W2, `94663e4b`), D24 (Docker container is the
   local gate), D26 (K1 now, K2 after W2).
 * **Open:**
-  * **D22** (not blocking W2): commit a parent test for W1 (§5 PHP row, step T1).
+  * **D22**: commit a parent test for W1 (§5 PHP row, step T1). *Amended 2026-11-17:* the
+    `edu_endpoint` case would sit in a suite CI never runs; recommendation is now to measure a
+    CI-run case in `tests/test_midnight_reset.php` first, else record the gap.
   * **D27** (blocks K2 only): how K2 makes "just after midnight" happen. Recommended: a per-run
     POSIX `TZ` offset (verified for SQLite, PHP's SQLite and Python; **Chromium ignores it**).
   * **D21** (stage V only): CI via a PR inside the fork into its `avian-visitors`.
