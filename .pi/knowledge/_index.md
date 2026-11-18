@@ -236,3 +236,10 @@ Three frame data sources, one renderer:
     worktree state; `5950f807` = base. ~4 min per run (most of it the 38 Chromium tests); exit 0 =
     every named suite passed, none skipped. New files are invisible until `git add`-ed. Rebuild is
     automatic (`docker build` each run; cached).
+25. **The page asks the station again after the frame decided** (review R, F1, 2026-11-17). The
+    frame decides on its own fetch; the captured page re-requests `recent` seconds later, and
+    `FRAME_READY` accepts a zero-tile collage once the empty-nest image loads
+    (`frame/shoot.py:66-75`). Across the station's midnight that capture is empty and was pushed.
+    Any "never blank" rule must therefore be re-checked on `capture["species"]` after the capture,
+    not only before it (Plan v0.5 §4.7 step f, `0046db23`;
+    [W2R](verification-log.md#w2r-review-r-fixes)).

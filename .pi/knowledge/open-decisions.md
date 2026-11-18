@@ -333,9 +333,10 @@ What this commits us to, per [test-environment.md](test-environment.md):
    mat geometry are not emulatable. Record the result in
    [verification-log.md](verification-log.md).
 
-On this machine the daemon is not running: Docker Desktop must be started before the
-first build. WSL2 Ubuntu stays a fine ad-hoc fallback but is no longer the gate.
+~~On this machine the daemon is not running: Docker Desktop must be started before the
+first build.~~ *(2026-11-17: Docker runs; K1 built.)* WSL2 Ubuntu stays a fine ad-hoc fallback but is no longer the gate.
 
+> *(Superseded 2026-11-17: virtualization enabled, WSL2 and Docker work; see D24.)*
 > **Environment finding (2026-11-16, while attempting R3):** WSL2 **cannot start** on this
 > machine — `Wsl/Service/CreateInstance/CreateVm/HCS/HCS_E_HYPERV_NOT_INSTALLED` (Virtual Machine Platform / virtualization not enabled). Docker
 > Desktop needs the same virtualization, so the D4 container is **blocked here** until the
@@ -359,7 +360,7 @@ Options (evidence in [test-environment.md](test-environment.md)):
   **fake station** (`php -S` on the real `avian/api/` against a synthetic `birds.db`) and a
   **headless fake `inky` panel** that records update counts and PNGs. Mirror as a CI job.
   Strongest option: it makes the brief's time scenarios deterministic. Needs Docker
-  Desktop started (it is installed; the daemon is not running).
+  Desktop started (it is installed; ~~the daemon is not running~~ *it runs since 2026-11-17; K1 built*).
 * **(B) WSL2 Ubuntu.** Same toolchain via `apt`, no image to maintain, faster to stand up
   here (Ubuntu is installed, currently Stopped). Less reproducible than (A) unless the
   package list is checked in.

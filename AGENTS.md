@@ -144,9 +144,12 @@ a report as a green check:
   `Class "SQLite3" not found` — an environment issue, not a product failure. Fix by opening a
   new shell or passing `PHP_INI_SCAN_DIR` explicitly. Uninstall: `scoop uninstall php` and
   delete that `.ini`.
-* **WSL2 cannot start here** (`HCS_E_HYPERV_NOT_INSTALLED`: Virtual Machine Platform /
+* ~~**WSL2 cannot start here** (`HCS_E_HYPERV_NOT_INSTALLED`: Virtual Machine Platform /
   virtualization not enabled), so the D4 Docker container is blocked until the operator
-  enables it (admin + reboot).
+  enables it (admin + reboot).~~ *Superseded 2026-11-17:* virtualization is on; WSL2 and Docker
+  work, and the D4 container exists as **K1**: `bash .pi/k1/run.sh [ref]` runs the parent's suites
+  on Linux (real `fcntl`) and is **the local gate** (D24/D26). The Windows points below still hold
+  for runs on this host, which are pre-checks only.
 * `fcntl` is absent → every `frame/display.py`-dependent test errors on import.
 * `os.geteuid` / `os.O_NOFOLLOW` absent → installer and credential tests fail to collect.
 * No e-ink panel → requirement checks must assert *"no push was attempted"*, not
@@ -157,8 +160,10 @@ The agreed fix is **[D4](.pi/knowledge/open-decisions.md#d4--what-environment-is
 Playwright Chromium) with a fake station and a headless fake panel, mirrored as a CI job —
 see [`.pi/knowledge/test-environment.md`](.pi/knowledge/test-environment.md) (read its Audit-2 amendment: `php -S` is SAPI
 `cli-server`, the Educators lock must be provisioned, and there is no clock seam for
-`recent`). Until that container exists, do not claim coverage from anything run on this
-Windows box. Note the existing Linux CI (`.github/workflows/python-app.yml`) already runs
+`recent`). ~~Until that container exists, do not claim coverage from anything run on this
+Windows box.~~ *2026-11-17:* the test runner half exists (K1, see
+[`.pi/knowledge/testing-and-ci.md`](.pi/knowledge/testing-and-ci.md#k1-the-local-linux-gate)); the fake station and
+fake panel (K2) do not yet. Claim coverage only from K1, CI or hardware, never from a Windows run. Note the existing Linux CI (`.github/workflows/python-app.yml`) already runs
 `pytest` where `fcntl` works — a CI result is real evidence; a local skip is not.
 
 Any report must name the environment and list what was **not** executed.

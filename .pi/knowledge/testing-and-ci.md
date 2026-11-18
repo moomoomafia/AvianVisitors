@@ -24,6 +24,21 @@ Python matrix in `.github/workflows/python-ci.yml`: **3.9 / 3.11 / 3.13** → ke
 `match`). `tomllib` needs the `tomli` backport on 3.9 (already in
 `frame/requirements-frame.txt`).
 
+## K1: the local Linux gate
+
+Added 2026-11-17 ([D24](open-decisions.md#d24--re-confirm-d4-container-as-the-local-gate-once-virtualization-works),
+[D26](open-decisions.md#d26--container-scope-phasing-and-build-authorisation)). From the repo root:
+`bash .pi/k1/run.sh` (tracked + staged worktree state) or `bash .pi/k1/run.sh <ref>` (e.g. base
+`5950f807`). It builds `.pi/k1/Dockerfile` (the parent's pinned `debian:bookworm-slim`, PHP 8.2,
+Python 3.11, Playwright 1.62.0 + Chromium, non-root user) and runs `.pi/k1/suite.sh` on an LF
+`git archive` of the ref. Exit 0 = every named suite passed and none skipped;
+`tests/test_educator_backend.php` is an A/B against `.pi/k1/educator-backend.baseline` (it fails on
+the parent's own base on Linux: [D28 write-up](bug-d28-educator-store-lost-lock.md)). ~4 minutes.
+Results per step: [K1 baseline](verification-log.md#k1-build-and-baseline),
+[W2](verification-log.md#w2-frame-change-and-tests), [W2R](verification-log.md#w2r-review-r-fixes)
+(`tests/test_frame_capture.py` 77 on base → 92 at `0046db23`). Everything below about Windows is a
+pre-check only.
+
 ## Verified state on this Windows workstation (2026-11-16)
 
 Environment: Python 3.14.0, pytest 9.1.1, Pillow present, playwright importable,
@@ -59,7 +74,7 @@ Error causes, confirmed:
 * Missing `php` degrades PHP contract tests to skips, not failures.
 
 **Implication:** this box cannot be the verification gate for frame work. Plan on
-WSL/Docker/CI for the authoritative run, and locally verify only the pure-Python
+~~WSL/Docker/CI~~ K1 (above) or CI for the authoritative run, and locally verify only the pure-Python
 subset (signature/gate logic) — or use the stub below.
 
 ### Running display.py tests on Windows

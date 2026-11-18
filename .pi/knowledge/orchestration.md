@@ -64,8 +64,16 @@ unless you pass `cwd`/`worktree`. Two consequences:
 * **PHP is now installed per-user (scoop, PHP 8.5; 2026-11-16, see [R3](verification-log.md#r3-execute-the-clamp-and-param-shape-claims-with-php))** and
   `pytest tests/test_midnight_reset.py` runs the PHP contract for real in a new shell. A shell
   that predates the install fails it with `Class "SQLite3" not found` — that is environment,
-  not product. *Before 2026-11-16 `php` was absent and the test passed vacuously.* WSL2 and
-  therefore Docker cannot start here (`HCS_E_HYPERV_NOT_INSTALLED`).
+  not product. *Before 2026-11-16 `php` was absent and the test passed vacuously.* ~~WSL2 and
+  therefore Docker cannot start here (`HCS_E_HYPERV_NOT_INSTALLED`).~~ *2026-11-17: Docker works;
+  the Linux gate is K1 (`bash .pi/k1/run.sh`, ~4 min, sees committed or staged files only); a
+  worker may run it before committing.*
+* **Observed 2026-11-17:** `reviewer` has **no shell** (it read files and used the sibling
+  checkout as the base), so the parent runs K1/flake8 for it. One `pi-worker` dispatch returned a
+  malformed tool call and no answer; `oracle` was the working fallback for read-only diagnosis.
+  Worker handoffs are generated with `.pi/scripts/build_handoff.py <plan> <task-header>`.
+* **Never put prose in `bash -lc '...'` heredocs** (one apostrophe executes backtick text); tell
+  children the same.
 * **`fcntl`, `os.geteuid`, `os.O_NOFOLLOW` are absent** → `frame/display.py`-dependent
   tests error locally; use the stub recipe in
   [testing-and-ci.md](testing-and-ci.md#running-displaypy-tests-on-windows) and label
