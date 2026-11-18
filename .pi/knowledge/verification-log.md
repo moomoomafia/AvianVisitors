@@ -1324,8 +1324,8 @@ libfaketime was needed.**
 **Design (cheaper than the planned `php -S` station; D20 reuse):**
 
 * **Fake station** = the parent's own `station` fixture idiom (`tests/test_frame_capture_browser.py:35-145`:
-  a Python `http.server` serving the real `avian/frontend/index.html` + assets, `cutout.php` from
-  `avian/assets/illustrations`, `bundle-assets.php` 404), except `action=recent` is answered by the
+  a Python `http.server` serving the real `avian/frontend/index.html` + assets, `avian/api/cutout.php` from
+  `avian/assets/illustrations`, `avian/api/bundle-assets.php` 404), except `action=recent` is answered by the
   **real** `avian/api/birdnet-api.php` through `php -r` with the T1 environment (Educators disabled, temp
   lock/state, synthetic `birds.db`). This avoids `php -S` (SAPI `cli-server` ignores the test overrides,
   and the Educators lock would need provisioning; [test-environment.md](test-environment.md)).
