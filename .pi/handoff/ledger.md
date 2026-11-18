@@ -11,7 +11,7 @@ only (~~v0.3~~, ~~v0.4~~ superseded 2026-11-17; v0.4 added P2 and T1; v0.5 added
 | K1 | `.pi/` Linux test container | parent | done 2026-11-17 | D26 | `bash .pi/k1/run.sh`; base and HEAD baselines in the verification log; educator backend gated A/B (parent bug D28) | re-run after each worker step |
 | W2 | §4.2–4.4 frame + §5 frame tests | worker | done 2026-11-17, local commit `dece12cf` | W1, P2, K1 | +302/−9 in 3 files, 14 new tests; parent: K1 green on `dece12cf` (91 passed), characterization 13/13, all new tests fail on pre-W2 code | review R: `run()` complexity 28, preview on fetch failure, missing `sci` |
 | K2 | fake station + fake panel + scenarios | parent | not started | W2, D27 | — | operator rules D27 first |
-| W3 | §4.5 docs | worker | not started | W2 | — | not dispatched this session |
+| W3 | §4.5 docs | worker | done 2026-11-17, local commit `ec5cdc7d` | W2 | +4 lines (README paragraph, commented config line); parent: README test 14 passed in K1, TOML parses | — |
 | T1 | optional PHP case (Plan v0.4 §5, only if D22 = a) | worker | not started (D22 open) | W1 | added 2026-11-17 by Plan v0.4 | case must pass on HEAD and fail on base `5950f807` |
 | R | Review | reviewer | not started | W1, W2, W3 (+T1 if any) | — | — |
 | V | §6 local runs; push only if authorised | parent | closed (needs separate permission) | R | — | D21 re-ask here |

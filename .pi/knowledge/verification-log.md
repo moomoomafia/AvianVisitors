@@ -1162,3 +1162,21 @@ error; `git status` showed only a partial append to this file, which was restore
 `git checkout` and re-appended from a file. Rule added to [AGENTS.md](../../AGENTS.md) "Practical repo traps".
 
 **Not executed:** K2, hardware, parent CI.
+
+## W3: config and README docs
+
+**Who:** `worker`, 2026-11-17, mission `b3cd326b-f25e-414d-b444-709a20f9c2ee`. **Result:** local commit
+`ec5cdc7d` `docs(frame): document reset_at_midnight (Plan v0.5 W3)`, not pushed: `frame/README.md` +2
+(one paragraph between the `--image-url` paragraph and "When updating a paired mic and frame"),
+`frame/config.example.toml` +2 (commented `reset_at_midnight` after `hours = 24`).
+
+**Worker deviations (accepted):** "the mic" instead of "the station" in the README (that file's own
+word); American spelling ("behavior"), as in the README.
+
+**Parent verification:** diff read (4 added lines, only the two files); the "every 15 minutes" claim
+matches `frame/install.sh:603` (`OnUnitActiveSec=15min`); in K1, `frame/test_bundle_render_integration.py`
+(the only test that reads `frame/README.md`) gives 14 passed / 12 skipped (skips need a disposable
+root container), and `frame/config.example.toml` parses with `tomllib` (key commented, as intended).
+The README behaviour claims were checked by the worker against `frame/display.py`; the parent's own W2
+diff read agrees (empty day exits 0 without capture; outdated mic exits 1 before quiet hours).
+**Not executed:** rendered markdown; hardware.
