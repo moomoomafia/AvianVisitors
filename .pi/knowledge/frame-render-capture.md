@@ -109,6 +109,13 @@ when the species list is empty; `EMPTY_WINDOW_COPY = 'no detections heard in thi
 preventing a blank panel is the caller's species list. Directly relevant to
 midnight-reset work: see [frame-refresh-decision.md](frame-refresh-decision.md).
 
+> **2026-11-17:** because `FRAME_READY` accepts the empty nest, the `reset_at_midnight` path re-checks
+> the **captured** list after the capture and declines an empty one (`frame/display.py:513-516` at HEAD;
+> review R F1, confirmed end to end by K2). With the flag on, the page's window caption reads
+> "since midnight" (`avian/frontend/apt.js:3609`, upstream). `frame/display.py` cites in this doc are at
+> base `5950f807`; see the mapping in
+> [frame-pipeline.md](frame-pipeline.md#line-numbers-after-w2-read-this-before-following-a-frame-cite).
+
 ## Layout inside the A5 opening (`display.py:233 mat_and_center`)
 
 ```

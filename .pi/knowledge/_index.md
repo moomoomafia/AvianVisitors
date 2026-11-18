@@ -254,3 +254,9 @@ Three frame data sources, one renderer:
     SQLite `localtime` honours it to the second). A list of clock readings lets midnight fall
     *between* two requests of one run, which makes timing races deterministic. Chromium ignores `TZ`;
     it does not matter while the page never decides the window. `.pi/k2/test_k2_midnight.py`.
+27. **`frame/` line numbers in the topic docs are at base `5950f807`** (2026-11-17). W2/W2R inserted lines
+    into `frame/display.py`, so most cites after `:49` have drifted (`run()` `:418` → `:442`, `main()`
+    `:494` → `:543`). Use the mapping table in
+    [frame-pipeline.md](frame-pipeline.md#line-numbers-after-w2-read-this-before-following-a-frame-cite)
+    before following a cite; `frame/shoot.py` moved only after `:243` (+3). The KB checker verifies a
+    line exists, not that it still says what the doc claims.

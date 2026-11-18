@@ -47,6 +47,14 @@ Properties that matter:
 
 ## The gate
 
+> **2026-11-17:** line numbers in this doc are at base `5950f807`; after W2 see the mapping in
+> [frame-pipeline.md](frame-pipeline.md#line-numbers-after-w2-read-this-before-following-a-frame-cite).
+> **With `reset_at_midnight` active** (local mode), a block runs **before** this gate on every path
+> (`frame/display.py:453-473` at HEAD): one clamped fetch; fetch error ⇒ timer True / forced False;
+> station did not clamp ⇒ False (exit 1); nothing drawable since midnight ⇒ True with no capture, push or
+> save. The gate below then decides on the clamped list, and after a successful capture a second check
+> declines an empty capture (`:513-516`, review R F1). Flag off: this gate is unchanged.
+
 `frame/display.py:444-452`:
 
 ```python

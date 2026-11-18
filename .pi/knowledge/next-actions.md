@@ -21,7 +21,8 @@ Rules:
 1. **Trigger:** the operator says to push the post-Oracle commits (opened 2026-11-17).
    **Action:** `git push origin feature/birdframe-midnight-reset`, verify with `git ls-remote origin`.
    **Log to:** [verification-log.md](verification-log.md) and the open threads.
-2. **Trigger:** the operator picks the next stage: V (answer D21) or H (hardware) (opened 2026-11-17).
+2. **Trigger:** the operator picks the next stage: V (answer D21) or H (hardware) (opened 2026-11-17;
+   recommended: V first).
    **Action:** V → per D21, open a PR **inside the fork** into its `avian-visitors` branch (Actions
    enabled), never the parent; read the CI result. H → write the hardware checklist from plan §6 for
    the operator; §8 deployment needs its own yes.

@@ -30,6 +30,32 @@ Notes:
   (`frame/birdframe-names:63-68`) — that's the pattern for "change a setting and
   redraw now".
 
+## Line numbers after W2 (read this before following a `frame/` cite)
+
+Citations into `frame/display.py` and `frame/shoot.py` across the frame docs were taken at **base
+`5950f807`**. The feature commits (W2 `dece12cf`, W2R `0046db23`, O1 `e18f304d`) inserted lines, so
+anything after `frame/display.py:49` has shifted. Mapping (measured 2026-11-17 with `grep -n` on base and
+HEAD):
+
+| Anchor | base | HEAD |
+|---|---|---|
+| `frame/display.py` `DEFAULTS` | `:42` | `:42` (new key at `:50`) |
+| `fetch_recent` | `:91` | `:92` (`fetch_recent_payload`; wrapper `:106`) |
+| `signature` | `:103` | `:110` |
+| `fetch_species` | `:132` | `:155` |
+| `push_panel` | `:308` | `:331` |
+| `in_quiet_hours` | `:348` | `:371` |
+| `obtain_image` | `:366` | `:389` |
+| `run()` | `:418` | `:442` |
+| `heal_due` / quiet hours / push / save in `run()` | `:444` / `:447` / `:477` / `:481` | `:489` / `:492` / `:526` / `:530` |
+| `main()` | `:494` | `:543` |
+| `frame/shoot.py` `FRAME_READY` / `_make_api_handler` | `:66` / `:243` | unchanged |
+| `frame/shoot.py` `shoot()` / `main()` | `:412` / `:662` | `:415` / `:665` |
+
+New in `run()` at HEAD: the `reset_at_midnight` block `:453-473` (steps a–d), the upstream signature
+block with `species = species if active else fetch_species(` at `:474-476`, and the post-capture
+decline (step f) at `:513-516`. Design: [Plan v0.5](../reset-after-midnight%20Plan%20v0.5.md) §4.2, §4.7.
+
 ## One run, step by step (`frame/display.py:418 run()`)
 
 ```

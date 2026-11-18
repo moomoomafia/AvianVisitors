@@ -95,6 +95,14 @@ forbids changing that global setting, so a new opt-in param (e.g.
 `$resetAtMidnight` argument — while keeping the "saved scope ignores the station
 display preference" invariant and leaving `stats`/`hourly`/`rhythm` untouched.
 
+> **Built 2026-11-17 (W1, `428f3104`):** `$resetAtMidnight = $RESET_AT_MIDNIGHT ||
+> (($_GET['reset_at_midnight'] ?? null) === '1')` (`avian/api/birdnet-api.php:136`), used for
+> `Cache-Control: no-store` (`:170`) and passed to `recentWindow` (`:363`). Only the exact value `1`
+> enables it; a request can never switch a station-wide ON off; scoped requests still ignore it.
+> Guarded by `tests/test_midnight_reset.py` (T1) and the `.pi/` probe. **Visible side effect:** the
+> collage's window caption reads "since midnight" whenever `midnight_clamped` is true
+> (`avian/frontend/apt.js:3609`, upstream code), so a frame with the flag on shows that caption.
+
 ## Date context & clocks — `dateContext()` `:279`
 
 ```php

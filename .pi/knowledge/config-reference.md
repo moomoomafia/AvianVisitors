@@ -63,10 +63,23 @@ the full reference. Line 1 of an installed file is a mode marker
 `basic_user` / `basic_pass` (both default `None`) — only if the **whole** station is
 behind basic auth; applied to the API fetch, the image fetch, and Playwright.
 
-### Not yet a key (the feature in this worktree)
+### `reset_at_midnight` (added on this branch, 2026-11-17)
 
-`reset_at_midnight` does **not** exist in `DEFAULTS`, `frame/config.example.toml`, or
-`frame/install.sh` yet — it is the thing being added. See
+~~`reset_at_midnight` does **not** exist in `DEFAULTS`, `frame/config.example.toml`, or
+`frame/install.sh` yet — it is the thing being added.~~ *(true until W2.)* Now: `DEFAULTS["reset_at_midnight"] =
+False` (`frame/display.py:50`); documented commented-out in `frame/config.example.toml:27-28` and in
+`frame/README.md:91`; **not** written by `frame/install.sh` (by design, plan §4.6).
+
+* Active only when the value is exactly `true` **and** local mode (`species_source != "birdweather"`,
+  `shoot = true`) (`frame/display.py:116-119`); otherwise one log line "applies only to local mode;
+  ignored" (`:454-455`) and behaviour is unchanged.
+* While active, `hours` is ignored: the frame asks the mic for `hours=24&reset_at_midnight=1` and the
+  capture uses the same window (`:460`, `:416-424`).
+* Needs an updated mic (W1). With an old mic, or during an Educators capture, the frame holds the
+  collage and exits 1 every run (`:464-468`).
+* Off switch: set it to `false` or remove it; no state reset needed (no new state keys, D9).
+
+Design: [Plan v0.5](../reset-after-midnight%20Plan%20v0.5.md) §4; background:
 [feature-midnight-reset.md](feature-midnight-reset.md).
 
 ## What the installer writes per mode (`frame/install.sh:705-752`)

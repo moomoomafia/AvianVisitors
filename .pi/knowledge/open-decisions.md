@@ -886,6 +886,10 @@ branch); (3) no CI — rely on local runs + the hardware pass.
 > independent second opinion on the same Ubuntu image family, not the only Linux evidence. What CI
 > adds beyond K1: the parent's own `ubuntu-latest` PHP 8.3 and its bare `pytest` over every suite with
 > `requirements.txt` installed. Recommendation unchanged: (1), at stage V, after a push.
+>
+> **Put to the operator 2026-11-17 (after the D30 Oracle loop):** stage V (this decision) is recommended
+> **before** H, because it is independent evidence that needs no one at the frame and is the last check
+> before the mandatory hardware pass. Still `OPEN`.
 
 ### D24 — Re-confirm D4: container as the local gate once virtualization works?
 
