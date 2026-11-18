@@ -48,8 +48,9 @@ every session; delete items when they close (their history lives in the register
    (`0046db23`, [log](verification-log.md#w2r-review-r-fixes), Plan v0.5 §4.7). K1 green on
    `0046db23`. T1 smoke alarm for W1 (`db9ff938`, D22 answered, [log](verification-log.md#t1-smoke-alarm-for-w1-d22)).
    K2 end-to-end midnight scenarios (`6eb0658b`, D27 = TZ shift, 7 passed, [log](verification-log.md#k2-end-to-end-midnight-scenarios)).
-   **Pushed:** `origin` is at `a66fe045` (2026-11-17, [push record](verification-log.md#push-to-origin-after-k2));
-   later record-only commits may follow it. **Oracle audit O done** (D30 loop): round 1 fixes in
+   **Pushed:** `origin` is at `2bff3453` (checked 2026-11-18 with `git ls-remote`; local HEAD `3165c611`
+   is **6 ahead** — the post-Oracle commits are not pushed, [push record + correction](verification-log.md#push-to-origin-after-k2)).
+   **Oracle audit O done** (D30 loop): round 1 fixes in
    `e18f304d` (journal message says "mic"), round 2 HAPPY
    ([round 2](verification-log.md#oracle-loop-round-2)); these commits are local, not pushed.
    **Waiting on the operator:** a push, then V (needs D21) or H (hardware). Handoffs are built with

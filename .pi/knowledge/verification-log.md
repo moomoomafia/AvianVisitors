@@ -1373,6 +1373,17 @@ feature/birdframe-midnight-reset`: `5f90208c..a66fe045`, 25 commits (W2 `dece12c
 HEAD; `upstream` push stays `DISABLED_NO_PUSH_TO_UPSTREAM`. No PR opened; a feature-branch push
 triggers no CI (`.github/workflows/python-app.yml` runs only on `main`/`test_me`/`avian-visitors`).
 
+> **Correction 2026-11-18 (parent)** — the fork holds one commit more than recorded above. Re-checked
+> with `git ls-remote origin refs/heads/feature/birdframe-midnight-reset` = **`2bff3453`**, i.e. the
+> record commit `2bff3453` ("record push a66fe045") was itself pushed 58 s later; evidence is the
+> `update by push` entry in `C:/apps/birdNet/AvianVisitors/.git/logs/refs/remotes/origin/feature/birdframe-midnight-reset`
+> at 2026-11-18 12:32:48 −0500. That second push was not recorded when it happened. As of this check
+> local HEAD `3165c611` is **6 commits ahead** of the remote, so
+> [next-actions.md](next-actions.md) item 1 (push the post-Oracle commits) is **still open**.
+> **Dating note:** the `2026-11-17` stamps in this log label the *session*, not the commit. Per
+> `git log --date=iso-local`, `cdf208de` is 2026-11-17 23:52 and every commit after it is 2026-11-18
+> (`0046db23` 00:07 … `3165c611` 13:05). Use commit dates, not doc dates, for ordering.
+
 ## Oracle loop round 1
 
 **Who:** `oracle`, 2026-11-17, mission `20f8ba04-601e-437d-9f0c-0e8fd5f92e8c`, read-only, on HEAD `7084551a`
